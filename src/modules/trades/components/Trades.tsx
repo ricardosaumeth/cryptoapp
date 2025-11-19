@@ -10,7 +10,6 @@ export interface Props {
 }
 
 const Trades = ({ trades }: Props) => {
-  console.log("trades", trades)
   const columnDefs: ColDef[] = useMemo(
     () => [
       {

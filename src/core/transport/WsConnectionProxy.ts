@@ -22,20 +22,20 @@ export class WsConnectionProxy implements ConnectionProxy {
 
   private connect(): void {
     this.socket = new WebSocket(this.realm)
-    
+
     this.socket.onopen = () => {
       this.reconnectAttempts = 0
       this.onConnectFn && this.onConnectFn()
     }
-    
+
     this.socket.onmessage = ({ data }) => {
       this.onReceivedFn && this.onReceivedFn(data)
     }
-    
+
     this.socket.onerror = (error) => {
       this.onErrorFn && this.onErrorFn(error)
     }
-    
+
     this.socket.onclose = () => {
       if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
         this.reconnectAttempts++

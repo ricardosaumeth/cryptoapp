@@ -41,13 +41,14 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
 
           if (Array.isArray(parsedData[1])) {
             // Snapshot
-            const [, trades] = parsedData
-            const formattedTrades = trades.map((t) => {
-              const [id, timestamp, amount, price] = t as [number, number, number, number]
-              return { id, timestamp, amount, price }
-            })
-
-            store.dispatch(updateTrades({ symbol, trades: formattedTrades }))
+            const [, rawTrades] = parsedData
+            const trades = rawTrades.map(([id, timestamp, amount, price]) => ({
+              id,
+              timestamp,
+              amount,
+              price,
+            }))
+            store.dispatch(updateTrades({ symbol, trades }))
           } else {
             // Single trade update
             const [, , trade] = parsedData
