@@ -16,7 +16,6 @@
     "types": ["vite/client"],
     "skipLibCheck": true,
 
-    /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

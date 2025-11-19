@@ -1,12 +1,12 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { tradesSlice } from '../trades/slice';
-import { subscriptionsSlice } from '../../core/transport/slice';
-import { WsConnectionProxy } from '../../core/transport/WsConnectionProxy';
-import { Connection } from '../../core/transport/Connection';
-import { createWsMiddleware } from '../../core/transport/wsMiddleware';
+import { configureStore } from "@reduxjs/toolkit"
+import { tradesSlice } from "../trades/slice"
+import { subscriptionsSlice } from "@"
+import { WsConnectionProxy } from "../../core/transport/WsConnectionProxy"
+import { Connection } from "../../core/transport/Connection"
+import { createWsMiddleware } from "../../core/transport/wsMiddleware"
 
-const connectionProxy = new WsConnectionProxy('wss://api-pub.bitfinex.com/ws/2');
-export const connection = new Connection(connectionProxy);
+const connectionProxy = new WsConnectionProxy("wss://api-pub.bitfinex.com/ws/2")
+export const connection = new Connection(connectionProxy)
 
 export default function createStore() {
   const store = configureStore({
@@ -20,13 +20,13 @@ export default function createStore() {
           extraArgument: { connection },
         },
       }).concat(createWsMiddleware(connection)),
-  });
+  })
 
-  connection.onConnect(() => console.log('Connected'));
-  connection.connect();
+  connection.onConnect(() => console.log("Connected"))
+  connection.connect()
 
-  return store;
+  return store
 }
 
-export type RootState = ReturnType<ReturnType<typeof createStore>['getState']>;
-export type AppDispatch = ReturnType<typeof createStore>['dispatch'];
+export type RootState = ReturnType<ReturnType<typeof createStore>["getState"]>
+export type AppDispatch = ReturnType<typeof createStore>["dispatch"]

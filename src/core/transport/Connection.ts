@@ -1,25 +1,25 @@
-import type { ConnectionProxy } from './types/ConnectionProxy';
+import type { ConnectionProxy } from "./types/ConnectionProxy"
 
 export class Connection {
   constructor(private connectionProxy: ConnectionProxy) {}
 
   connect() {
-    this.connectionProxy.start();
+    this.connectionProxy.start()
   }
 
   disconnect() {
-    this.connectionProxy.stop();
+    this.connectionProxy.stop()
   }
 
   send(message: any): void {
-    this.connectionProxy.send(message);
+    this.connectionProxy.send(message)
   }
 
   onConnect(callback: () => void) {
-    this.connectionProxy.onConnect(callback);
+    this.connectionProxy.onConnect(callback)
   }
 
   onReceive(callback: (data: any) => void) {
-    this.connectionProxy.onReceived(callback);
+    this.connectionProxy.onReceived(callback)
   }
 }
