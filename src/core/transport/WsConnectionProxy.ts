@@ -5,6 +5,10 @@ export class WsConnectionProxy implements ConnectionProxy {
   private onConnectFn?: () => void
   private onReceivedFn?: (data?: any) => void
   private onErrorFn?: (error: any) => void
+  private reconnectAttempts = 0
+  private maxReconnectAttempts = 5
+  private reconnectDelay = 1000
+  private shouldReconnect = true
 
   constructor(private realm: string) {
     this.socket = undefined
@@ -12,16 +16,40 @@ export class WsConnectionProxy implements ConnectionProxy {
   }
 
   start(): void {
+    this.shouldReconnect = true
+    this.connect()
+  }
+
+  private connect(): void {
     this.socket = new WebSocket(this.realm)
-    this.socket.onopen = () => this.onConnectFn && this.onConnectFn()
+    
+    this.socket.onopen = () => {
+      this.reconnectAttempts = 0
+      this.onConnectFn && this.onConnectFn()
+    }
+    
     this.socket.onmessage = ({ data }) => {
       this.onReceivedFn && this.onReceivedFn(data)
     }
-    this.socket.onerror = (error) => this.onErrorFn && this.onErrorFn(error)
+    
+    this.socket.onerror = (error) => {
+      this.onErrorFn && this.onErrorFn(error)
+    }
+    
+    this.socket.onclose = () => {
+      if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
+        this.reconnectAttempts++
+        setTimeout(() => this.connect(), this.reconnectDelay * this.reconnectAttempts)
+      }
+    }
   }
 
   stop(): void {
-    throw new Error("Method not implemented.")
+    this.shouldReconnect = false
+    if (this.socket) {
+      this.socket.close()
+      this.socket = undefined
+    }
   }
 
   send(message: any): void {
