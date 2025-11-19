@@ -4,9 +4,6 @@ import createStore, { type AppDispatch } from "./modules/redux/store"
 import { subscribeToSymbol } from "./core/transport/slice"
 import Trades from "./modules/trades/components"
 import { Container, Header, TradesPanel } from "./App.styled"
-import { ModuleRegistry, ClientSideRowModelModule, ValidationModule } from "ag-grid-community"
-
-ModuleRegistry.registerModules([ClientSideRowModelModule, ValidationModule])
 
 const store = createStore()
 

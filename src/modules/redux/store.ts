@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { tradesSlice } from "../trades/slice"
-import { subscriptionsSlice } from "@"
+import { subscriptionsSlice } from "../../core/transport/slice"
 import { WsConnectionProxy } from "../../core/transport/WsConnectionProxy"
 import { Connection } from "../../core/transport/Connection"
 import { createWsMiddleware } from "../../core/transport/wsMiddleware"
