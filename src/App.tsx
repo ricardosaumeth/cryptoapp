@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect } from 'react';
+import { Provider, useDispatch } from 'react-redux';
+import createStore, { type AppDispatch } from './modules/redux/store';
+import { subscribeToSymbol } from './core/transport/slice';
+import Trades from './modules/trades/components';
+import { Container, Header, TradesPanel } from './App.styled';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-balham.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+const store = createStore();
+
+function AppContent() {
+  const dispatch = useDispatch<AppDispatch>();
+  const symbol = 'tBTCUSD';
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      dispatch(subscribeToSymbol({ symbol }));
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [dispatch, symbol]);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Container>
+      <Header>
+        <h1>Crypto Trader</h1>
+      </Header>
+      <TradesPanel>
+        <Trades symbol={symbol} />
+      </TradesPanel>
+    </Container>
+  );
 }
 
-export default App
+function App() {
+  return (
+    <Provider store={store}>
+      <AppContent />
+    </Provider>
+  );
+}
+
+export default App;
