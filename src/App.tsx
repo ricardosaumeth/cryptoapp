@@ -4,12 +4,17 @@ import createStore, { type AppDispatch } from "./modules/redux/store"
 import { subscribeToSymbol } from "./core/transport/slice"
 import Trades from "./modules/trades/components"
 import { Container, Header, TradesPanel } from "./App.styled"
+import { bootstrapApp } from "./modules/app/slice"
 
 const store = createStore()
 
 function AppContent() {
   const dispatch = useDispatch<AppDispatch>()
   const symbol = "tBTCUSD"
+
+  useEffect(() => {
+    dispatch(bootstrapApp())
+  }, [dispatch])
 
   useEffect(() => {
     const timer = setTimeout(() => {

@@ -23,7 +23,6 @@ export default function createStore() {
   })
 
   connection.onConnect(() => console.log("Connected"))
-  connection.connect()
 
   return store
 }
