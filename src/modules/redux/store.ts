@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { tradesSlice } from "../trades/slice"
 import { subscriptionsSlice } from "../../core/transport/slice"
+import { refDataSlice } from "../reference-data/slice"
 import { WsConnectionProxy } from "../../core/transport/WsConnectionProxy"
 import { Connection } from "../../core/transport/Connection"
 import { createWsMiddleware } from "../../core/transport/wsMiddleware"
@@ -13,6 +14,7 @@ export default function createStore() {
     reducer: {
       trades: tradesSlice.reducer,
       subscriptions: subscriptionsSlice.reducer,
+      refData: refDataSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({

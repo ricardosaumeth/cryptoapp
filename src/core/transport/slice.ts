@@ -41,7 +41,7 @@ export const subscriptionsSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(subscribeToSymbol.fulfilled, (state, action) => {
+    builder.addCase(subscribeToSymbol.fulfilled, (_state, action) => {
       console.log(`Subscribed to ${action.payload}`)
     })
   },
