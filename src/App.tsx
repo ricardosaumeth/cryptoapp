@@ -18,7 +18,7 @@ function AppContent() {
   return (
     <Container>
       <Header>
-        <h1>Crypto Trader</h1>
+        <h1>Crypto App</h1>
       </Header>
       <TickersPanel>
         <Tickers />
