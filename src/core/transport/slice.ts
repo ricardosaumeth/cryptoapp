@@ -10,19 +10,23 @@ export interface SubscriptionState {
 
 const initialState: SubscriptionState = {}
 
-export const subscribeToSymbol = createAsyncThunk(
-  "trades/subscribeToSymbol",
-  async ({ symbol }: { symbol: string }) => {
-    const msg = {
-      event: "subscribe",
-      channel: "trades",
-      symbol,
-    }
+const createSubscribeThunk = (channel: string, actionType: string) =>
+  createAsyncThunk(
+    actionType,
+    async ({ symbol }: { symbol: string }) => {
+      const msg = {
+        event: "subscribe",
+        channel,
+        symbol,
+      }
 
-    connection.send(JSON.stringify(msg))
-    return symbol
-  }
-)
+      connection.send(JSON.stringify(msg))
+      return symbol
+    }
+  )
+
+export const tradeSubscribeToSymbol = createSubscribeThunk("trades", "trades/subscribeToSymbol")
+export const tickerSubscribeToSymbol = createSubscribeThunk("ticker", "ticker/subscribeToSymbol")
 
 export const subscriptionsSlice = createSlice({
   name: "subscriptions",
@@ -41,8 +45,11 @@ export const subscriptionsSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(subscribeToSymbol.fulfilled, (_state, action) => {
-      console.log(`Subscribed to ${action.payload}`)
+    builder.addCase(tradeSubscribeToSymbol.fulfilled, (_state, action) => {
+      console.log(`Subscribed to trade ${action.payload}`)
+    }),
+    builder.addCase(tickerSubscribeToSymbol.fulfilled, (_state, action) => {
+      console.log(`Subscribed to ticker ${action.payload}`)
     })
   },
 })

@@ -10,4 +10,3 @@ export const IdenticalPart = styled.div``
 export const ChangedPart = styled.div`
   color: ${Palette.Orange};
 `
-

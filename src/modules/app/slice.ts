@@ -1,10 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
 import { refDataLoad } from "../reference-data/slice"
-//import { subscribeToSymbol } from "../ticker/slice"
-import { subscribeToSymbol } from "../../core/transport/slice"
+import { tradeSubscribeToSymbol } from "../../core/transport/slice"
 
 import type { Connection } from "../../core/transport/Connection"
-import { tickerSubscribeToSymbol } from "../../modules/tickers/slice"
+import { tickerSubscribeToSymbol } from "../../core/transport/slice"
 
 export const bootstrapApp = createAsyncThunk("app/bootstrap", async (_, { dispatch, extra }) => {
   console.log("Bootstrap App")
@@ -14,6 +13,11 @@ export const bootstrapApp = createAsyncThunk("app/bootstrap", async (_, { dispat
   connection.connect()
 
   const currencyPairs = await dispatch(refDataLoad()).unwrap()
+
+  // Subscribe to trades for first currency pair
+  setTimeout(async () => {
+    dispatch(tradeSubscribeToSymbol({ symbol: `t${currencyPairs[0]}` }))
+  }, 2000)
 
   // Subscribe to ticker for all currency pairs
   const tickerPromises = currencyPairs.map(
@@ -26,11 +30,6 @@ export const bootstrapApp = createAsyncThunk("app/bootstrap", async (_, { dispat
           }, index * 2000) // 2000ms delay between subscriptions
       )
   )
-
-  // Subscribe to trades for first currency pair
-  setTimeout(async () => {
-    dispatch(subscribeToSymbol({ symbol: `t${currencyPairs[0]}` }))
-  }, 2000)
 
   await Promise.all(tickerPromises)
 })

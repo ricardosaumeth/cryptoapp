@@ -1,6 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import { type Ticker } from "./types/Ticker"
-import { connection } from "../redux/store"
 
 export interface TickerState {
   [symbol: string]: Ticker
@@ -21,16 +20,6 @@ export const tickerSlice = createSlice({
   name: "ticker",
   initialState,
   reducers: {
-    tickerSubscribeToSymbol: (_state, action: PayloadAction<SubscribeToSymbolPayload>) => {
-      const { symbol } = action.payload
-      const msg = {
-        event: "subscribe",
-        channel: "ticker",
-        symbol,
-      }
-
-      connection.send(JSON.stringify(msg))
-    },
     updateTicker: (state, action: PayloadAction<TickerUpdatePayload>) => {
       const { symbol, data } = action.payload
       const [
@@ -65,5 +54,5 @@ export const tickerSlice = createSlice({
   },
 })
 
-export const { tickerSubscribeToSymbol, updateTicker } = tickerSlice.actions
+export const { updateTicker } = tickerSlice.actions
 export default tickerSlice.reducer
