@@ -1,11 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { tradesSlice } from "../trades/slice"
-import { subscriptionsSlice } from "../../core/transport/slice"
+import { subscriptionsSlice, wsConnectionStatusChanged } from "../../core/transport/slice"
 import { refDataSlice } from "../reference-data/slice"
 import { tickerSlice } from "../tickers/slice"
 import { WsConnectionProxy } from "../../core/transport/WsConnectionProxy"
 import { Connection } from "../../core/transport/Connection"
 import { createWsMiddleware } from "../../core/transport/wsMiddleware"
+import { ConnectionStatus } from "../../core/transport/types/ConnectionStatus"
 
 const connectionProxy = new WsConnectionProxy("wss://api-pub.bitfinex.com/ws/2")
 export const connection = new Connection(connectionProxy)
@@ -26,7 +27,10 @@ export default function createStore() {
       }).concat(createWsMiddleware(connection)),
   })
 
-  connection.onConnect(() => console.log("Connected"))
+  connection.onConnect(() => {
+    store.dispatch(wsConnectionStatusChanged(ConnectionStatus.Connected))
+    console.log("Connected")
+  })
 
   return store
 }

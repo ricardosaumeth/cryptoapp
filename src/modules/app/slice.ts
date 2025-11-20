@@ -1,35 +1,49 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
 import { refDataLoad } from "../reference-data/slice"
 import { tradeSubscribeToSymbol } from "../../core/transport/slice"
-
 import type { Connection } from "../../core/transport/Connection"
 import { tickerSubscribeToSymbol } from "../../core/transport/slice"
+import type { RootState } from "../redux/store"
+import { ConnectionStatus } from "../../core/transport/types/ConnectionStatus"
 
-export const bootstrapApp = createAsyncThunk("app/bootstrap", async (_, { dispatch, extra }) => {
-  console.log("Bootstrap App")
+const waitForConnection = (getState: () => RootState): Promise<void> => {
+  return new Promise((resolve) => {
+    const checkConnection = () => {
+      if (getState().subscriptions.wsConnectionStatus === ConnectionStatus.Connected) {
+        resolve()
+      } else {
+        setTimeout(checkConnection, 100)
+      }
+    }
+    checkConnection()
+  })
+}
 
-  const { connection } = extra as { connection: Connection }
+export const bootstrapApp = createAsyncThunk(
+  "app/bootstrap",
+  async (_, { dispatch, getState, extra }) => {
+    console.log("Bootstrap App")
 
-  connection.connect()
+    const { connection } = extra as { connection: Connection }
 
-  const currencyPairs = await dispatch(refDataLoad()).unwrap()
+    connection.connect()
+    await waitForConnection(getState as () => RootState)
 
-  // Subscribe to trades for first currency pair
-  setTimeout(async () => {
-    dispatch(tradeSubscribeToSymbol({ symbol: `t${currencyPairs[0]}` }))
-  }, 2000)
+    const currencyPairs = await dispatch(refDataLoad()).unwrap()
 
-  // Subscribe to ticker for all currency pairs
-  const tickerPromises = currencyPairs.map(
-    (currencyPair: any, index: number) =>
-      new Promise(
-        (resolve) =>
-          setTimeout(() => {
-            dispatch(tickerSubscribeToSymbol({ symbol: `t${currencyPair}` }))
-            resolve(null)
-          }, index * 2000) // 2000ms delay between subscriptions
+    // Subscribe to trades for first currency pair
+    setTimeout(() => {
+      dispatch(tradeSubscribeToSymbol({ symbol: `t${currencyPairs[0]}` }))
+    }, 2000)
+
+    // Subscribe to ticker for all currency pairs with delays
+    currencyPairs.forEach((currencyPair: string, index: number) => {
+      setTimeout(
+        () => {
+          dispatch(tickerSubscribeToSymbol({ symbol: `t${currencyPair}` }))
+        },
+        (index + 1) * 2000
       )
-  )
-
-  await Promise.all(tickerPromises)
-})
+    })
+  }
+)
