@@ -3,14 +3,15 @@ import { AgGridReact } from "ag-grid-react"
 import type { ColDef } from "ag-grid-community"
 import { DateTime } from "luxon"
 import type { Trade } from "../types/Trade"
-import { Container } from "./Trades.styled"
+import { Container, Header } from "./Trades.styled"
 import theme from "../../../theme/style"
 
 export interface Props {
   trades: Trade[]
+  currencyPair: string
 }
 
-const Trades = ({ trades }: Props) => {
+const Trades = ({ trades, currencyPair }: Props) => {
   const columnDefs: ColDef[] = useMemo(
     () => [
       {
@@ -25,7 +26,7 @@ const Trades = ({ trades }: Props) => {
         valueFormatter: (params) => Math.abs(params.value).toString(),
         cellStyle: (params) => {
           return {
-            color: params.value < 0 ? theme.SELL : theme.BUY,
+            color: params.value < 0 ? theme.Sell : theme.Buy,
           }
         },
       },
@@ -46,7 +47,10 @@ const Trades = ({ trades }: Props) => {
   )
 
   return (
-    <Container className="ag-theme-quartz-dark" style={{ height: 400, width: "100%" }}>
+    <Container className="ag-theme-quartz-dark">
+      <Header>
+        <span>Trades - {currencyPair}</span>
+      </Header>
       <AgGridReact
         columnDefs={columnDefs}
         rowData={trades}

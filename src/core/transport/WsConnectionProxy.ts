@@ -53,7 +53,7 @@ export class WsConnectionProxy implements ConnectionProxy {
   }
 
   send(message: any): void {
-    if (this.socket) {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       this.socket.send(message)
     }
   }
