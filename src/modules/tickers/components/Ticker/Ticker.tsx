@@ -1,18 +1,28 @@
-import { Container, CurrencyPair, Price } from "./Ticker.styled"
+import { Container, CurrencyPair, Price, RelativeChange, Change } from "./Ticker.styled"
 import UpdateHighlight from "../../../../core/components/update-highlight/UpdateHighlight"
 
 export interface Props {
   currencyPair: string
   lastPrice: number
+  dailyChange: number
+  dailyChangeRelative: number
 }
 
-const Ticker = ({ currencyPair, lastPrice }: Props) => {
+const Ticker = ({ currencyPair, lastPrice, dailyChange, dailyChangeRelative }: Props) => {
+  const base = currencyPair.slice(0, 3)
+  const counter = currencyPair.slice(3)
+
   return (
     <Container>
-      <CurrencyPair>{currencyPair}</CurrencyPair>
+      <CurrencyPair>{[base, counter].join(" / ")}</CurrencyPair>
       <Price>
-        <UpdateHighlight value={lastPrice?.toString()} />
+        <UpdateHighlight value={lastPrice?.toFixed(2)} />
       </Price>
+      <RelativeChange $isPositive={dailyChangeRelative > 0}>
+        {dailyChangeRelative}
+        {dailyChangeRelative && "%"}
+      </RelativeChange>
+      <Change $isPositive={dailyChangeRelative > 0}>{dailyChange?.toFixed(2)}</Change>
     </Container>
   )
 }

@@ -9,7 +9,16 @@ export interface ContainerProps {
 
 const TickerContainer = ({ currencyPair }: ContainerProps) => {
   const ticker = useSelector(getTicker)(currencyPair)
-  return <Ticker currencyPair={currencyPair} lastPrice={ticker?.lastPrice!} />
+  const { lastPrice, dailyChange, dailyChangeRelative } = ticker || {}
+
+  return (
+    <Ticker
+      currencyPair={currencyPair}
+      lastPrice={lastPrice!}
+      dailyChange={dailyChange!}
+      dailyChangeRelative={dailyChangeRelative!}
+    />
+  )
 }
 
 export default TickerContainer
