@@ -11,11 +11,14 @@ export const tradesSlice = createSlice({
   name: "trades",
   initialState,
   reducers: {
-    updateTrades: (state, action: PayloadAction<{ currencyPair: string; trades: Trade[] }>) => {
+    tradesSnapshotReducer: (
+      state,
+      action: PayloadAction<{ currencyPair: string; trades: Trade[] }>
+    ) => {
       const { currencyPair, trades } = action.payload
       state[currencyPair] = trades
     },
-    addTrade: (state, action: PayloadAction<{ currencyPair: string; trade: Trade }>) => {
+    tradesUpdateReducer: (state, action: PayloadAction<{ currencyPair: string; trade: Trade }>) => {
       const { currencyPair, trade } = action.payload
       const trades = state[currencyPair] ?? (state[currencyPair] = [])
       const existingIndex = trades.findIndex((t) => t.id === trade.id)
@@ -24,9 +27,11 @@ export const tradesSlice = createSlice({
         trades[existingIndex] = trade
       } else {
         trades.push(trade)
+        // Sort to maintain chronological order
+        trades.sort((a, b) => a.timestamp - b.timestamp)
       }
     },
   },
 })
 
-export const { updateTrades, addTrade } = tradesSlice.actions
+export const { tradesSnapshotReducer, tradesUpdateReducer } = tradesSlice.actions

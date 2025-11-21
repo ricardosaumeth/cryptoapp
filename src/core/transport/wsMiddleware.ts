@@ -1,19 +1,18 @@
-import { Connection } from "./Connection"
-import { updateTrades, addTrade } from "../../modules/trades/slice"
-import { updateTicker } from "../../modules/tickers/slice"
 import type { Middleware } from "@reduxjs/toolkit"
+import { Connection } from "./Connection"
+import { tradesSnapshotReducer, tradesUpdateReducer } from "../../modules/trades/slice"
+import { updateTicker } from "../../modules/tickers/slice"
 import { subscribeToChannelAck } from "./slice"
+import { candlesSnapshotReducer, candlesUpdateReducer } from "../../modules/candles/slice"
 
-const handleSubscriptionAck = (parsedData: any, dispatch: any) => {
-  dispatch(
+const handleSubscriptionAck = (parsedData: any, store: any) => {
+  const { chanId: channelId, channel, event, symbol, key } = parsedData
+
+  store.dispatch(
     subscribeToChannelAck({
-      channelId: parsedData.chanId,
-      channel: parsedData.channel,
-      request: {
-        channel: parsedData.channel,
-        event: parsedData.event,
-        symbol: parsedData.symbol,
-      },
+      channelId,
+      channel,
+      request: key ? { channel, event, key } : { channel, event, symbol },
     })
   )
 }
@@ -22,6 +21,7 @@ const handleTradesData = (parsedData: any[], subscription: any, dispatch: any) =
   const currencyPair = subscription.request.symbol.slice(1)
 
   if (Array.isArray(parsedData[1])) {
+    // Snapshot
     const [, rawTrades] = parsedData
     const trades = rawTrades.map(([id, timestamp, amount, price]: any[]) => ({
       id,
@@ -29,11 +29,12 @@ const handleTradesData = (parsedData: any[], subscription: any, dispatch: any) =
       amount,
       price,
     }))
-    dispatch(updateTrades({ currencyPair, trades }))
+    dispatch(tradesSnapshotReducer({ currencyPair, trades }))
   } else {
+    // Single trade update
     const [, , trade] = parsedData
     const [id, timestamp, amount, price] = trade
-    dispatch(addTrade({ currencyPair, trade: { id, timestamp, amount, price } }))
+    dispatch(tradesUpdateReducer({ currencyPair, trade: { id, timestamp, amount, price } }))
   }
 }
 
@@ -41,14 +42,30 @@ const handleTickerData = (parsedData: any[], subscription: any, dispatch: any) =
   dispatch(updateTicker({ symbol: subscription.request.symbol, data: parsedData }))
 }
 
+const handleCandlesData = (parsedData: any[], subscription: any, dispatch: any) => {
+  const { key } = subscription.request
+  const [, , symbol] = key.split(":")
+  const currencyPair = symbol.slice(1)
+
+  if (Array.isArray(parsedData[1][0])) {
+    // Snapshot
+    const [, candles] = parsedData
+    dispatch(candlesSnapshotReducer({ currencyPair, candles }))
+  } else {
+    // Single candle update
+    const [, candle] = parsedData
+    dispatch(candlesUpdateReducer({ currencyPair, candle }))
+  }
+}
+
 export const createWsMiddleware = (connection: Connection): Middleware => {
   return (store) => (next) => (action) => {
     connection.onReceive((data) => {
       const parsedData = JSON.parse(data)
-      console.log("parsedData", parsedData)
+      //console.log("parsedData", parsedData)
 
       if (parsedData.event === "subscribed") {
-        handleSubscriptionAck(parsedData, store.dispatch)
+        handleSubscriptionAck(parsedData, store)
         return
       }
 
@@ -64,6 +81,8 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
           handleTradesData(parsedData, subscription, store.dispatch)
         } else if (subscription?.channel === "ticker") {
           handleTickerData(parsedData, subscription, store.dispatch)
+        } else if (subscription?.channel === "candles") {
+          handleCandlesData(parsedData, subscription, store.dispatch)
         }
       }
     })

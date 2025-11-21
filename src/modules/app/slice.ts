@@ -1,8 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
 import { refDataLoad } from "../reference-data/slice"
-import { tradeSubscribeToSymbol } from "../../core/transport/slice"
+import {
+  tradeSubscribeToSymbol,
+  tickerSubscribeToSymbol,
+  candlesSubscribeToSymbol,
+} from "../../core/transport/slice"
 import type { Connection } from "../../core/transport/Connection"
-import { tickerSubscribeToSymbol } from "../../core/transport/slice"
 import type { RootState } from "../redux/store"
 import { ConnectionStatus } from "../../core/transport/types/ConnectionStatus"
 
@@ -33,14 +36,15 @@ export const bootstrapApp = createAsyncThunk(
 
     // Subscribe to trades for first currency pair
     setTimeout(() => {
-      dispatch(tradeSubscribeToSymbol({ symbol: `t${currencyPairs[0]}` }))
+      dispatch(tradeSubscribeToSymbol({ symbol: currencyPairs[0] }))
     }, 2000)
 
     // Subscribe to ticker for all currency pairs with delays
     currencyPairs.forEach((currencyPair: string, index: number) => {
       setTimeout(
         () => {
-          dispatch(tickerSubscribeToSymbol({ symbol: `t${currencyPair}` }))
+          dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
+          dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: "1M" }))
         },
         (index + 1) * 2000
       )
