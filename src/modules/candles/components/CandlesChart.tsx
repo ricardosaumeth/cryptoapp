@@ -3,7 +3,7 @@ import { Container } from "./CandlesChart.styled"
 import Highcharts from "highcharts/highstock"
 import HighchartsReact from "highcharts-react-official"
 import { type Candle } from "../types/Candle"
-import darkUnica from "highcharts/themes/dark-unica"
+import "highcharts/themes/dark-unica"
 
 export interface Props {
   candles: Candle[]
@@ -11,6 +11,10 @@ export interface Props {
 
 const CandlesChart = ({ candles }: Props) => {
   const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
+    accessibility: {
+      enabled: false,
+    },
+
     series: [
       {
         type: "candlestick",
@@ -45,7 +49,6 @@ const CandlesChart = ({ candles }: Props) => {
   }, [candles])
 
   useEffect(() => {
-    import("highcharts/themes/dark-unica")
     setReady(true)
   }, [])
 
