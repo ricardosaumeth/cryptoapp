@@ -16,7 +16,6 @@ export const Container = styled.div`
   grid-gap: 5px;
   padding: 10px;
   box-sizing: border-box;
-  font-family: FiraSans-Regular;
 `
 
 export const Header = styled.div`

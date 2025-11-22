@@ -4,6 +4,7 @@ import { tradesSnapshotReducer, tradesUpdateReducer } from "../../modules/trades
 import { updateTicker } from "../../modules/tickers/slice"
 import { subscribeToChannelAck } from "./slice"
 import { candlesSnapshotReducer, candlesUpdateReducer } from "../../modules/candles/slice"
+import { Channel } from "./types/Channels"
 
 const handleSubscriptionAck = (parsedData: any, store: any) => {
   const { chanId: channelId, channel, event, symbol, key } = parsedData
@@ -77,11 +78,11 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
         const [channelId] = parsedData
         const subscription = store.getState().subscriptions[channelId]
 
-        if (subscription?.channel === "trades") {
+        if (subscription?.channel === Channel.TRADES) {
           handleTradesData(parsedData, subscription, store.dispatch)
-        } else if (subscription?.channel === "ticker") {
+        } else if (subscription?.channel === Channel.TICKER) {
           handleTickerData(parsedData, subscription, store.dispatch)
-        } else if (subscription?.channel === "candles") {
+        } else if (subscription?.channel === Channel.CANDLES) {
           handleCandlesData(parsedData, subscription, store.dispatch)
         }
       }

@@ -3,9 +3,9 @@ import { Container } from "./CandlesChart.styled"
 import Highcharts from "highcharts/highstock"
 import HighchartsReact from "highcharts-react-official"
 import { type Candle } from "../types/Candle"
-import Palette from "../../../theme/style"
 import { formatCurrencyPair } from "../../reference-data/utils"
-import "highcharts/themes/dark-unica"
+import Palette from "../../../theme/style"
+import "../../../theme/Highchart"
 
 export interface Props {
   candles: Candle[]
@@ -23,8 +23,36 @@ const CandlesChart = ({ candles, currencyPair }: Props) => {
         data: [],
       },
     ],
+    rangeSelector: {
+      selected: 1,
+      buttons: [
+        {
+          type: "minute",
+          count: 5,
+          text: "5m",
+        },
+        {
+          type: "minute",
+          count: 30,
+          text: "30m",
+        },
+        {
+          type: "hour",
+          count: 1,
+          text: "1h",
+        },
+        {
+          type: "hour",
+          count: 12,
+          text: "12h",
+        },
+        {
+          type: "all",
+          text: "All",
+        },
+      ],
+    },
   })
-  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     if (candles && candles.length > 0) {
@@ -48,27 +76,21 @@ const CandlesChart = ({ candles, currencyPair }: Props) => {
         ],
         plotOptions: {
           candlestick: {
-            color: Palette.Negative,
-            upColor: Palette.Positive,
+            color: Palette.Ask,
+            upColor: Palette.Bid,
           },
         },
       })
     }
   }, [candles, currencyPair])
 
-  useEffect(() => {
-    setReady(true)
-  }, [])
-
   return (
     <Container>
-      {ready && (
-        <HighchartsReact
-          highcharts={Highcharts}
-          options={chartOptions}
-          constructorType={"stockChart"}
-        />
-      )}
+      <HighchartsReact
+        highcharts={Highcharts}
+        options={chartOptions}
+        constructorType={"stockChart"}
+      />
     </Container>
   )
 }

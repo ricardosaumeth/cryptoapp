@@ -44,7 +44,7 @@ export const bootstrapApp = createAsyncThunk(
       setTimeout(
         () => {
           dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
-          dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: "1M" }))
+          dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: "1m" }))
         },
         (index + 1) * 2000
       )

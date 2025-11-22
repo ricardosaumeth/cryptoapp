@@ -1,13 +1,15 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import { ConnectionStatus } from "./types/ConnectionStatus"
 import type { Connection } from "./Connection"
+import { type ChannelTypes, Channel } from "./types/Channels"
+import { SubscriptionActionType, type SubscriptionActionTypes } from "./types/ActionTypes"
 
 export interface SubscriptionState {
   [channelId: number]: {
     channel: string
     request:
-      | { channel: string; event: string; symbol: string }
-      | { channel: string; event: string; key: string }
+      | { channel: ChannelTypes; event: string; symbol: string }
+      | { channel: ChannelTypes; event: string; key: string }
   }
   wsConnectionStatus: ConnectionStatus
 }
@@ -21,7 +23,7 @@ interface SubscribePayload {
   timeframe?: string
 }
 
-const createSubscribeThunk = (channel: string, actionType: string) =>
+const createSubscribeThunk = (channel: ChannelTypes, actionType: SubscriptionActionTypes) =>
   createAsyncThunk(actionType, async ({ symbol, timeframe }: SubscribePayload, { extra }) => {
     const { connection } = extra as { connection: Connection }
 
@@ -41,9 +43,18 @@ const createSubscribeThunk = (channel: string, actionType: string) =>
     return symbol
   })
 
-export const tradeSubscribeToSymbol = createSubscribeThunk("trades", "trades/subscribeToSymbol")
-export const tickerSubscribeToSymbol = createSubscribeThunk("ticker", "ticker/subscribeToSymbol")
-export const candlesSubscribeToSymbol = createSubscribeThunk("candles", "candles/subscribeToSymbol")
+export const tradeSubscribeToSymbol = createSubscribeThunk(
+  Channel.TRADES,
+  SubscriptionActionType.SUBSCRIBE_TO_TRADES
+)
+export const tickerSubscribeToSymbol = createSubscribeThunk(
+  Channel.TICKER,
+  SubscriptionActionType.SUBSCRIBE_TO_TICKER
+)
+export const candlesSubscribeToSymbol = createSubscribeThunk(
+  Channel.CANDLES,
+  SubscriptionActionType.SUBSCRIBE_TO_CANDLES
+)
 
 export const subscriptionsSlice = createSlice({
   name: "subscriptions",
@@ -56,10 +67,10 @@ export const subscriptionsSlice = createSlice({
       state,
       action: PayloadAction<{
         channelId: number
-        channel: string
+        channel: ChannelTypes
         request:
-          | { channel: string; event: string; symbol: string }
-          | { channel: string; event: string; key: string }
+          | { channel: ChannelTypes; event: string; symbol: string }
+          | { channel: ChannelTypes; event: string; key: string }
       }>
     ) => {
       const { channelId, channel, request } = action.payload
