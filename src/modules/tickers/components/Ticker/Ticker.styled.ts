@@ -14,7 +14,7 @@ export const Container = styled.div`
   border: 1px solid ${Palette.Border};
 
   &:hover {
-    background-color: rgba(50, 120, 255, 0.18);
+    background-color: rgba(50, 120, 255, 0.15);
   }
 `
 
