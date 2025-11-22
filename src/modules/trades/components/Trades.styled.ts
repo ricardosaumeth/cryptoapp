@@ -8,6 +8,7 @@ export const Container = styled.div`
 
 export const Header = styled.div`
   height: 20px;
+  color: ${Palette.White};
 
   > span {
     color: ${Palette.Label};

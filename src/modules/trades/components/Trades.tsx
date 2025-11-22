@@ -5,6 +5,7 @@ import { DateTime } from "luxon"
 import type { Trade } from "../types/Trade"
 import { Container, Header } from "./Trades.styled"
 import theme from "../../../theme/style"
+import { formatCurrencyPair } from "../../reference-data/utils"
 
 export interface Props {
   trades: Trade[]
@@ -49,7 +50,8 @@ const Trades = ({ trades, currencyPair }: Props) => {
   return (
     <Container className="ag-theme-quartz-dark">
       <Header>
-        <span>Trades - {currencyPair}</span>
+        <span>Trades - </span>
+        {formatCurrencyPair(currencyPair)}
       </Header>
       <AgGridReact
         columnDefs={columnDefs}

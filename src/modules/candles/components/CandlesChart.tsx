@@ -3,18 +3,20 @@ import { Container } from "./CandlesChart.styled"
 import Highcharts from "highcharts/highstock"
 import HighchartsReact from "highcharts-react-official"
 import { type Candle } from "../types/Candle"
+import Palette from "../../../theme/style"
+import { formatCurrencyPair } from "../../reference-data/utils"
 import "highcharts/themes/dark-unica"
 
 export interface Props {
   candles: Candle[]
+  currencyPair: string
 }
 
-const CandlesChart = ({ candles }: Props) => {
+const CandlesChart = ({ candles, currencyPair }: Props) => {
   const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
     accessibility: {
       enabled: false,
     },
-
     series: [
       {
         type: "candlestick",
@@ -40,13 +42,19 @@ const CandlesChart = ({ candles }: Props) => {
         series: [
           {
             type: "candlestick",
-            name: "Price",
+            name: formatCurrencyPair(currencyPair),
             data: chartData,
           },
         ],
+        plotOptions: {
+          candlestick: {
+            color: Palette.Negative,
+            upColor: Palette.Positive,
+          },
+        },
       })
     }
-  }, [candles])
+  }, [candles, currencyPair])
 
   useEffect(() => {
     setReady(true)

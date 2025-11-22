@@ -5,7 +5,7 @@ const Palette = {
   Negative: "#df4249",
   Orange: "#ffa41b",
   White: "#fff",
-  BackgroundColor: "#1b1e2b",
+  BackgroundColor: "#1f2936",
   Label: "rgba(245, 245, 245, 0.64)",
   Border: "#424242",
 }
