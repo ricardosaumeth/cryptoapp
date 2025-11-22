@@ -8,6 +8,7 @@ import {
   CellStyleModule,
 } from "ag-grid-community"
 import "ag-grid-community/styles/ag-theme-quartz.css"
+import "./theme/fonts.css"
 
 ModuleRegistry.registerModules([ClientSideRowModelModule, ValidationModule, CellStyleModule])
 

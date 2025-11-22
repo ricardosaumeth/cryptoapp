@@ -16,6 +16,7 @@ export const Container = styled.div`
   grid-gap: 5px;
   padding: 10px;
   box-sizing: border-box;
+  font-family: FiraSans-Regular;
 `
 
 export const Header = styled.div`
@@ -25,6 +26,7 @@ export const Header = styled.div`
   color: ${Palette.White};
   position: relative;
   overflow: hidden;
+  font-family: FiraSans-MediumItalic;
 
   &::before {
     content: "";
@@ -55,24 +57,30 @@ export const Header = styled.div`
 
 export const TickersPanel = styled.div`
   grid-area: ticker;
+  font-family: FiraSans-MediumItalic;
 `
 
 export const TradesPanel = styled.div`
   grid-area: trades;
+  font-family: FiraSans-MediumItalic;
 `
 
 export const CandlesPanel = styled.div`
   grid-area: candles;
+  font-family: FiraSans-MediumItalic;
 `
 
 export const ChartPanel = styled.div`
   grid-area: chart;
+  font-family: FiraSans-MediumItalic;
 `
 
 export const DepthPanel = styled.div`
   grid-area: depth;
+  font-family: FiraSans-MediumItalic;
 `
 
 export const BookPanel = styled.div`
   grid-area: book;
+  font-family: FiraSans-MediumItalic;
 `
