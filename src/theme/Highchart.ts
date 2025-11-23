@@ -1,6 +1,7 @@
 import * as Highcharts from "highcharts/highstock"
 import Palette from "./style"
-;(Highcharts as any).theme = {
+
+const theme = ((Highcharts as any).theme = {
   colors: [
     "#2b908f",
     "#90ee7e",
@@ -126,24 +127,55 @@ import Palette from "./style"
       },
     },
   },
+  accessibility: {
+    enabled: false,
+  },
   // scroll charts
   rangeSelector: {
+    enabled: true,
+    selected: 1,
+    buttons: [
+      {
+        type: "minute",
+        count: 5,
+        text: "5m",
+      },
+      {
+        type: "minute",
+        count: 30,
+        text: "30m",
+      },
+      {
+        type: "hour",
+        count: 1,
+        text: "1h",
+      },
+      {
+        type: "hour",
+        count: 12,
+        text: "12h",
+      },
+      {
+        type: "all",
+        text: "All",
+      },
+    ],
     buttonTheme: {
-      fill: "#505053",
+      fill: "#2c3e50",
       stroke: "#000000",
       style: {
         color: "#CCC",
       },
       states: {
         hover: {
-          fill: "#707073",
+          fill: "rgba(50, 120, 255, 0.15)",
           stroke: "#000000",
           style: {
             color: "white",
           },
         },
         select: {
-          fill: "#000003",
+          fill: "#4682b4",
           stroke: "#000000",
           style: {
             color: "white",
@@ -161,6 +193,15 @@ import Palette from "./style"
     },
   },
   navigator: {
+    enabled: true,
+    xAxis: {
+      gridLineColor: "#505053",
+      labels: {
+        style: {
+          color: "white",
+        },
+      },
+    },
     handles: {
       backgroundColor: "#666",
       borderColor: "#AAA",
@@ -170,9 +211,6 @@ import Palette from "./style"
     series: {
       color: "#7798BF",
       lineColor: "#A6C7ED",
-    },
-    xAxis: {
-      gridLineColor: "#505053",
     },
   },
   scrollbar: {
@@ -185,6 +223,6 @@ import Palette from "./style"
     trackBackgroundColor: "#404043",
     trackBorderColor: "#404043",
   },
-}
+})
 
-Highcharts.setOptions((Highcharts as any).theme)
+Highcharts.setOptions(theme as unknown as Highcharts.Options)

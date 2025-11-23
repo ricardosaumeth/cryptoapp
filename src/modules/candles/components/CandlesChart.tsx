@@ -14,44 +14,12 @@ export interface Props {
 
 const CandlesChart = ({ candles, currencyPair }: Props) => {
   const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
-    accessibility: {
-      enabled: false,
-    },
     series: [
       {
         type: "candlestick",
         data: [],
       },
     ],
-    rangeSelector: {
-      selected: 1,
-      buttons: [
-        {
-          type: "minute",
-          count: 5,
-          text: "5m",
-        },
-        {
-          type: "minute",
-          count: 30,
-          text: "30m",
-        },
-        {
-          type: "hour",
-          count: 1,
-          text: "1h",
-        },
-        {
-          type: "hour",
-          count: 12,
-          text: "12h",
-        },
-        {
-          type: "all",
-          text: "All",
-        },
-      ],
-    },
   })
 
   useEffect(() => {
@@ -66,7 +34,6 @@ const CandlesChart = ({ candles, currencyPair }: Props) => {
 
       setChartOptions({
         rangeSelector: { enabled: true },
-        navigator: { enabled: true },
         series: [
           {
             type: "candlestick",
