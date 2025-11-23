@@ -8,14 +8,15 @@ export interface Props {
   lastPrice: number
   dailyChange: number
   dailyChangeRelative: number
+  onClick: () => void
 }
 
-const Ticker = ({ currencyPair, lastPrice, dailyChange, dailyChangeRelative }: Props) => {
+const Ticker = ({ currencyPair, lastPrice, dailyChange, dailyChangeRelative, onClick }: Props) => {
   const isPositiveChange = dailyChange > 0
   const percentChange = dailyChangeRelative ? dailyChangeRelative * 100 : undefined
 
   return (
-    <Container>
+    <Container onClick={onClick}>
       <CurrencyPair>{formatCurrencyPair(currencyPair)}</CurrencyPair>
       <Price>
         <UpdateHighlight value={lastPrice?.toFixed(2)} />

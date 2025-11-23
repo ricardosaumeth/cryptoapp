@@ -1,5 +1,8 @@
 import { useSelector } from "react-redux"
+import { useDispatch } from "react-redux"
+import { type AppDispatch } from "../../../../modules/redux/store"
 import { getTicker } from "./../../selectors"
+import { selectCurrencyPair } from "../../../selection/slice"
 
 import Ticker from "./Ticker"
 
@@ -8,6 +11,8 @@ export interface ContainerProps {
 }
 
 const TickerContainer = ({ currencyPair }: ContainerProps) => {
+  const dispatch = useDispatch<AppDispatch>()
+
   const ticker = useSelector(getTicker)(currencyPair)
   const { lastPrice, dailyChange, dailyChangeRelative } = ticker || {}
 
@@ -17,6 +22,7 @@ const TickerContainer = ({ currencyPair }: ContainerProps) => {
       lastPrice={lastPrice!}
       dailyChange={dailyChange!}
       dailyChangeRelative={dailyChangeRelative!}
+      onClick={() => dispatch(selectCurrencyPair({ currencyPair }))}
     />
   )
 }

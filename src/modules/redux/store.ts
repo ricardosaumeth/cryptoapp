@@ -4,6 +4,7 @@ import { subscriptionsSlice, wsConnectionStatusChanged } from "../../core/transp
 import { refDataSlice } from "../reference-data/slice"
 import { tickerSlice } from "../tickers/slice"
 import { candleSlice } from "../candles/slice"
+import { selectionSlice } from "../selection/slice"
 import { WsConnectionProxy } from "../../core/transport/WsConnectionProxy"
 import { Connection } from "../../core/transport/Connection"
 import { createWsMiddleware } from "../../core/transport/wsMiddleware"
@@ -20,6 +21,7 @@ export default function createStore() {
       refData: refDataSlice.reducer,
       ticker: tickerSlice.reducer,
       candles: candleSlice.reducer,
+      selection: selectionSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
