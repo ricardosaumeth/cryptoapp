@@ -4,7 +4,7 @@ import { tradesSnapshotReducer, tradesUpdateReducer } from "../../modules/trades
 import { updateTicker } from "../../modules/tickers/slice"
 import { subscribeToChannelAck, type requestSubscribeToChannelAck } from "./slice"
 import { candlesSnapshotReducer, candlesUpdateReducer } from "../../modules/candles/slice"
-import { bookSnapshotReducer, bookUpdateReducer } from "src/modules/book/slice"
+import { bookSnapshotReducer, bookUpdateReducer } from "../../modules/book/slice"
 import { Channel } from "./types/Channels"
 
 const handleSubscriptionAck = (parsedData: any, store: any) => {

@@ -62,7 +62,6 @@ const Trades = memo(({ trades, currencyPair }: Props) => {
         columnDefs={columnDefs}
         rowData={trades}
         getRowId={getRowId}
-        suppressRowClickSelection
         animateRows={false}
       />
     </Container>

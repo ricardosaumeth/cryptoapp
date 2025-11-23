@@ -31,23 +31,18 @@ export const bookSlice = createSlice({
     ) => {
       const { currencyPair, order } = action.payload
       const [id, price, amount] = order
-      const orderIndex = state[currencyPair]?.findIndex((o) => o.id === id) ?? -1
-      const newOrUpdatedOrder = {
-        id,
-        price,
-        amount,
-      }
+      const orders = state[currencyPair] ?? (state[currencyPair] = [])
+      const orderIndex = orders.findIndex((o) => o.id === id)
+
       if (price === 0 && orderIndex >= 0) {
         // remove
-        const updatedState = state[currencyPair]?.slice()
-        updatedState!.splice(orderIndex, 1)
+        orders.splice(orderIndex, 1)
       } else if (orderIndex >= 0) {
         // update
-        const updatedState = state[currencyPair]?.slice()
-        updatedState!.splice(orderIndex, 1, newOrUpdatedOrder)
+        orders[orderIndex] = { id, price, amount }
       } else {
         // add
-        state[currencyPair]?.push(newOrUpdatedOrder)
+        orders.push({ id, price, amount })
       }
     },
   },
