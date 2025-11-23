@@ -52,7 +52,7 @@ const Book = ({ orders, currencyPair }: Props) => {
       <AgGridReact
         columnDefs={columnDefs}
         rowData={orders}
-        getRowId={(params) => [params.data.bid?.id, params.data.ask?.id].join("#")}
+        getRowId={(params) => `${params.data.bid.id}-${params.data.ask.id}`}
       />
     </Container>
   )
