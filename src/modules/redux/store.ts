@@ -5,6 +5,7 @@ import { refDataSlice } from "../reference-data/slice"
 import { tickerSlice } from "../tickers/slice"
 import { candleSlice } from "../candles/slice"
 import { selectionSlice } from "../selection/slice"
+import { bookSlice } from "../book/slice"
 import { WsConnectionProxy } from "../../core/transport/WsConnectionProxy"
 import { Connection } from "../../core/transport/Connection"
 import { createWsMiddleware } from "../../core/transport/wsMiddleware"
@@ -22,6 +23,7 @@ export default function createStore() {
       ticker: tickerSlice.reducer,
       candles: candleSlice.reducer,
       selection: selectionSlice.reducer,
+      book: bookSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({

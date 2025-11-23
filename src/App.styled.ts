@@ -12,7 +12,7 @@ export const Container = styled.div`
     "header header header"
     "ticker ticker ticker"
     "trades candles candles"
-    "trades depth book";
+    "trades book book";
   grid-gap: 5px;
   padding: 10px;
   box-sizing: border-box;

@@ -6,13 +6,16 @@ import type { RootState } from "../redux/store"
 import { ConnectionStatus } from "../../core/transport/types/ConnectionStatus"
 import { selectCurrencyPair } from "../selection/slice"
 
+export const SUBSCRIPTION_TIMEOUT_IN_MS = 2000
+const CHECK_CONNECTION_TIMEOUT_IN_MS = 100
+
 const waitForConnection = (getState: () => RootState): Promise<void> => {
   return new Promise((resolve) => {
     const checkConnection = () => {
       if (getState().subscriptions.wsConnectionStatus === ConnectionStatus.Connected) {
         resolve()
       } else {
-        setTimeout(checkConnection, 100)
+        setTimeout(checkConnection, CHECK_CONNECTION_TIMEOUT_IN_MS)
       }
     }
     checkConnection()
@@ -39,7 +42,7 @@ export const bootstrapApp = createAsyncThunk(
         () => {
           dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
         },
-        (index + 1) * 2000
+        (index + 1) * SUBSCRIPTION_TIMEOUT_IN_MS
       )
     })
   }

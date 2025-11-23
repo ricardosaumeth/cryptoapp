@@ -2,18 +2,44 @@ import type { Middleware } from "@reduxjs/toolkit"
 import { Connection } from "./Connection"
 import { tradesSnapshotReducer, tradesUpdateReducer } from "../../modules/trades/slice"
 import { updateTicker } from "../../modules/tickers/slice"
-import { subscribeToChannelAck } from "./slice"
+import { subscribeToChannelAck, type requestSubscribeToChannelAck } from "./slice"
 import { candlesSnapshotReducer, candlesUpdateReducer } from "../../modules/candles/slice"
+import { bookSnapshotReducer, bookUpdateReducer } from "src/modules/book/slice"
 import { Channel } from "./types/Channels"
 
 const handleSubscriptionAck = (parsedData: any, store: any) => {
-  const { chanId: channelId, channel, event, symbol, key } = parsedData
+  const { chanId: channelId, channel, event, symbol, key, prec } = parsedData
+
+  const request: requestSubscribeToChannelAck = {
+    event,
+    channel,
+  }
+
+  switch (channel) {
+    case Channel.CANDLES:
+      request.key = key
+      break
+
+    case Channel.BOOK:
+      request.prec = prec
+      request.symbol = symbol
+      delete request.event
+      break
+
+    case Channel.TRADES:
+    case Channel.TICKER:
+      request.symbol = symbol
+      break
+
+    default:
+      console.warn("Unhandled channel:", channel)
+  }
 
   store.dispatch(
     subscribeToChannelAck({
       channelId,
       channel,
-      request: key ? { channel, event, key } : { channel, event, symbol },
+      request,
     })
   )
 }
@@ -59,6 +85,19 @@ const handleCandlesData = (parsedData: any[], subscription: any, dispatch: any) 
   }
 }
 
+const handleBookData = (parsedData: any[], subscription: any, dispatch: any) => {
+  const currencyPair = subscription.request.symbol.slice(1)
+  if (Array.isArray(parsedData[1][0])) {
+    // Snapshot
+    const [, orders] = parsedData
+    dispatch(bookSnapshotReducer({ currencyPair, orders }))
+  } else {
+    // Single candle update
+    const [, order] = parsedData
+    dispatch(bookUpdateReducer({ currencyPair, order }))
+  }
+}
+
 export const createWsMiddleware = (connection: Connection): Middleware => {
   return (store) => (next) => (action) => {
     connection.onReceive((data) => {
@@ -84,6 +123,8 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
           handleTickerData(parsedData, subscription, store.dispatch)
         } else if (subscription?.channel === Channel.CANDLES) {
           handleCandlesData(parsedData, subscription, store.dispatch)
+        } else if (subscription?.channel === Channel.BOOK) {
+          handleBookData(parsedData, subscription, store.dispatch)
         }
       }
     })
