@@ -2,9 +2,9 @@ import { useSelector } from "react-redux"
 import { useMemo } from "react"
 import { createSelector } from "@reduxjs/toolkit"
 import Book from "./Book"
-import { getBook } from "../selectors"
-import { getCurrencyPair } from "../../selection/selectors"
-import { type RootState } from "../../redux/store"
+import { getBook } from "../../selectors"
+import { getCurrencyPair } from "../../../selection/selectors"
+import { type RootState } from "../../../redux/store"
 
 const BookContainer = () => {
   const currencyPair = useSelector(getCurrencyPair)

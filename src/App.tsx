@@ -4,9 +4,18 @@ import createStore, { type AppDispatch } from "./modules/redux/store"
 import Trades from "./modules/trades/components"
 import Tickers from "./modules/tickers/components/Tickers"
 import CandlesChart from "./modules/candles/components"
-import { Container, Header, TickersPanel, TradesPanel, CandlesPanel, BookPanel } from "./App.styled"
+import DepthChart from "./modules/book/components/DepthChart"
+import {
+  Container,
+  Header,
+  TickersPanel,
+  TradesPanel,
+  CandlesPanel,
+  BookPanel,
+  DepthPanel,
+} from "./App.styled"
 import { bootstrapApp } from "./modules/app/slice"
-import Book from "./modules/book/components"
+import Book from "./modules/book/components/Book"
 
 const store = createStore()
 
@@ -34,6 +43,9 @@ function AppContent() {
       <BookPanel>
         <Book />
       </BookPanel>
+      <DepthPanel>
+        <DepthChart />
+      </DepthPanel>
     </Container>
   )
 }

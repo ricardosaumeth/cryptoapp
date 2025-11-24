@@ -117,14 +117,26 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
         const [channelId] = parsedData
         const subscription = store.getState().subscriptions[channelId]
 
-        if (subscription?.channel === Channel.TRADES) {
-          handleTradesData(parsedData, subscription, store.dispatch)
-        } else if (subscription?.channel === Channel.TICKER) {
-          handleTickerData(parsedData, subscription, store.dispatch)
-        } else if (subscription?.channel === Channel.CANDLES) {
-          handleCandlesData(parsedData, subscription, store.dispatch)
-        } else if (subscription?.channel === Channel.BOOK) {
-          handleBookData(parsedData, subscription, store.dispatch)
+        switch (subscription?.channel) {
+          case Channel.TRADES:
+            handleTradesData(parsedData, subscription, store.dispatch)
+            break
+
+          case Channel.TICKER:
+            handleTickerData(parsedData, subscription, store.dispatch)
+            break
+
+          case Channel.CANDLES:
+            handleCandlesData(parsedData, subscription, store.dispatch)
+            break
+
+          case Channel.BOOK:
+            handleBookData(parsedData, subscription, store.dispatch)
+            break
+
+          default:
+            console.warn("Unhandled channel:", subscription?.channel)
+            break
         }
       }
     })

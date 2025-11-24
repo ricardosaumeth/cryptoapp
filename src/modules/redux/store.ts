@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { tradesSlice } from "../trades/slice"
-import { subscriptionsSlice, wsConnectionStatusChanged } from "../../core/transport/slice"
+import { subscriptionsSlice, changeConnectionStatus } from "../../core/transport/slice"
 import { refDataSlice } from "../reference-data/slice"
 import { tickerSlice } from "../tickers/slice"
 import { candleSlice } from "../candles/slice"
@@ -34,7 +34,7 @@ export default function createStore() {
   })
 
   connection.onConnect(() => {
-    store.dispatch(wsConnectionStatusChanged(ConnectionStatus.Connected))
+    store.dispatch(changeConnectionStatus(ConnectionStatus.Connected))
     console.log("Connected")
   })
 

@@ -87,7 +87,7 @@ export const subscriptionsSlice = createSlice({
   name: "subscriptions",
   initialState,
   reducers: {
-    wsConnectionStatusChanged: (state, action: PayloadAction<ConnectionStatus>) => {
+    changeConnectionStatus: (state, action: PayloadAction<ConnectionStatus>) => {
       state.wsConnectionStatus = action.payload
     },
     subscribeToChannelAck: (
@@ -113,8 +113,11 @@ export const subscriptionsSlice = createSlice({
       .addCase(candlesSubscribeToSymbol.fulfilled, (_state, action) => {
         console.log(`Subscribed to candle ${action.payload}`)
       })
+      .addCase(bookSubscribeToSymbol.fulfilled, (_state, action) => {
+        console.log(`Subscribed to book ${action.payload}`)
+      })
   },
 })
 
-export const { wsConnectionStatusChanged, subscribeToChannelAck } = subscriptionsSlice.actions
+export const { changeConnectionStatus, subscribeToChannelAck } = subscriptionsSlice.actions
 export default subscriptionsSlice.reducer

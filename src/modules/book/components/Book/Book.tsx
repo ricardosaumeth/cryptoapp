@@ -1,9 +1,9 @@
 import { AgGridReact } from "ag-grid-react"
 import { type ColDef } from "ag-grid-community"
 import { Container, Header } from "./Book.styled"
-import { formatCurrencyPair } from "../../reference-data/utils"
-import { type Order } from "../types/Order"
-import Palette from "../../../theme/style"
+import { formatCurrencyPair } from "../../../reference-data/utils"
+import { type Order } from "../../types/Order"
+import Palette from "../../../../theme/style"
 
 export interface Props {
   currencyPair?: string
