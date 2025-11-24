@@ -1,4 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit"
+import { appBootstrapSlice } from "../app/slice"
 import { tradesSlice } from "../trades/slice"
 import { subscriptionsSlice, changeConnectionStatus } from "../../core/transport/slice"
 import { refDataSlice } from "../reference-data/slice"
@@ -17,6 +18,7 @@ export const connection = new Connection(connectionProxy)
 export default function createStore() {
   const store = configureStore({
     reducer: {
+      app: appBootstrapSlice.reducer,
       trades: tradesSlice.reducer,
       subscriptions: subscriptionsSlice.reducer,
       refData: refDataSlice.reducer,

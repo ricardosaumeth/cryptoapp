@@ -24,6 +24,9 @@ const DepthChart = ({ depth }: Props) => {
       height: "250px",
       backgroundColor: Palette.BackgroundColor,
     },
+    accessibility: {
+      enabled: false,
+    },
     title: {
       text: "",
     },
