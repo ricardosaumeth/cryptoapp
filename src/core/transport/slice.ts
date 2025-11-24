@@ -60,7 +60,20 @@ const createSubscribeThunk = (channel: ChannelTypes, actionType: SubscriptionAct
     }
 
     connection.send(JSON.stringify(msg))
-    return symbol
+    return msg
+  })
+
+const createUnsubscribeThunk = (channel: ChannelTypes) =>
+  createAsyncThunk(`unsubscribe/${channel}`, async (chanId: string, { extra }) => {
+    const { connection } = extra as { connection: Connection }
+
+    const msg = {
+      event: "unsubscribe",
+      chanId,
+    }
+
+    connection.send(JSON.stringify(msg))
+    return msg
   })
 
 export const tradeSubscribeToSymbol = createSubscribeThunk(
@@ -83,6 +96,8 @@ export const bookSubscribeToSymbol = createSubscribeThunk(
   SubscriptionActionType.SUBSCRIBE_TO_BOOK
 )
 
+export const unsubscribeChannelsToSymbol = createUnsubscribeThunk(Channel.TRADES)
+
 export const subscriptionsSlice = createSlice({
   name: "subscriptions",
   initialState,
@@ -101,23 +116,36 @@ export const subscriptionsSlice = createSlice({
       const { channelId, channel, request } = action.payload
       state[channelId] = { channel, request }
     },
+    unSubscribeToChannelAck: (
+      state,
+      action: PayloadAction<{
+        channelId: number
+      }>
+    ) => {
+      const { channelId } = action.payload
+      delete state[channelId]
+    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(tradeSubscribeToSymbol.fulfilled, (_state, action) => {
-        console.log(`Subscribed to trade ${action.payload}`)
+        console.log(`Subscribed to trade ${JSON.stringify(action.payload)}`)
       })
       .addCase(tickerSubscribeToSymbol.fulfilled, (_state, action) => {
-        console.log(`Subscribed to ticker ${action.payload}`)
+        console.log(`Subscribed to ticker ${JSON.stringify(action.payload)}`)
       })
       .addCase(candlesSubscribeToSymbol.fulfilled, (_state, action) => {
-        console.log(`Subscribed to candle ${action.payload}`)
+        console.log(`Subscribed to candle ${JSON.stringify(action.payload)}`)
       })
       .addCase(bookSubscribeToSymbol.fulfilled, (_state, action) => {
-        console.log(`Subscribed to book ${action.payload}`)
+        console.log(`Subscribed to book ${JSON.stringify(action.payload)}`)
+      })
+      .addCase(unsubscribeChannelsToSymbol.fulfilled, (_state, action) => {
+        console.log(`Unsubscribed to channel ${JSON.stringify(action.payload)}`)
       })
   },
 })
 
-export const { changeConnectionStatus, subscribeToChannelAck } = subscriptionsSlice.actions
+export const { changeConnectionStatus, subscribeToChannelAck, unSubscribeToChannelAck } =
+  subscriptionsSlice.actions
 export default subscriptionsSlice.reducer

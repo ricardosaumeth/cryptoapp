@@ -2,7 +2,11 @@ import type { Middleware } from "@reduxjs/toolkit"
 import { Connection } from "./Connection"
 import { tradesSnapshotReducer, tradesUpdateReducer } from "../../modules/trades/slice"
 import { updateTicker } from "../../modules/tickers/slice"
-import { subscribeToChannelAck, type requestSubscribeToChannelAck } from "./slice"
+import {
+  subscribeToChannelAck,
+  unSubscribeToChannelAck,
+  type requestSubscribeToChannelAck,
+} from "./slice"
 import { candlesSnapshotReducer, candlesUpdateReducer } from "../../modules/candles/slice"
 import { bookSnapshotReducer, bookUpdateReducer } from "../../modules/book/slice"
 import { Channel } from "./types/Channels"
@@ -42,6 +46,11 @@ const handleSubscriptionAck = (parsedData: any, store: any) => {
       request,
     })
   )
+}
+
+const handleUnSubscriptionAck = (parsedData: any, store: any) => {
+  const { chanId: channelId } = parsedData
+  store.dispatch(unSubscribeToChannelAck({ channelId }))
 }
 
 const handleTradesData = (parsedData: any[], subscription: any, dispatch: any) => {
@@ -106,6 +115,9 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
 
       if (parsedData.event === "subscribed") {
         handleSubscriptionAck(parsedData, store)
+        return
+      } else if (parsedData.event === "unsubscribed") {
+        handleUnSubscriptionAck(parsedData, store)
         return
       }
 
