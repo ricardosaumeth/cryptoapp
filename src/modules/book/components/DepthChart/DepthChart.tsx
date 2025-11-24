@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import * as Highcharts from "highcharts"
 import HighchartsReact from "highcharts-react-official"
 import { useThrottle } from "../../../../core/hooks/useThrottle"
-import { Container, Header } from "./DepthChart.styled"
+import { Container } from "./DepthChart.styled"
 import Palette from "../../../../theme/style"
 import "../../../../theme/Highchart"
 
@@ -16,11 +16,13 @@ export interface Props {
 }
 
 const DepthChart = ({ depth }: Props) => {
-  const debouncedDepth = useThrottle<Depth>(depth, 2000)
+  const debouncedDepth = useThrottle<Depth>(depth, 1000)
   const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
     chart: {
       type: "area",
       animation: false,
+      height: "250px",
+      backgroundColor: Palette.BackgroundColor,
     },
     title: {
       text: "",
@@ -43,6 +45,10 @@ const DepthChart = ({ depth }: Props) => {
     xAxis: {
       labels: {
         autoRotation: [],
+        style: {
+          color: Palette.White,
+          fontFamily: "FiraSans-MediumItalic",
+        },
       },
     },
     yAxis: {
@@ -99,7 +105,6 @@ const DepthChart = ({ depth }: Props) => {
 
   return (
     <Container>
-      <Header>Depth</Header>
       <HighchartsReact highcharts={Highcharts} options={chartOptions} constructorType={"chart"} />
     </Container>
   )

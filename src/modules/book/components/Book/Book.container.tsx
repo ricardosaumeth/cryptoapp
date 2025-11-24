@@ -19,7 +19,7 @@ const BookContainer = () => {
 
   const orders = useSelector(selectOrders)
 
-  return <Book currencyPair={currencyPair} orders={orders} />
+  return <Book orders={orders} />
 }
 
 export default BookContainer

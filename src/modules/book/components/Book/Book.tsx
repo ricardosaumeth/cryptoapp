@@ -1,21 +1,19 @@
 import { AgGridReact } from "ag-grid-react"
 import { type ColDef } from "ag-grid-community"
-import { Container, Header } from "./Book.styled"
-import { formatCurrencyPair } from "../../../reference-data/utils"
+import { Container } from "./Book.styled"
 import { type Order } from "../../types/Order"
 import Palette from "../../../../theme/style"
 
 export interface Props {
-  currencyPair?: string
   orders: { bid: Order; ask: Order }[]
 }
 
-const Book = ({ orders, currencyPair }: Props) => {
+const Book = ({ orders }: Props) => {
   const columnDefs: ColDef[] = [
     {
       headerName: "Bid Amount",
       field: "bid.amount",
-
+      width: 100,
       cellStyle: () => ({
         color: Palette.Bid,
       }),
@@ -23,6 +21,7 @@ const Book = ({ orders, currencyPair }: Props) => {
     {
       headerName: "Bid Price",
       field: "bid.price",
+      width: 100,
       cellStyle: () => ({
         color: Palette.Bid,
       }),
@@ -30,6 +29,7 @@ const Book = ({ orders, currencyPair }: Props) => {
     {
       headerName: "Ask Price",
       field: "ask.price",
+      width: 100,
       cellStyle: () => ({
         color: Palette.Ask,
       }),
@@ -37,6 +37,7 @@ const Book = ({ orders, currencyPair }: Props) => {
     {
       headerName: "Ask Amount",
       field: "ask.amount",
+      width: 100,
       cellStyle: () => ({
         color: Palette.Ask,
       }),
@@ -46,9 +47,6 @@ const Book = ({ orders, currencyPair }: Props) => {
 
   return (
     <Container className="ag-theme-quartz-dark">
-      <Header>
-        <span>Book - {currencyPair && formatCurrencyPair(currencyPair)}</span>
-      </Header>
       <AgGridReact
         columnDefs={columnDefs}
         rowData={orders}

@@ -6,7 +6,7 @@ import { getTrades } from "./selector"
 const TradesContainer = () => {
   const currencyPair = useSelector(getCurrencyPair)
   const trades = useSelector(getTrades(currencyPair))
-  return <Trades trades={trades} currencyPair={currencyPair} />
+  return <Trades trades={trades} />
 }
 
 export default TradesContainer

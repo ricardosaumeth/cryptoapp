@@ -14,13 +14,16 @@ export interface Props {
 
 const CandlesChart = ({ candles, currencyPair }: Props) => {
   const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
+    time: {
+      useUTC: false,
+    },
     series: [
       {
         type: "candlestick",
         data: [],
       },
     ],
-  })
+  } as Highcharts.Options)
 
   useEffect(() => {
     if (candles && candles.length > 0) {

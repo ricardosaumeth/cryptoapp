@@ -7,6 +7,7 @@ import CandlesChart from "./modules/candles/components"
 import DepthChart from "./modules/book/components/DepthChart"
 import {
   Container,
+  Content,
   Header,
   TickersPanel,
   TradesPanel,
@@ -28,24 +29,24 @@ function AppContent() {
 
   return (
     <Container>
-      <Header>
-        <h1>Crypto App</h1>
-      </Header>
-      <TickersPanel>
-        <Tickers />
-      </TickersPanel>
-      <TradesPanel>
-        <Trades />
-      </TradesPanel>
-      <CandlesPanel>
-        <CandlesChart />
-      </CandlesPanel>
-      <BookPanel>
-        <Book />
-      </BookPanel>
-      <DepthPanel>
-        <DepthChart />
-      </DepthPanel>
+      <Content>
+        <Header>Crypto App</Header>
+        <TickersPanel>
+          <Tickers />
+        </TickersPanel>
+        <TradesPanel>
+          <Trades />
+        </TradesPanel>
+        <CandlesPanel>
+          <CandlesChart />
+        </CandlesPanel>
+        <BookPanel>
+          <Book />
+        </BookPanel>
+        <DepthPanel>
+          <DepthChart />
+        </DepthPanel>
+      </Content>
     </Container>
   )
 }

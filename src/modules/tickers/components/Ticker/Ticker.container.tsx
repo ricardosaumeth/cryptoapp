@@ -5,6 +5,7 @@ import { getTicker } from "./../../selectors"
 import { selectCurrencyPair } from "../../../selection/slice"
 
 import Ticker from "./Ticker"
+import { getCurrencyPair } from "../../../selection/selectors"
 
 export interface ContainerProps {
   currencyPair: string
@@ -15,6 +16,7 @@ const TickerContainer = ({ currencyPair }: ContainerProps) => {
 
   const ticker = useSelector(getTicker)(currencyPair)
   const { lastPrice, dailyChange, dailyChangeRelative } = ticker || {}
+  const selectedCurrencyPair = useSelector(getCurrencyPair)
 
   return (
     <Ticker
@@ -23,6 +25,7 @@ const TickerContainer = ({ currencyPair }: ContainerProps) => {
       dailyChange={dailyChange!}
       dailyChangeRelative={dailyChangeRelative!}
       onClick={() => dispatch(selectCurrencyPair({ currencyPair }))}
+      isActive={selectedCurrencyPair === currencyPair}
     />
   )
 }

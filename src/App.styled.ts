@@ -5,12 +5,17 @@ export const Container = styled.div`
   position: absolute;
   inset: 0;
   background-color: ${Palette.BackgroundColor};
+  width: 100vw;
+  height: 100vh;
+`
+
+export const Content = styled.div`
   display: grid;
-  grid-template-rows: 100px 100px 1fr 1fr;
-  grid-template-columns: 400px 1fr 400px;
+  grid-template-rows: 40px 80px 1fr 250px;
+  grid-template-columns: 400px 400px 1fr;
   grid-template-areas:
     "header header header"
-    "ticker ticker ticker"
+    "tickers tickers tickers"
     "trades candles candles"
     "trades book depth";
   grid-gap: 5px;
@@ -20,12 +25,17 @@ export const Container = styled.div`
 
 export const Header = styled.div`
   background-color: #4682b4;
-  padding: 0 10px;
   grid-area: header;
   color: ${Palette.White};
   position: relative;
-  overflow: hidden;
+  overflow: hidden; // keeps animation inside this component
   font-family: FiraSans-MediumItalic;
+  padding: 0 0 0 10px;
+  font-size: 28px;
+
+  display: flex;
+  justify-content: start;
+  align-items: center;
 
   &::before {
     content: "";
@@ -55,31 +65,25 @@ export const Header = styled.div`
 `
 
 export const TickersPanel = styled.div`
-  grid-area: ticker;
-  font-family: FiraSans-MediumItalic;
+  grid-area: tickers;
 `
 
 export const TradesPanel = styled.div`
   grid-area: trades;
-  font-family: FiraSans-MediumItalic;
 `
 
 export const CandlesPanel = styled.div`
   grid-area: candles;
-  font-family: FiraSans-MediumItalic;
 `
 
 export const ChartPanel = styled.div`
   grid-area: chart;
-  font-family: FiraSans-MediumItalic;
 `
 
 export const DepthPanel = styled.div`
   grid-area: depth;
-  font-family: FiraSans-MediumItalic;
 `
 
 export const BookPanel = styled.div`
   grid-area: book;
-  font-family: FiraSans-MediumItalic;
 `

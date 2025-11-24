@@ -22,6 +22,11 @@ const theme = ((Highcharts as any).theme = {
         [1, "#3e3e40"],
       ],
     },
+    style: {
+      color: Palette.White,
+      fontFamily: "FiraSans-MediumItalic",
+      fontSize: "14px",
+    },
   },
   xAxis: {
     labels: {
