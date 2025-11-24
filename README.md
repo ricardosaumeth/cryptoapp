@@ -2,6 +2,8 @@
 
 A modern, real-time cryptocurrency trading dashboard built with React, TypeScript, and Redux Toolkit.
 
+![Logo](./public/crypto-app.png)
+
 ## ✨ Features
 
 - **Real-time Data**: Live cryptocurrency prices, trades, and market data via WebSocket
