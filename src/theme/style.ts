@@ -8,6 +8,7 @@ const Palette = {
   Orange: "#FFA41B",
   White: "#FFF",
   BackgroundColor: "#1f2936",
+  BackgroundColorOnHover: "rgba(50, 120, 255, 0.15)",
   Label: "rgba(245, 245, 245, 0.64)",
   Border: "#424242",
   LightGray: "rgba(245, 245, 245, 0.64)",

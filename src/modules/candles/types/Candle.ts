@@ -6,3 +6,5 @@ export interface Candle {
   low: number
   volume: number
 }
+
+export type CandleTuple = [number, number, number, number, number, number]

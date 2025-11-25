@@ -14,12 +14,15 @@ import {
   CandlesPanel,
   BookPanel,
   DepthPanel,
+  Footer,
 } from "./App.styled"
 import { bootstrapApp, updateTitle } from "./modules/app/slice"
 import Book from "./modules/book/components/Book"
 import { getCurrencyPair } from "./modules/selection/selectors"
 import { getTicker } from "./modules/tickers/selectors"
 import { GithubCorner } from "./GithubCorner"
+import Widget from "./core/components/Widget"
+import Diagnostics from "./core/components/Diagnostics"
 
 const store = createStore()
 
@@ -43,22 +46,31 @@ function AppContent() {
     <Container>
       <Content>
         <GithubCorner href={link} />
-        <Header>Crypto App</Header>
+        <Header>Crypto Trader</Header>
         <TickersPanel>
           <Tickers />
         </TickersPanel>
         <TradesPanel>
-          <Trades />
+          <Widget title={"Trades"}>
+            <Trades />
+          </Widget>
         </TradesPanel>
         <CandlesPanel>
           <CandlesChart />
         </CandlesPanel>
         <BookPanel>
-          <Book />
+          <Widget title={"Book"}>
+            <Book />
+          </Widget>
         </BookPanel>
         <DepthPanel>
-          <DepthChart />
+          <Widget title={"Depth"}>
+            <DepthChart />
+          </Widget>
         </DepthPanel>
+        <Footer>
+          <Diagnostics />
+        </Footer>
       </Content>
     </Container>
   )

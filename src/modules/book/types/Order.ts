@@ -3,3 +3,5 @@ export interface Order {
   price: number
   amount: number
 }
+
+export type OrderTuple = [number, number, number]

@@ -1,6 +1,8 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { Trade } from "./types/Trade"
 
+export const MAX_TRADES = 100
+
 interface TradesState {
   [currencyPair: string]: Trade[]
 }
@@ -30,6 +32,8 @@ export const tradesSlice = createSlice({
         // Sort to maintain chronological order
         trades.sort((a, b) => a.timestamp - b.timestamp)
       }
+
+      trades.slice(0, MAX_TRADES) // only keep the top x trades, so we don't eventually fill up the memory
     },
   },
 })

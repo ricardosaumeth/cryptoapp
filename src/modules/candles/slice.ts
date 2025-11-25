@@ -1,8 +1,9 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
-import { type Candle } from "./types/Candle"
+import type { Candle, CandleTuple } from "./types/Candle"
+
+const MAX_CANDLES = 1000
 
 type SymbolState = Candle[]
-type CandleTuple = [number, number, number, number, number, number]
 
 export interface CandlesState {
   [currencyPair: string]: SymbolState
@@ -58,6 +59,12 @@ export const candleSlice = createSlice({
         // Sort to maintain chronological order
         state[currencyPair]!.sort((a, b) => a.timestamp - b.timestamp)
       }
+
+      if (!state[currencyPair]) {
+        state[currencyPair] = []
+      }
+
+      state[currencyPair] = state[currencyPair]!.slice(0, MAX_CANDLES) // restrict number of candles so we don't eventully fill up the memory
     },
   },
 })

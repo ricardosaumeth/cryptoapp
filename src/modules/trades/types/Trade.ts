@@ -4,3 +4,5 @@ export interface Trade {
   amount: number
   price: number
 }
+
+export type RawTrade = [number, number, number, number]

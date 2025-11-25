@@ -10,6 +10,7 @@ import {
 import { candlesSnapshotReducer, candlesUpdateReducer } from "../../modules/candles/slice"
 import { bookSnapshotReducer, bookUpdateReducer } from "../../modules/book/slice"
 import { Channel } from "./types/Channels"
+import type { RawTrade, Trade } from "../../modules/trades/types/Trade"
 
 const handleSubscriptionAck = (parsedData: any, store: any) => {
   const { chanId: channelId, channel, event, symbol, key, prec } = parsedData
@@ -59,12 +60,14 @@ const handleTradesData = (parsedData: any[], subscription: any, dispatch: any) =
   if (Array.isArray(parsedData[1])) {
     // Snapshot
     const [, rawTrades] = parsedData
-    const trades = rawTrades.map(([id, timestamp, amount, price]: any[]) => ({
-      id,
-      timestamp,
-      amount,
-      price,
-    }))
+    const trades: Trade[] = rawTrades
+      .sort((a: RawTrade, b: RawTrade) => b[1] - a[1])
+      .map(([id, timestamp, amount, price]: RawTrade) => ({
+        id,
+        timestamp,
+        amount,
+        price,
+      }))
     dispatch(tradesSnapshotReducer({ currencyPair, trades }))
   } else {
     // Single trade update

@@ -17,17 +17,52 @@ const CandlesChart = ({ candles, currencyPair }: Props) => {
     time: {
       useUTC: false,
     },
+    yAxis: [
+      {
+        labels: {
+          align: "right",
+          x: -3,
+        },
+        title: {
+          text: "OHLC",
+        },
+        height: "70%",
+        lineWidth: 2,
+        resize: {
+          enabled: true,
+        },
+      },
+      {
+        labels: {
+          align: "right",
+          x: -3,
+        },
+        title: {
+          text: "Volume",
+        },
+        top: "75%",
+        height: "25%",
+        offset: 0,
+        lineWidth: 2,
+      },
+    ],
     series: [
       {
         type: "candlestick",
         data: [],
+      },
+      {
+        type: "column",
+        name: "Volume",
+        data: [],
+        yAxis: 1,
       },
     ],
   } as Highcharts.Options)
 
   useEffect(() => {
     if (candles && candles.length > 0) {
-      const chartData = candles.map(({ timestamp, open, high, low, close }) => [
+      const ohlc = candles.map(({ timestamp, open, high, low, close }) => [
         timestamp,
         open,
         high,
@@ -35,19 +70,32 @@ const CandlesChart = ({ candles, currencyPair }: Props) => {
         close,
       ])
 
+      const volumes = candles
+        .map(({ timestamp, volume }) => [timestamp, volume])
+        .sort((a, b) => a[0]! - b[0]!)
+
       setChartOptions({
         rangeSelector: { enabled: true },
         series: [
           {
             type: "candlestick",
             name: formatCurrencyPair(currencyPair),
-            data: chartData,
+            data: ohlc,
+          },
+          {
+            type: "column",
+            data: volumes,
           },
         ],
         plotOptions: {
           candlestick: {
             color: Palette.Ask,
             upColor: Palette.Bid,
+          },
+          column: {
+            color: Palette.LightGray,
+            borderRadius: 0,
+            borderWidth: 0,
           },
         },
       })

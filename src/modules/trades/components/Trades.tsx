@@ -1,16 +1,20 @@
 import { useMemo, memo } from "react"
 import { AgGridReact } from "ag-grid-react"
 import type { ColDef } from "ag-grid-community"
-import { DateTime } from "luxon"
 import type { Trade } from "../types/Trade"
 import { Container } from "./Trades.styled"
 import Palette from "../../../theme/style"
+import { useThrottle } from "../../../core/hooks/useThrottle"
+// import { useGridResize } from "../../../core/hooks/useGridResize";
+// import Loading from "../../../core/components/Loading";
+import { amountFormatter, priceFormatter, timeFormatter } from "../../ag-grid/formatter"
 
 export interface Props {
   trades: Trade[]
 }
 
 const Trades = memo(({ trades }: Props) => {
+  const throttledTrades = useThrottle<Trade[]>(trades, 500)
   const columnDefs: ColDef[] = useMemo(
     () => [
       {
@@ -21,43 +25,56 @@ const Trades = memo(({ trades }: Props) => {
       {
         headerName: "Amount",
         field: "amount",
-        width: 120,
-        valueFormatter: (params) => Math.abs(params.value).toString(),
+        valueFormatter: (params) => amountFormatter({ value: Math.abs(params.value) }),
+      },
+      {
+        headerName: "Price",
+        field: "price",
         cellStyle: (params) => {
           return {
             color: params.value < 0 ? Palette.Ask : Palette.Bid,
           }
         },
-      },
-      {
-        headerName: "Price",
-        field: "price",
+        valueFormatter: priceFormatter,
       },
       {
         headerName: "Time",
         field: "timestamp",
-        sort: "desc",
-        width: 90,
-        valueFormatter: (params) =>
-          DateTime.fromMillis(params.value).toLocaleString(DateTime.TIME_24_WITH_SECONDS),
+        valueFormatter: timeFormatter,
         cellStyle: () => ({
-          color: "rgba(245, 245, 245, 0.64)",
+          color: Palette.LightGray,
         }),
       },
     ],
     []
   )
 
+  //useGridResize(gridApi);
+
   const getRowId = useMemo(() => (params: any) => `${params.data.id}`, [])
 
   return (
     <Container className="ag-theme-quartz-dark">
-      <AgGridReact
+      {/* <AgGridReact
         columnDefs={columnDefs}
-        rowData={trades}
+        rowData={throttledTrades}
         getRowId={getRowId}
         animateRows={false}
-      />
+        onGridReady={event => event.api.sizeColumnsToFit()}
+      /> */}
+      {/* {isStale && <Stale />} */}
+      <AgGridReact
+        columnDefs={columnDefs}
+        rowData={throttledTrades}
+        getRowId={getRowId}
+        onGridReady={(event) => {
+          //setGridApi(event.api);
+        }}
+        noRowsOverlayComponent={"customLoadingOverlay"}
+        //frameworkComponents={{
+        //customLoadingOverlay: Loading,
+        //}}
+      ></AgGridReact>
     </Container>
   )
 })

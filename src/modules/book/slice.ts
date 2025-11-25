@@ -1,8 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
-import type { Order } from "./types/Order"
+import type { Order, OrderTuple } from "./types/Order"
 
 type SymbolState = Order[]
-type OrderTuple = [number, number, number]
 
 export interface BookState {
   [currencyPair: string]: SymbolState

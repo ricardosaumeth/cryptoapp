@@ -1,6 +1,6 @@
 import { Container, CurrencyPair, Price, RelativeChange, Change } from "./Ticker.styled"
 import UpdateHighlight from "../../../../core/components/update-highlight/UpdateHighlight"
-import { formatCurrencyPair } from "../../../reference-data/utils"
+import { formatCurrencyPair, formatPrice } from "../../../reference-data/utils"
 import TrendIndicator from "../../../../core/components/trend-indicator"
 
 export interface Props {
@@ -27,7 +27,7 @@ const Ticker = ({
     <Container onClick={onClick} $isActive={!!isActive}>
       <CurrencyPair>{formatCurrencyPair(currencyPair)}</CurrencyPair>
       <Price>
-        <UpdateHighlight value={lastPrice?.toFixed(2)} />
+        <UpdateHighlight value={formatPrice(lastPrice)} />
       </Price>
       <RelativeChange $isPositive={isPositiveChange}>
         <TrendIndicator value={dailyChangeRelative} />
