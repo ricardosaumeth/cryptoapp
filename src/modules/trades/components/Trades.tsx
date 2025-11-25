@@ -25,11 +25,13 @@ const Trades = memo(({ trades }: Props) => {
       {
         headerName: "Amount",
         field: "amount",
+        width: 125,
         valueFormatter: (params) => amountFormatter({ value: Math.abs(params.value) }),
       },
       {
         headerName: "Price",
         field: "price",
+        width: 125,
         cellStyle: (params) => {
           return {
             color: params.value < 0 ? Palette.Ask : Palette.Bid,
@@ -40,6 +42,7 @@ const Trades = memo(({ trades }: Props) => {
       {
         headerName: "Time",
         field: "timestamp",
+        width: 125,
         valueFormatter: timeFormatter,
         cellStyle: () => ({
           color: Palette.LightGray,

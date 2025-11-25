@@ -1,10 +1,10 @@
 import { useSelector } from "react-redux"
 import Trades from "./Trades"
-import { getCurrencyPair } from "../../selection/selectors"
+import { getSelectedCurrencyPair } from "../../selection/selectors"
 import { getTrades } from "./selector"
 
 const TradesContainer = () => {
-  const currencyPair = useSelector(getCurrencyPair)
+  const currencyPair = useSelector(getSelectedCurrencyPair)
   const trades = useSelector(getTrades(currencyPair))
   return <Trades trades={trades} />
 }

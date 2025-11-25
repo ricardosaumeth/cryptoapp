@@ -3,7 +3,7 @@ import type { RootState } from "../redux/store"
 
 const selectionSelector = (state: RootState) => state.selection
 
-export const getCurrencyPair = createSelector(
+export const getSelectedCurrencyPair = createSelector(
   selectionSelector,
   (selection) => selection.currencyPair
 )

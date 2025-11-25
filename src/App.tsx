@@ -3,6 +3,7 @@ import { Provider, useDispatch, useSelector } from "react-redux"
 import createStore, { type AppDispatch } from "./modules/redux/store"
 import Trades from "./modules/trades/components"
 import Tickers from "./modules/tickers/components/Tickers"
+import Market from "./modules/tickers/components/Market"
 import CandlesChart from "./modules/candles/components"
 import DepthChart from "./modules/book/components/DepthChart"
 import {
@@ -10,6 +11,7 @@ import {
   Content,
   Header,
   TickersPanel,
+  MarketPanel,
   TradesPanel,
   CandlesPanel,
   BookPanel,
@@ -18,7 +20,7 @@ import {
 } from "./App.styled"
 import { bootstrapApp, updateTitle } from "./modules/app/slice"
 import Book from "./modules/book/components/Book"
-import { getCurrencyPair } from "./modules/selection/selectors"
+import { getSelectedCurrencyPair } from "./modules/selection/selectors"
 import { getTicker } from "./modules/tickers/selectors"
 import { GithubCorner } from "./GithubCorner"
 import Widget from "./core/components/Widget"
@@ -29,7 +31,7 @@ const store = createStore()
 function AppContent() {
   const link = "https://github.com/ricardosaumeth/cryptoapp"
   const dispatch = useDispatch<AppDispatch>()
-  const currencyPair = useSelector(getCurrencyPair)
+  const currencyPair = useSelector(getSelectedCurrencyPair)
   const ticker = useSelector(getTicker)(currencyPair)
 
   useEffect(() => {
@@ -38,7 +40,7 @@ function AppContent() {
 
   useEffect(() => {
     if (currencyPair && ticker) {
-      dispatch(updateTitle({ currencyPair, lastPrice: ticker.lastPrice }))
+      dispatch(updateTitle({ currencyPair, lastPrice: ticker.lastPrice! }))
     }
   }, [currencyPair, ticker])
 
@@ -50,6 +52,11 @@ function AppContent() {
         <TickersPanel>
           <Tickers />
         </TickersPanel>
+        <MarketPanel>
+          <Widget title={"Market"}>
+            <Market />
+          </Widget>
+        </MarketPanel>
         <TradesPanel>
           <Widget title={"Trades"}>
             <Trades />

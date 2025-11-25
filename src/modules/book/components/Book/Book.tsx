@@ -1,7 +1,7 @@
 import { AgGridReact } from "ag-grid-react"
 import { type ColDef } from "ag-grid-community"
 import { useThrottle } from "../../../../core/hooks/useThrottle"
-import { priceFormatter } from "../../../ag-grid/formatter"
+import { priceFormatter, amountFormatter } from "../../../ag-grid/formatter"
 import { Container } from "./Book.styled"
 //import Loading from "../../../../core/components/Loading";
 import { type Order } from "../../types/Order"
@@ -19,12 +19,14 @@ const Book = ({ orders }: Props) => {
     {
       headerName: "Bid Amount",
       field: "bid.amount",
-      // valueFormatter: amountFormatter,
+      width: 100,
+      valueFormatter: amountFormatter,
       // cellRenderer: bidAmountRenderer,
     },
     {
       headerName: "Bid Price",
       field: "bid.price",
+      width: 95,
       cellStyle: () => ({
         color: Palette.Bid,
       }),
@@ -34,6 +36,7 @@ const Book = ({ orders }: Props) => {
     {
       headerName: "Ask Price",
       field: "ask.price",
+      width: 95,
       cellStyle: () => ({
         color: Palette.Ask,
       }),
@@ -42,6 +45,7 @@ const Book = ({ orders }: Props) => {
     {
       headerName: "Ask Amount",
       field: "ask.amount",
+      width: 100,
       //valueFormatter: (params) =>
       //   amountFormatter({ value: Math.abs(params.value) }),
       // cellRenderer: askAmountRenderer,

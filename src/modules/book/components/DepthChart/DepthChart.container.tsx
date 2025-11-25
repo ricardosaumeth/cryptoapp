@@ -1,13 +1,13 @@
 import { useSelector } from "react-redux"
 import DepthChart from "./DepthChart"
 import { getDepth } from "../../selectors"
-import { getCurrencyPair } from "../../../selection/selectors"
+import { getSelectedCurrencyPair } from "../../../selection/selectors"
 import type { RootState } from "../../../redux/store"
 import { createSelector } from "@reduxjs/toolkit"
 import { useMemo } from "react"
 
 const DepthContainer = () => {
-  const currencyPair = useSelector(getCurrencyPair)
+  const currencyPair = useSelector(getSelectedCurrencyPair)
 
   const emptyDepth = useMemo(() => ({ bids: [], asks: [] }), [])
 

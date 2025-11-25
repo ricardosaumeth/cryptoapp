@@ -1,1 +1,13 @@
-["BTCUSD", "BTCEUR", "BTCGBP", "BTCJPY", "ETHGBP"]
+[
+  "BTCUSD",
+  "BTCEUR",
+  "BTCGBP",
+  "BTCJPY",
+  "BTCUST",
+  "ETHBTC",
+  "ETHEUR",
+  "ETHGBP",
+  "ETHJPY",
+  "ETHUSD",
+  "ETHUST"
+]

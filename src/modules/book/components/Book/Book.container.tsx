@@ -3,11 +3,11 @@ import { useMemo } from "react"
 import { createSelector } from "@reduxjs/toolkit"
 import Book from "./Book"
 import { getBook } from "../../selectors"
-import { getCurrencyPair } from "../../../selection/selectors"
+import { getSelectedCurrencyPair } from "../../../selection/selectors"
 import { type RootState } from "../../../redux/store"
 
 const BookContainer = () => {
-  const currencyPair = useSelector(getCurrencyPair)
+  const currencyPair = useSelector(getSelectedCurrencyPair)
 
   const selectOrders = useMemo(
     () =>
