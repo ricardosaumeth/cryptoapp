@@ -9,7 +9,7 @@ const initialState: RefDataState = {
 }
 
 export const refDataLoad = createAsyncThunk("refData/load", async () => {
-  const response = await fetch("/data/currencyPairs.json")
+  const response = await fetch(`${import.meta.env.BASE_URL}data/currencyPairs.json`)
   if (!response.ok) {
     throw new Error("Failed to load currency pairs")
   }
