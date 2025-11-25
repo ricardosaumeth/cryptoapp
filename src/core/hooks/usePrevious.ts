@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
 
 export const usePrevious = (val: any) => {
-  const ref = useRef()
+  const ref = useRef({})
 
   useEffect(() => {
     ref.current = val
