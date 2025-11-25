@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { GridApi } from "ag-grid-community"
+import { type GridApi } from "ag-grid-community"
 import { debounce } from "lodash"
 
 const DEBOUNCE_RESIZE_IN_MS = 200

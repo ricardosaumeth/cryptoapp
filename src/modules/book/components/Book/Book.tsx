@@ -1,19 +1,18 @@
 import { AgGridReact } from "ag-grid-react"
-import { type ColDef, type GridApi } from "ag-grid-community"
+import { type ColDef } from "ag-grid-community"
 import { useThrottle } from "../../../../core/hooks/useThrottle"
 import { priceFormatter } from "../../../ag-grid/formatter"
 import { Container } from "./Book.styled"
 //import Loading from "../../../../core/components/Loading";
 import { type Order } from "../../types/Order"
 import Palette from "../../../../theme/style"
-import { useState } from "react"
 
 export interface Props {
   orders: { bid: Order; ask: Order }[]
 }
 
 const Book = ({ orders }: Props) => {
-  const [gridApi, setGridApi] = useState<GridApi | undefined>()
+  //const [gridApi, setGridApi] = useState<GridApi | undefined>()
 
   const throttledOrders = useThrottle<{ bid: Order; ask: Order }[]>(orders, 100)
   const columnDefs: ColDef[] = [
@@ -58,9 +57,9 @@ const Book = ({ orders }: Props) => {
         columnDefs={columnDefs}
         rowData={throttledOrders}
         getRowId={(params) => `${params.data.bid.id}-${params.data.ask.id}`}
-        onGridReady={(event) => {
-          setGridApi(event.api)
-        }}
+        // onGridReady={(event) => {
+        //   setGridApi(event.api)
+        // }}
         noRowsOverlayComponent={"customLoadingOverlay"}
         // frameworkComponents={{
         //   customLoadingOverlay: Loading,

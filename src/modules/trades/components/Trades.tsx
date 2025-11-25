@@ -67,9 +67,9 @@ const Trades = memo(({ trades }: Props) => {
         columnDefs={columnDefs}
         rowData={throttledTrades}
         getRowId={getRowId}
-        onGridReady={(event) => {
-          //setGridApi(event.api);
-        }}
+        //</Container>onGridReady={(event) => {
+        //setGridApi(event.api);
+        //}}
         noRowsOverlayComponent={"customLoadingOverlay"}
         //frameworkComponents={{
         //customLoadingOverlay: Loading,
