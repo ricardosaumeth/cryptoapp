@@ -6,6 +6,7 @@ import { Container } from "./Book.styled"
 //import Loading from "../../../../core/components/Loading";
 import { type Order } from "../../types/Order"
 import Palette from "../../../../theme/style"
+import { bidAmountRenderer, askAmountRenderer } from './renderers';
 
 export interface Props {
   orders: { bid: Order; ask: Order }[]
@@ -19,14 +20,14 @@ const Book = ({ orders }: Props) => {
     {
       headerName: "Bid Amount",
       field: "bid.amount",
-      width: 100,
+      width: 160,
       valueFormatter: amountFormatter,
-      // cellRenderer: bidAmountRenderer,
+      cellRenderer: bidAmountRenderer,
     },
     {
       headerName: "Bid Price",
       field: "bid.price",
-      width: 95,
+      width: 125,
       cellStyle: () => ({
         color: Palette.Bid,
       }),
@@ -36,7 +37,7 @@ const Book = ({ orders }: Props) => {
     {
       headerName: "Ask Price",
       field: "ask.price",
-      width: 95,
+      width: 125,
       cellStyle: () => ({
         color: Palette.Ask,
       }),
@@ -45,10 +46,10 @@ const Book = ({ orders }: Props) => {
     {
       headerName: "Ask Amount",
       field: "ask.amount",
-      width: 100,
-      //valueFormatter: (params) =>
-      //   amountFormatter({ value: Math.abs(params.value) }),
-      // cellRenderer: askAmountRenderer,
+      width: 160,
+      valueFormatter: (params) =>
+        amountFormatter({ value: Math.abs(params.value) }),
+      cellRenderer: askAmountRenderer,
     },
   ]
 
@@ -60,7 +61,7 @@ const Book = ({ orders }: Props) => {
       <AgGridReact
         columnDefs={columnDefs}
         rowData={throttledOrders}
-        getRowId={(params) => `${params.data.bid.id}-${params.data.ask.id}`}
+        getRowId={({data}) => [data.bid?.id, data.ask?.id].join("#")}
         // onGridReady={(event) => {
         //   setGridApi(event.api)
         // }}

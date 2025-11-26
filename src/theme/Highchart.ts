@@ -138,12 +138,17 @@ const theme = ((Highcharts as any).theme = {
   // scroll charts
   rangeSelector: {
     enabled: true,
-    selected: 1,
+    selected: 2,
     buttons: [
       {
         type: "minute",
         count: 5,
         text: "5m",
+      },
+      {
+        type: "minute",
+        count: 15,
+        text: "15m",
       },
       {
         type: "minute",
@@ -154,11 +159,6 @@ const theme = ((Highcharts as any).theme = {
         type: "hour",
         count: 1,
         text: "1h",
-      },
-      {
-        type: "hour",
-        count: 12,
-        text: "12h",
       },
       {
         type: "all",

@@ -75,7 +75,6 @@ const CandlesChart = ({ candles, currencyPair }: Props) => {
         .sort((a, b) => a[0]! - b[0]!)
 
       setChartOptions({
-        rangeSelector: { enabled: true },
         series: [
           {
             type: "candlestick",

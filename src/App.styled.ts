@@ -12,21 +12,14 @@ export const Container = styled.div`
 
 export const Content = styled.div`
   display: grid;
-  grid-template-rows: 40px 70px 1fr 250px;
-  grid-template-columns: 400px 1fr 400px;
-  grid-template-areas:
-    "header header header"
-    "tickers tickers tickers"
-    "market candles candles"
-    "trades book depth"
-    "footer footer footer";
   grid-gap: 5px;
   padding: 5px 10px;
-  box-sizing: border-box;
-
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   @media only screen and (min-width: 1200px) {
-    grid-template-rows: 40px 70px 1fr 250px 50px;
-    grid-template-columns: 400px 400px 1fr;
+    grid-template-rows: 40px 70px 1fr 250px 30px;
+    grid-template-columns: 400px 1fr 1fr;
     grid-template-areas:
       "header header header"
       "tickers tickers tickers"
@@ -36,26 +29,27 @@ export const Content = styled.div`
   }
 
   @media only screen and (min-width: 600px) and (max-width: 1200px) {
-    grid-template-rows: 40px 70px 1fr 250px 50px;
+    grid-template-rows: 40px 70px 1fr 1fr 30px;
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
       "header header"
-      "tickers tickers"
-      "trades book"
+      "market book"
+      "market book"
       "trades depth"
       "footer footer";
 
+    .tickers ,
     .candles-chart {
       display: none;
     }
   }
 
   @media only screen and (max-width: 600px) {
-    grid-template-rows: 40px calc(100% - 90px) 50px;
-    grid-template-columns: 1fr;
+    grid-template-rows: 40px calc(100% - 90px) 30px;
+    grid-template-columns: calc(100% - 20px);
     grid-template-areas:
       "header"
-      "tickers"
+      "market"
       "footer";
 
     .candles-chart {
@@ -107,7 +101,9 @@ export const Header = styled.div`
 
 export const TickersPanel = styled.div`
   grid-area: tickers;
-  overflow: auto;
+  overflow: hidden;
+  width: 1200px;
+  margin: 0 auto;
 `
 
 export const MarketPanel = styled.div`
@@ -132,4 +128,5 @@ export const DepthPanel = styled.div`
 
 export const Footer = styled.div`
   grid-area: footer;
+  padding: 0 10px;
 `

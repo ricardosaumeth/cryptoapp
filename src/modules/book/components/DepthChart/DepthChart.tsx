@@ -21,7 +21,6 @@ const DepthChart = ({ depth }: Props) => {
     chart: {
       type: "area",
       animation: false,
-      height: "250px",
       backgroundColor: Palette.BackgroundColor,
     },
     accessibility: {
