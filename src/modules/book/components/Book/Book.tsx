@@ -20,7 +20,7 @@ const Book = ({ orders }: Props) => {
     {
       headerName: "Bid Amount",
       field: "bid.amount",
-      width: 160,
+      width: 140,
       valueFormatter: amountFormatter,
       cellRenderer: bidAmountRenderer,
     },
@@ -46,7 +46,7 @@ const Book = ({ orders }: Props) => {
     {
       headerName: "Ask Amount",
       field: "ask.amount",
-      width: 160,
+      width: 140,
       valueFormatter: (params) => amountFormatter({ value: Math.abs(params.value) }),
       cellRenderer: askAmountRenderer,
     },
@@ -61,6 +61,7 @@ const Book = ({ orders }: Props) => {
         columnDefs={columnDefs}
         rowData={throttledOrders}
         getRowId={({ data }) => [data.bid?.id, data.ask?.id].join("#")}
+        suppressHorizontalScroll={true}
         // onGridReady={(event) => {
         //   setGridApi(event.api)
         // }}

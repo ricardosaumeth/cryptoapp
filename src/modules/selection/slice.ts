@@ -20,6 +20,8 @@ export const selectCurrencyPair = createAsyncThunk(
   "selection/selectCurrencyPair",
   async ({ currencyPair }: { currencyPair: string }, { dispatch, getState, rejectWithValue }) => {
     try {
+      dispatch(selectionSlice.actions.setCurrencyPair(currencyPair))
+
       const state = getState() as RootState
       const previousPair = state.selection.currencyPair
 
@@ -60,11 +62,10 @@ export const selectCurrencyPair = createAsyncThunk(
 export const selectionSlice = createSlice({
   name: "selection",
   initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder.addCase(selectCurrencyPair.fulfilled, (state, action) => {
+  reducers: {
+    setCurrencyPair: (state, action) => {
       state.currencyPair = action.payload
-    })
+    },
   },
 })
 

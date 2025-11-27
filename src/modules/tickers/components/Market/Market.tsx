@@ -55,7 +55,7 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
       headerName: "",
       field: "prices",
       cellRenderer: "priceChartRenderer",
-      width: 60,
+      width: 63,
       cellStyle: () => ({
         paddingLeft: 0,
         paddingRight: 0,
@@ -74,6 +74,7 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
         rowData={tickers}
         rowClassRules={rowClassRules}
         getRowId={(params) => params.data.currencyPair}
+        suppressHorizontalScroll={true}
         onGridReady={(event) => {
           event.api.sizeColumnsToFit()
         }}

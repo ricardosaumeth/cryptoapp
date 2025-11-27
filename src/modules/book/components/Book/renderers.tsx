@@ -1,18 +1,14 @@
 import { type ICellRendererParams } from "ag-grid-community"
 import Palette from "../../../../theme/style"
+import React from "react"
 
-const amountRenderer = (value: string, styles: { [key: string]: any }) => {
-  // const formattedStyles = Object.keys(styles)
-  //   .map((key) => [key, styles[key]].join(":"))
-  //   .join(";")
-
-  // return `
-  //     <div style="position: relative;">
-  //         <div style="height: 30px; position: absolute; z-index: 0; ${formattedStyles}"></div>
-  //         <div style="position: absolute; z-index: 1;">${value}</div>
-  //     </div>`;
-  console.log(styles)
-  return value
+const amountRenderer = (value: string, styles: React.CSSProperties) => {
+  return (
+    <div style={{ position: "relative" }}>
+      <div style={{ height: "30px", position: "absolute", zIndex: 0, ...styles }} />
+      <div style={{ position: "absolute", zIndex: 1 }}>{value}</div>
+    </div>
+  )
 }
 
 export const bidAmountRenderer = (params: ICellRendererParams) => {
@@ -20,7 +16,7 @@ export const bidAmountRenderer = (params: ICellRendererParams) => {
   const { bidDepth: depth, maxDepth } = params.data
   const width = ((depth || 0) / maxDepth) * 100
   return amountRenderer(valueFormatted as string, {
-    "background-color": Palette.BidTransparent,
+    backgroundColor: Palette.BidTransparent,
     width: `${width}%`,
     left: "-12px",
   })
@@ -31,7 +27,7 @@ export const askAmountRenderer = (params: ICellRendererParams) => {
   const { askDepth: depth, maxDepth } = params.data
   const width = ((depth || 0) / maxDepth) * 100
   return amountRenderer(valueFormatted as string, {
-    "background-color": Palette.AskTransparent,
+    backgroundColor: Palette.AskTransparent,
     width: `${width}%`,
     right: "-12px",
   })
