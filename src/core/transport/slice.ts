@@ -15,6 +15,7 @@ export type requestSubscribeToChannelAck = {
 
 export interface SubscriptionState {
   [channelId: number]: {
+    isStale?: boolean
     channel: string
     request: requestSubscribeToChannelAck
   }
@@ -96,7 +97,8 @@ export const bookSubscribeToSymbol = createSubscribeThunk(
   SubscriptionActionType.SUBSCRIBE_TO_BOOK
 )
 
-export const unsubscribeChannelsToSymbol = createUnsubscribeThunk(Channel.TRADES)
+export const unsubscribeFromTrades = createUnsubscribeThunk(Channel.TRADES)
+export const unsubscribeFromBook = createUnsubscribeThunk(Channel.BOOK)
 
 export const subscriptionsSlice = createSlice({
   name: "subscriptions",
@@ -140,7 +142,7 @@ export const subscriptionsSlice = createSlice({
       .addCase(bookSubscribeToSymbol.fulfilled, (_state, action) => {
         console.log(`Subscribed to book ${JSON.stringify(action.payload)}`)
       })
-      .addCase(unsubscribeChannelsToSymbol.fulfilled, (_state, action) => {
+      .addCase(unsubscribeFromTrades.fulfilled, (_state, action) => {
         console.log(`Unsubscribed to channel ${JSON.stringify(action.payload)}`)
       })
   },

@@ -73,7 +73,7 @@ const Trades = memo(({ trades }: Props) => {
         //</Container>onGridReady={(event) => {
         //setGridApi(event.api);
         //}}
-        noRowsOverlayComponent={"customLoadingOverlay"}
+        //noRowsOverlayComponent={"customLoadingOverlay"}
         //frameworkComponents={{
         //customLoadingOverlay: Loading,
         //}}

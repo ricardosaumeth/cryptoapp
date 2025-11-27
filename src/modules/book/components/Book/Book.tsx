@@ -6,7 +6,7 @@ import { Container } from "./Book.styled"
 //import Loading from "../../../../core/components/Loading";
 import { type Order } from "../../types/Order"
 import Palette from "../../../../theme/style"
-import { bidAmountRenderer, askAmountRenderer } from './renderers';
+import { bidAmountRenderer, askAmountRenderer } from "./renderers"
 
 export interface Props {
   orders: { bid: Order; ask: Order }[]
@@ -47,8 +47,7 @@ const Book = ({ orders }: Props) => {
       headerName: "Ask Amount",
       field: "ask.amount",
       width: 160,
-      valueFormatter: (params) =>
-        amountFormatter({ value: Math.abs(params.value) }),
+      valueFormatter: (params) => amountFormatter({ value: Math.abs(params.value) }),
       cellRenderer: askAmountRenderer,
     },
   ]
@@ -61,11 +60,11 @@ const Book = ({ orders }: Props) => {
       <AgGridReact
         columnDefs={columnDefs}
         rowData={throttledOrders}
-        getRowId={({data}) => [data.bid?.id, data.ask?.id].join("#")}
+        getRowId={({ data }) => [data.bid?.id, data.ask?.id].join("#")}
         // onGridReady={(event) => {
         //   setGridApi(event.api)
         // }}
-        noRowsOverlayComponent={"customLoadingOverlay"}
+        //noRowsOverlayComponent={"customLoadingOverlay"}
         // frameworkComponents={{
         //   customLoadingOverlay: Loading,
         // }}

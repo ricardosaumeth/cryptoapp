@@ -3,9 +3,10 @@ import {
   candlesSubscribeToSymbol,
   tradeSubscribeToSymbol,
   bookSubscribeToSymbol,
-  unsubscribeChannelsToSymbol,
+  unsubscribeFromTrades,
+  unsubscribeFromBook,
 } from "../../core/transport/slice"
-import { SUBSCRIPTION_TIMEOUT_IN_MS } from "../app/slice"
+import { DEFAULT_TIMEFRAME, SUBSCRIPTION_TIMEOUT_IN_MS } from "../app/slice"
 import type { RootState } from "../redux/store"
 
 interface CurrencyPairState {
@@ -25,14 +26,16 @@ export const selectCurrencyPair = createAsyncThunk(
     if (previousPair) {
       const unsubPromises = Object.entries(state.subscriptions)
         .filter(([chanId]) => chanId !== "wsConnectionStatus")
-        .map(([chanId]) => dispatch(unsubscribeChannelsToSymbol(chanId)))
+        .map(([chanId]) => {
+          dispatch(unsubscribeFromTrades(chanId))
+          dispatch(unsubscribeFromBook(chanId))
+        })
 
       await Promise.all(unsubPromises)
     }
 
     setTimeout(() => {
       dispatch(tradeSubscribeToSymbol({ symbol: currencyPair }))
-      dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: "1m" }))
       dispatch(bookSubscribeToSymbol({ symbol: currencyPair, prec: "R0" }))
     }, SUBSCRIPTION_TIMEOUT_IN_MS)
     return currencyPair

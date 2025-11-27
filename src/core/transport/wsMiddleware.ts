@@ -11,6 +11,7 @@ import { candlesSnapshotReducer, candlesUpdateReducer } from "../../modules/cand
 import { bookSnapshotReducer, bookUpdateReducer } from "../../modules/book/slice"
 import { Channel } from "./types/Channels"
 import type { RawTrade, Trade } from "../../modules/trades/types/Trade"
+import { getLookupKey } from "../../modules/candles/utils"
 
 const handleSubscriptionAck = (parsedData: any, store: any) => {
   const { chanId: channelId, channel, event, symbol, key, prec } = parsedData
@@ -83,17 +84,18 @@ const handleTickerData = (parsedData: any[], subscription: any, dispatch: any) =
 
 const handleCandlesData = (parsedData: any[], subscription: any, dispatch: any) => {
   const { key } = subscription.request
-  const [, , symbol] = key.split(":")
+  const [, timeframe, symbol] = key.split(":")
   const currencyPair = symbol.slice(1)
+  const lookupKey = getLookupKey(currencyPair, timeframe)
 
   if (Array.isArray(parsedData[1][0])) {
     // Snapshot
     const [, candles] = parsedData
-    dispatch(candlesSnapshotReducer({ currencyPair, candles }))
+    dispatch(candlesSnapshotReducer({ lookupKey, candles }))
   } else {
     // Single candle update
     const [, candle] = parsedData
-    dispatch(candlesUpdateReducer({ currencyPair, candle }))
+    dispatch(candlesUpdateReducer({ lookupKey, candle }))
   }
 }
 

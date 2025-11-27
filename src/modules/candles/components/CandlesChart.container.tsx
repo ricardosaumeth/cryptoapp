@@ -1,15 +1,26 @@
+import { useMemo } from "react"
 import { useSelector } from "react-redux"
 import CandlesChart from "./CandlesChart"
 import { getSelectedCurrencyPair } from "../../selection/selectors"
 import { getCandles } from "../selectors"
-import type { RootState } from "../../redux/store"
 import type { Candle } from "../types/Candle"
+import type { RootState } from "../../redux/store"
+import { DEFAULT_TIMEFRAME } from "../../app/slice"
 
 const CandlesChartContainer = () => {
-  const currencyPair = useSelector(getSelectedCurrencyPair)
-  const candles: Candle[] = useSelector((state: RootState) => getCandles(state)(currencyPair)) || []
+  const selectedCurrencyPair = useSelector(getSelectedCurrencyPair)
+  const emptyCandles: Candle[] = []
+  const selectCandles = useMemo(
+    () => (state: RootState) =>
+      selectedCurrencyPair
+        ? (getCandles(state)(selectedCurrencyPair, DEFAULT_TIMEFRAME) ?? emptyCandles)
+        : emptyCandles,
+    [selectedCurrencyPair]
+  )
 
-  return <CandlesChart candles={candles} currencyPair={currencyPair} />
+  const candles = useSelector(selectCandles)
+
+  return <CandlesChart candles={candles} currencyPair={selectedCurrencyPair} />
 }
 
 export default CandlesChartContainer

@@ -22,6 +22,7 @@ export const tickerSlice = createSlice({
   reducers: {
     updateTicker: (state, action: PayloadAction<TickerUpdatePayload>) => {
       const { symbol, data } = action.payload
+      const currencyPair = symbol.slice(1)
       const [
         ,
         [
@@ -38,7 +39,8 @@ export const tickerSlice = createSlice({
         ],
       ] = data
 
-      state[symbol.slice(1)] = {
+      state[currencyPair] = {
+        currencyPair,
         bid,
         bidSize,
         ask,

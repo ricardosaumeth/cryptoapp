@@ -7,14 +7,14 @@ import { getSelectedCurrencyPair } from "../../../selection/selectors"
 import { type RootState } from "../../../redux/store"
 
 const BookContainer = () => {
-  const currencyPair = useSelector(getSelectedCurrencyPair)
+  const selectedCurrencyPair = useSelector(getSelectedCurrencyPair)
 
   const selectOrders = useMemo(
     () =>
-      createSelector([(state: RootState) => state, () => currencyPair], (state, pair) =>
+      createSelector([(state: RootState) => state, () => selectedCurrencyPair], (state, pair) =>
         pair ? getBook(state)(pair) : []
       ),
-    [currencyPair]
+    [selectedCurrencyPair]
   )
 
   const orders = useSelector(selectOrders)

@@ -7,7 +7,7 @@ import { createSelector } from "@reduxjs/toolkit"
 import { useMemo } from "react"
 
 const DepthContainer = () => {
-  const currencyPair = useSelector(getSelectedCurrencyPair)
+  const selectedCurrencyPair = useSelector(getSelectedCurrencyPair)
 
   const emptyDepth = useMemo(() => ({ bids: [], asks: [] }), [])
 
@@ -16,7 +16,13 @@ const DepthContainer = () => {
     (state, pair) => (pair ? getDepth(state)(pair) : emptyDepth)
   )
 
-  const depth = useSelector((state: RootState) => selectDepth(state, currencyPair))
+  //const depth = useSelector((state: RootState) => selectDepth(state, selectedCurrencyPair))
+  const selectDepthMemo = useMemo(
+    () => (state: RootState) => selectDepth(state, selectedCurrencyPair),
+    [selectedCurrencyPair]
+  )
+
+  const depth = useSelector(selectDepthMemo)
 
   return <DepthChart depth={depth} />
 }

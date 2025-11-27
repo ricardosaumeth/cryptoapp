@@ -8,10 +8,10 @@ const bookSelector = (state: RootState) => state.book
 export const getRawBook = createSelector(bookSelector, (book) => (symbol: string) => book[symbol])
 
 // [
-  //     { bid: { price: 100 }, ask: { price: 101 }, depth: 0 },
-  //     { bid: { price: 99 }, ask: { price: 102 }, depth: 1 },
-  //     { bid: { price: 98 }, ask: undefined, depth: 2 }
-  // ]
+//     { bid: { price: 100 }, ask: { price: 101 }, depth: 0 },
+//     { bid: { price: 99 }, ask: { price: 102 }, depth: 1 },
+//     { bid: { price: 98 }, ask: undefined, depth: 2 }
+// ]
 export const getBook = createSelector(bookSelector, (book) => (symbol: string) => {
   const rawBook = book[symbol] || []
 
@@ -19,27 +19,27 @@ export const getBook = createSelector(bookSelector, (book) => (symbol: string) =
 
   const asks = rawBook.filter((order) => order.amount < 0).sort((a, b) => a.price - b.price)
 
-  const levels = Math.max(bids.length, asks.length);
-        const maxBidDepth = bids.map(bid => bid.amount).reduce((acc, v) => acc += v, 0);
-        const maxAskDepth = asks.map(ask => Math.abs(ask.amount)).reduce((acc, v) => acc += v, 0);
-        const maxDepth = maxBidDepth + maxAskDepth;
+  const levels = Math.max(bids.length, asks.length)
+  const maxBidDepth = bids.map((bid) => bid.amount).reduce((acc, v) => (acc += v), 0)
+  const maxAskDepth = asks.map((ask) => Math.abs(ask.amount)).reduce((acc, v) => (acc += v), 0)
+  const maxDepth = maxBidDepth + maxAskDepth
 
-        const result: {bid: Order, ask: Order, bidDepth: number, askDepth: number, maxDepth: number}[] = [];
-        range(levels)
-            .forEach(level => {
-                const bid = bids[level]!;
-                const ask = asks[level]!;
+  const result: { bid: Order; ask: Order; bidDepth: number; askDepth: number; maxDepth: number }[] =
+    []
+  range(levels).forEach((level) => {
+    const bid = bids[level]!
+    const ask = asks[level]!
 
-                result.push({
-                    bid,
-                    ask,
-                    bidDepth: bid && (result[level - 1] ? result[level - 1]!.bidDepth : 0) + bid.amount,
-                    askDepth: ask && (result[level - 1] ? result[level - 1]!.askDepth : 0) + Math.abs(ask.amount),
-                    maxDepth
-                });
-            });
-        return result;
+    result.push({
+      bid,
+      ask,
+      bidDepth: bid && (result[level - 1] ? result[level - 1]!.bidDepth : 0) + bid.amount,
+      askDepth: ask && (result[level - 1] ? result[level - 1]!.askDepth : 0) + Math.abs(ask.amount),
+      maxDepth,
     })
+  })
+  return result
+})
 
 const getPricePoints = (orders: Order[]) =>
   uniq(orders.map((order) => order.price)).sort((a, b) => a - b)

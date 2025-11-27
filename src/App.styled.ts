@@ -17,9 +17,10 @@ export const Content = styled.div`
   width: 100%;
   height: 100%;
   overflow: hidden;
+
   @media only screen and (min-width: 1200px) {
     grid-template-rows: 40px 70px 1fr 250px 30px;
-    grid-template-columns: 400px 1fr 1fr;
+    grid-template-columns: 450px 1fr 1fr;
     grid-template-areas:
       "header header header"
       "tickers tickers tickers"
@@ -38,7 +39,7 @@ export const Content = styled.div`
       "trades depth"
       "footer footer";
 
-    .tickers ,
+    .tickers,
     .candles-chart {
       display: none;
     }
@@ -108,25 +109,31 @@ export const TickersPanel = styled.div`
 
 export const MarketPanel = styled.div`
   grid-area: market;
+  font-family: FiraSans-Medium;
 `
 
 export const TradesPanel = styled.div`
   grid-area: trades;
+  font-family: FiraSans-Medium;
 `
 
 export const CandlesPanel = styled.div`
   grid-area: candles;
+  font-family: FiraSans-Medium;
 `
 
 export const BookPanel = styled.div`
   grid-area: book;
+  font-family: FiraSans-Medium;
 `
 
 export const DepthPanel = styled.div`
   grid-area: depth;
+  font-family: FiraSans-Medium;
 `
 
 export const Footer = styled.div`
   grid-area: footer;
+  font-family: FiraSans-Medium;
   padding: 0 10px;
 `

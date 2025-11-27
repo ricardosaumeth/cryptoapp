@@ -17,10 +17,10 @@ export const candleSlice = createSlice({
   reducers: {
     candlesSnapshotReducer: (
       state,
-      action: PayloadAction<{ currencyPair: string; candles: CandleTuple[] }>
+      action: PayloadAction<{ lookupKey: string; candles: CandleTuple[] }>
     ) => {
-      const { currencyPair, candles } = action.payload
-      state[currencyPair] = candles
+      const { lookupKey, candles } = action.payload
+      state[lookupKey] = candles
         .map(([timestamp, open, close, high, low, volume]) => ({
           timestamp,
           open,
@@ -33,11 +33,11 @@ export const candleSlice = createSlice({
     },
     candlesUpdateReducer: (
       state,
-      action: PayloadAction<{ currencyPair: string; candle: CandleTuple }>
+      action: PayloadAction<{ lookupKey: string; candle: CandleTuple }>
     ) => {
-      const { currencyPair, candle } = action.payload
+      const { lookupKey, candle } = action.payload
       const [timestamp, open, close, high, low, volume] = candle
-      const candleIndex = state[currencyPair]?.findIndex((c) => c.timestamp === timestamp) ?? -1
+      const candleIndex = state[lookupKey]?.findIndex((c) => c.timestamp === timestamp) ?? -1
       const newOrUpdatedCandle = {
         timestamp,
         open,
@@ -49,22 +49,22 @@ export const candleSlice = createSlice({
 
       if (candleIndex >= 0) {
         // Update existing candle
-        state[currencyPair]![candleIndex] = newOrUpdatedCandle
+        state[lookupKey]![candleIndex] = newOrUpdatedCandle
       } else {
         // Add new candle
-        if (!state[currencyPair]) {
-          state[currencyPair] = []
+        if (!state[lookupKey]) {
+          state[lookupKey] = []
         }
-        state[currencyPair]!.push(newOrUpdatedCandle)
+        state[lookupKey]!.push(newOrUpdatedCandle)
         // Sort to maintain chronological order
-        state[currencyPair]!.sort((a, b) => a.timestamp - b.timestamp)
+        state[lookupKey]!.sort((a, b) => a.timestamp - b.timestamp)
       }
 
-      if (!state[currencyPair]) {
-        state[currencyPair] = []
+      if (!state[lookupKey]) {
+        state[lookupKey] = []
       }
 
-      state[currencyPair] = state[currencyPair]!.slice(0, MAX_CANDLES) // restrict number of candles so we don't eventully fill up the memory
+      state[lookupKey] = state[lookupKey]!.slice(0, MAX_CANDLES) // restrict number of candles so we don't eventully fill up the memory
     },
   },
 })

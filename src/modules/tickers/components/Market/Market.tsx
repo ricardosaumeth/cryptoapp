@@ -3,12 +3,13 @@ import { AgGridReact } from "ag-grid-react"
 import type { ColDef, GridApi } from "ag-grid-community"
 import { priceFormatter, volumeFormatter } from "../../../ag-grid/formatter"
 import { type Ticker } from "../../types/Ticker"
+import PriceChartRenderer from "./PriceChart"
 import { formatCurrencyPair } from "../../../reference-data/utils"
 import { Container } from "./Market.styled"
 import Palette from "../../../../theme/style"
 
 export interface StateProps {
-  tickers: (Ticker & { currencyPair: string })[]
+  tickers: (Ticker & { currencyPair: string; prices: number[] })[]
   selectedCurrencyPair?: string
 }
 
@@ -25,13 +26,13 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
     {
       headerName: "Ccy",
       field: "currencyPair",
-      width: 100,
+      width: 95,
       valueFormatter: (params) => formatCurrencyPair(params.value),
     },
     {
       headerName: "Bid Price",
       field: "bid",
-      width: 90,
+      width: 95,
       cellStyle: () => ({
         color: Palette.Bid,
       }),
@@ -41,7 +42,7 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
     {
       headerName: "Ask Price",
       field: "ask",
-      width: 90,
+      width: 95,
       cellStyle: () => ({
         color: Palette.Ask,
       }),
@@ -50,8 +51,18 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
     {
       headerName: "Volume",
       field: "volume",
-      width: 90,
+      width: 95,
       valueFormatter: volumeFormatter,
+    },
+    {
+      headerName: "",
+      field: "prices",
+      cellRenderer: "priceChartRenderer",
+      width: 70,
+      cellStyle: () => ({
+        paddingLeft: 0,
+        paddingRight: 0,
+      }),
     },
   ]
 
@@ -79,9 +90,11 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
           setGridApi(event.api)
           event.api.sizeColumnsToFit()
         }}
-        rowSelection={"single"}
         onRowClicked={(event) => {
           onClick(event.data.currencyPair)
+        }}
+        components={{
+          priceChartRenderer: PriceChartRenderer,
         }}
       ></AgGridReact>
     </Container>
