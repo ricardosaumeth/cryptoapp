@@ -18,28 +18,42 @@ const initialState: CurrencyPairState = {
 
 export const selectCurrencyPair = createAsyncThunk(
   "selection/selectCurrencyPair",
-  async ({ currencyPair }: { currencyPair: string }, { dispatch, getState }) => {
-    const state = getState() as RootState
-    const previousPair = state.selection.currencyPair
+  async ({ currencyPair }: { currencyPair: string }, { dispatch, getState, rejectWithValue }) => {
+    try {
+      const state = getState() as RootState
+      const previousPair = state.selection.currencyPair
 
-    if (previousPair) {
-      const unsubPromises = Object.entries(state.subscriptions)
-        .filter(([chanId]) => {
-          const sub = state.subscriptions[Number(chanId)]
-          return sub?.channel === Channel.TRADES || sub?.channel === Channel.BOOK
-        })
-        .map(([chanId]) => {
-          return dispatch(unsubscribeFromTradesAndBook(chanId)).unwrap()
-        })
-
-      await Promise.all(unsubPromises)
+      if (previousPair && previousPair !== currencyPair) {
+        const unsubPromises = Object.entries(state.subscriptions)
+          .filter(([chanId]) => {
+            const sub = state.subscriptions[Number(chanId)]
+            return sub?.channel === Channel.TRADES || sub?.channel === Channel.BOOK
+          })
+          .map(async ([chanId]) => {
+            try {
+              return await dispatch(unsubscribeFromTradesAndBook(chanId)).unwrap()
+            } catch (error) {
+              console.warn(`Failed to unsubscribe from channel ${chanId}:`, error)
+              return null
+            }
+          })
+        // Promise.allSettled waits for all operations to complete regardless of
+        // individual failures, ensuring cleanup always happens.
+        await Promise.allSettled(unsubPromises)
+      }
+      // The original code returned immediately while setTimeout was still pending,
+      // creating a race condition. The new version properly waits for the timeout
+      // to complete before resolving.
+      return new Promise<string>((resolve) => {
+        setTimeout(() => {
+          dispatch(tradeSubscribeToSymbol({ symbol: currencyPair }))
+          dispatch(bookSubscribeToSymbol({ symbol: currencyPair, prec: "R0" }))
+          resolve(currencyPair)
+        }, SUBSCRIPTION_TIMEOUT_IN_MS)
+      })
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : "Unknown error")
     }
-
-    setTimeout(() => {
-      dispatch(tradeSubscribeToSymbol({ symbol: currencyPair }))
-      dispatch(bookSubscribeToSymbol({ symbol: currencyPair, prec: "R0" }))
-    }, SUBSCRIPTION_TIMEOUT_IN_MS)
-    return currencyPair
   }
 )
 
