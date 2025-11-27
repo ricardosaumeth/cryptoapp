@@ -5,7 +5,7 @@ interface GithubCornerProps {
   size?: number
 }
 
-export const GithubCorner = ({
+export const GithubLink = ({
   href,
   color = "#fff",
   bgColor = "#501DAF",

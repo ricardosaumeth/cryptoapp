@@ -64,8 +64,9 @@ const createSubscribeThunk = (channel: ChannelTypes, actionType: SubscriptionAct
     return msg
   })
 
-const createUnsubscribeThunk = (channel: ChannelTypes) =>
-  createAsyncThunk(`unsubscribe/${channel}`, async (chanId: string, { extra }) => {
+export const unsubscribeFromTradesAndBook = createAsyncThunk(
+  "unsubscribe/fromTradesAndBook",
+  async (chanId: string, { extra }) => {
     const { connection } = extra as { connection: Connection }
 
     const msg = {
@@ -75,7 +76,8 @@ const createUnsubscribeThunk = (channel: ChannelTypes) =>
 
     connection.send(JSON.stringify(msg))
     return msg
-  })
+  }
+)
 
 export const tradeSubscribeToSymbol = createSubscribeThunk(
   Channel.TRADES,
@@ -96,9 +98,6 @@ export const bookSubscribeToSymbol = createSubscribeThunk(
   Channel.BOOK,
   SubscriptionActionType.SUBSCRIBE_TO_BOOK
 )
-
-export const unsubscribeFromTrades = createUnsubscribeThunk(Channel.TRADES)
-export const unsubscribeFromBook = createUnsubscribeThunk(Channel.BOOK)
 
 export const subscriptionsSlice = createSlice({
   name: "subscriptions",
@@ -142,7 +141,7 @@ export const subscriptionsSlice = createSlice({
       .addCase(bookSubscribeToSymbol.fulfilled, (_state, action) => {
         console.log(`Subscribed to book ${JSON.stringify(action.payload)}`)
       })
-      .addCase(unsubscribeFromTrades.fulfilled, (_state, action) => {
+      .addCase(unsubscribeFromTradesAndBook.fulfilled, (_state, action) => {
         console.log(`Unsubscribed to channel ${JSON.stringify(action.payload)}`)
       })
   },

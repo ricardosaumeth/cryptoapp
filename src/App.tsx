@@ -22,7 +22,7 @@ import { bootstrapApp, updateTitle } from "./modules/app/slice"
 import Book from "./modules/book/components/Book"
 import { getSelectedCurrencyPair } from "./modules/selection/selectors"
 import { getTicker } from "./modules/tickers/selectors"
-import { GithubCorner } from "./GithubCorner"
+import { GithubLink } from "./GithubLink"
 import Widget from "./core/components/Widget"
 import Diagnostics from "./core/components/Diagnostics"
 
@@ -47,7 +47,7 @@ function AppContent() {
   return (
     <Container>
       <Content>
-        <GithubCorner href={link} />
+        <GithubLink href={link} />
         <Header>Crypto Trader</Header>
         <TickersPanel>
           <Tickers />

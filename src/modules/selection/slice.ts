@@ -1,13 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import {
-  candlesSubscribeToSymbol,
   tradeSubscribeToSymbol,
   bookSubscribeToSymbol,
-  unsubscribeFromTrades,
-  unsubscribeFromBook,
+  unsubscribeFromTradesAndBook,
 } from "../../core/transport/slice"
-import { DEFAULT_TIMEFRAME, SUBSCRIPTION_TIMEOUT_IN_MS } from "../app/slice"
+import { SUBSCRIPTION_TIMEOUT_IN_MS } from "../app/slice"
 import type { RootState } from "../redux/store"
+import { Channel } from "../../core/transport/types/Channels"
 
 interface CurrencyPairState {
   currencyPair: string
@@ -25,10 +24,12 @@ export const selectCurrencyPair = createAsyncThunk(
 
     if (previousPair) {
       const unsubPromises = Object.entries(state.subscriptions)
-        .filter(([chanId]) => chanId !== "wsConnectionStatus")
+        .filter(([chanId]) => {
+          const sub = state.subscriptions[Number(chanId)]
+          return sub?.channel === Channel.TRADES || sub?.channel === Channel.BOOK
+        })
         .map(([chanId]) => {
-          dispatch(unsubscribeFromTrades(chanId))
-          dispatch(unsubscribeFromBook(chanId))
+          return dispatch(unsubscribeFromTradesAndBook(chanId)).unwrap()
         })
 
       await Promise.all(unsubPromises)
