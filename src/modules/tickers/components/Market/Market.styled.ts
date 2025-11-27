@@ -1,4 +1,5 @@
 import styled from "styled-components"
+import Palette from "../../../../theme/style"
 
 export const Container = styled.div`
   width: 100%;
@@ -6,5 +7,6 @@ export const Container = styled.div`
 
   .selected-row {
     font-family: FiraSans-Medium;
+    background-color: ${Palette.BackgroundColorOnHover};
   }
 `

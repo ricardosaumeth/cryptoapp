@@ -20,13 +20,11 @@ export interface DispatchProps {
 export type Props = StateProps & DispatchProps
 
 const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
-  const [gridApi, setGridApi] = useState<GridApi | undefined>()
-
   const columnDefs: ColDef[] = [
     {
       headerName: "Ccy",
       field: "currencyPair",
-      width: 95,
+      width: 100,
       valueFormatter: (params) => formatCurrencyPair(params.value),
     },
     {
@@ -58,7 +56,7 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
       headerName: "",
       field: "prices",
       cellRenderer: "priceChartRenderer",
-      width: 70,
+      width: 60,
       cellStyle: () => ({
         paddingLeft: 0,
         paddingRight: 0,
@@ -67,17 +65,8 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
   ]
 
   const rowClassRules = {
-    "selected-row": (params: any) => params.node.isSelected(),
+    "selected-row": (params: any) => params.data.currencyPair === selectedCurrencyPair,
   }
-
-  useEffect(() => {
-    if (gridApi) {
-      gridApi.forEachNode(function (node) {
-        node.setSelected(node.data.currencyPair === selectedCurrencyPair)
-      })
-      gridApi.redrawRows()
-    }
-  }, [gridApi, selectedCurrencyPair])
 
   return (
     <Container className="ag-theme-quartz-dark">
@@ -87,7 +76,6 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
         rowClassRules={rowClassRules}
         getRowId={(params) => params.data.currencyPair}
         onGridReady={(event) => {
-          setGridApi(event.api)
           event.api.sizeColumnsToFit()
         }}
         onRowClicked={(event) => {
