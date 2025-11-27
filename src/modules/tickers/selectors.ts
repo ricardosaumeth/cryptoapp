@@ -5,10 +5,10 @@ import { type Ticker } from "./types/Ticker"
 import { getCurrencyPairs } from "../reference-data/selectors"
 import { getSelectedCurrencyPair } from "../selection/selectors"
 import { candlesSelector } from "../candles/selectors"
-import { getSubscriptionId, getSubscriptions } from "../../core/transport/selectors"
+//import { getSubscriptionId, getSubscriptions } from "../../core/transport/selectors"
 import { getValueAt } from "../../core/utils"
 import { getLookupKey } from "../candles/utils"
-import { Channel } from "../../core/transport/types/Channels"
+//import { Channel } from "../../core/transport/types/Channels"
 import { DEFAULT_TIMEFRAME } from "../app/slice"
 
 const tickerSelector = (state: RootState) => state.ticker

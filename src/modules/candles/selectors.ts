@@ -1,9 +1,9 @@
 import { createSelector } from "reselect"
 import type { RootState } from "../redux/store"
 import { getLookupKey } from "./utils"
-import type { Candle } from "./types/Candle"
+//import type { Candle } from "./types/Candle"
 
-const DEFAULT_CANDLES: Candle[] = []
+// const DEFAULT_CANDLES: Candle[] = []
 
 export const candlesSelector = (state: RootState) => state.candles
 

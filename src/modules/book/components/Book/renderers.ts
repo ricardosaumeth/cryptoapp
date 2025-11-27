@@ -2,15 +2,16 @@ import { type ICellRendererParams } from "ag-grid-community"
 import Palette from "../../../../theme/style"
 
 const amountRenderer = (value: string, styles: { [key: string]: any }) => {
-  const formattedStyles = Object.keys(styles)
-    .map((key) => [key, styles[key]].join(":"))
-    .join(";")
+  // const formattedStyles = Object.keys(styles)
+  //   .map((key) => [key, styles[key]].join(":"))
+  //   .join(";")
 
   // return `
   //     <div style="position: relative;">
   //         <div style="height: 30px; position: absolute; z-index: 0; ${formattedStyles}"></div>
   //         <div style="position: absolute; z-index: 1;">${value}</div>
   //     </div>`;
+  console.log(styles)
   return value
 }
 

@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react"
 import { AgGridReact } from "ag-grid-react"
-import type { ColDef, GridApi } from "ag-grid-community"
+import type { ColDef } from "ag-grid-community"
 import { priceFormatter, volumeFormatter } from "../../../ag-grid/formatter"
 import { type Ticker } from "../../types/Ticker"
 import PriceChartRenderer from "./PriceChart"
