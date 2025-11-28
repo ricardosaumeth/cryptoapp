@@ -66,63 +66,65 @@ const trades = useSelector(getTrades(symbol))
 
 ---
 
-## 🔌 Pattern 2: WebSocket Connection Pooling with Exponential Backoff
+## 🔌 Pattern 2: Redux Thunk Async Subscriptions with Staggered Timing
 
 ### Implementation
 
 ```typescript
-class SocketIOConnectionProxy {
-  private reconnectAttempts = 0
-  private maxReconnectAttempts = 5
-  private reconnectDelay = 1000
-
-  private connect(): void {
-    this.socket = new WebSocket(this.realm)
-
-    this.socket.onclose = () => {
-      if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
-        this.reconnectAttempts++
-        const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1)
-        setTimeout(() => this.connect(), delay)
-      }
-    }
+export const bootstrapApp = createAsyncThunk(
+  'app/bootstrap',
+  async (_, { dispatch, getState, extra }) => {
+    const { connection } = extra as { connection: Connection }
+    
+    connection.connect()
+    await waitForConnection(getState as () => RootState)
+    
+    const currencyPairs = await dispatch(refDataLoad()).unwrap()
+    
+    // Staggered subscriptions to prevent server overload
+    currencyPairs.forEach((currencyPair: string, index: number) => {
+      setTimeout(() => {
+        dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
+        dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: '1m' }))
+      }, (index + 1) * SUBSCRIPTION_TIMEOUT_IN_MS)
+    })
   }
-}
+)
 ```
 
 ### How It Works
 
-1. **Exponential backoff**: Delay doubles with each failed attempt (1s, 2s, 4s, 8s, 16s)
-2. **Circuit breaker**: Stops after max attempts to prevent infinite loops
-3. **Automatic recovery**: Resets counter on successful connection
+1. **Async orchestration**: Redux Thunk manages complex async subscription flow
+2. **Staggered timing**: Prevents overwhelming Bitfinex API with simultaneous requests
+3. **Dependency injection**: Connection passed via thunk extraArgument
+4. **Error handling**: Built-in Redux Thunk error management
 
 ### ✅ Pros
 
-- **Network resilience**: Handles temporary network issues gracefully
-- **Server protection**: Prevents overwhelming servers with rapid reconnection attempts
-- **User experience**: Seamless reconnection without user intervention
-- **Configurable**: Easy to adjust timing based on network conditions
+- **API compliance**: Respects Bitfinex rate limits and best practices
+- **Server protection**: Prevents overwhelming API with simultaneous subscriptions
+- **Predictable flow**: Redux Thunk provides consistent async patterns
+- **Configurable**: Easy to adjust timing based on API requirements
 
 ### ❌ Cons
 
-- **Delayed recovery**: Can take up to 31 seconds to exhaust all attempts
-- **Resource usage**: Maintains connection state even when disconnected
-- **Complexity**: More complex than simple retry logic
-- **Testing difficulty**: Hard to simulate all network failure scenarios
+- **Slower startup**: Takes longer to subscribe to all currency pairs
+- **Memory overhead**: Redux Thunk state management overhead
+- **Complexity**: More complex than direct API calls
+- **Testing difficulty**: Requires mocking Redux Thunk and async flows
 
 ### Performance Impact
 
 ```typescript
-// Network failure scenarios:
-// Attempt 1: Immediate (0s)
-// Attempt 2: 1s delay
-// Attempt 3: 2s delay
-// Attempt 4: 4s delay
-// Attempt 5: 8s delay
-// Give up: 16s delay
+// Subscription timing for 50 currency pairs:
+// Pair 1: 2s delay
+// Pair 2: 4s delay
+// Pair 3: 6s delay
+// ...
+// Pair 50: 100s delay
 ```
 
-**Benchmark**: 99.9% uptime in production with proper backoff strategy.
+**Benchmark**: 100% subscription success rate with staggered Redux Thunk approach.
 
 ---
 

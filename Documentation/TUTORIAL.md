@@ -4,10 +4,11 @@ A comprehensive guide to building a real-time cryptocurrency trading dashboard f
 
 ## 🎯 What You'll Build
 
-- Real-time crypto price dashboard
+- Real-time crypto price dashboard with Bitfinex API
+- Redux Thunk async subscription management
 - Interactive candlestick charts
+- Order book and depth chart
 - Live trade feeds
-- WebSocket connections
 - Modern dark UI with animations
 
 ## 📋 Prerequisites
@@ -36,8 +37,11 @@ npm install @reduxjs/toolkit react-redux styled-components
 npm install highcharts highcharts-react-official
 
 # Additional utilities
-npm install reselect lodash
-npm install --save-dev @types/lodash
+npm install lodash luxon numeral
+npm install --save-dev @types/lodash @types/luxon @types/numeral
+
+# Data grid
+npm install ag-grid-community ag-grid-react
 ```
 
 ### 1.3 Setup Project Structure
@@ -50,10 +54,14 @@ src/
 ├── modules/
 │   ├── app/
 │   ├── redux/
+│   ├── book/
 │   ├── candles/
+│   ├── common/
+│   ├── ping/
+│   ├── reference-data/
+│   ├── selection/
 │   ├── tickers/
-│   ├── trades/
-│   └── reference-data/
+│   └── trades/
 └── theme/
 ```
 
@@ -109,7 +117,7 @@ import { configureStore } from "@reduxjs/toolkit"
 import { Connection } from "../../core/transport/Connection"
 import { SocketIOConnectionProxy } from "../../core/transport/SocketIOConnectionProxy"
 
-const connectionProxy = new SocketIOConnectionProxy("wss://api-pub.bitfinex.com/ws/2")
+const connectionProxy = new WsConnectionProxy("wss://api-pub.bitfinex.com/ws/2")
 export const connection = new Connection(connectionProxy)
 
 const createStore = () => {
@@ -147,12 +155,12 @@ export interface ConnectionProxy {
 }
 ```
 
-### 4.2 WebSocket Implementation (`src/core/transport/SocketIOConnectionProxy.ts`)
+### 4.2 WebSocket Implementation (`src/core/transport/WsConnectionProxy.ts`)
 
 ```typescript
 import type { ConnectionProxy } from "./types/ConnectionProxy"
 
-export class SocketIOConnectionProxy implements ConnectionProxy {
+export class WsConnectionProxy implements ConnectionProxy {
   private socket?: WebSocket
   private onConnectFn?: () => void
   private onReceivedFn?: (data: any) => void
@@ -241,11 +249,11 @@ export const tradesSlice = createSlice({
   name: "trades",
   initialState,
   reducers: {
-    updateTrades: (state, action: PayloadAction<{ currencyPair: string; trades: Trade[] }>) => {
+    tradesSnapshotReducer: (state, action: PayloadAction<{ currencyPair: string; trades: Trade[] }>) => {
       const { currencyPair, trades } = action.payload
-      state[currencyPair] = trades.sort((a, b) => a.timestamp - b.timestamp)
+      state[currencyPair] = trades
     },
-    addTrade: (state, action: PayloadAction<{ currencyPair: string; trade: Trade }>) => {
+    tradesUpdateReducer: (state, action: PayloadAction<{ currencyPair: string; trade: Trade }>) => {
       const { currencyPair, trade } = action.payload
       const trades = state[currencyPair] ?? (state[currencyPair] = [])
       const existingIndex = trades.findIndex((t) => t.id === trade.id)
@@ -260,7 +268,7 @@ export const tradesSlice = createSlice({
   },
 })
 
-export const { updateTrades, addTrade } = tradesSlice.actions
+export const { tradesSnapshotReducer, tradesUpdateReducer } = tradesSlice.actions
 export default tradesSlice.reducer
 ```
 

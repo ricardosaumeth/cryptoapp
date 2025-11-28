@@ -10,6 +10,8 @@ CryptoApp follows a **modular, event-driven architecture** designed for real-tim
 
 ### Core Principles
 
+- **Redux Thunk Async Operations**: Centralized async subscription management
+- **Bitfinex API Integration**: Direct WebSocket API v2 integration
 - **Separation of Concerns**: Each module has a single responsibility
 - **Unidirectional Data Flow**: Redux ensures predictable state changes
 - **Real-time First**: Architecture optimized for live data streams
@@ -116,21 +118,22 @@ redux/
 ```typescript
 const store = configureStore({
   reducer: {
-    trades: tradesReducer,
-    tickers: tickersReducer,
-    candles: candlesReducer,
-    subscriptions: subscriptionsReducer,
-    refData: refDataReducer,
+    app: appBootstrapSlice.reducer,
+    trades: tradesSlice.reducer,
+    ticker: tickerSlice.reducer,
+    candles: candleSlice.reducer,
+    subscriptions: subscriptionsSlice.reducer,
+    refData: refDataSlice.reducer,
+    selection: selectionSlice.reducer,
+    book: bookSlice.reducer,
+    ping: pingSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       thunk: {
-        extraArgument: { connection }, // Dependency injection
+        extraArgument: { connection }, // Dependency injection for async thunks
       },
-      serializableCheck: {
-        ignoredActions: ["persist/PERSIST"], // Performance optimization
-      },
-    }).concat(wsMiddleware, loggerMiddleware),
+    }).concat(createWsMiddleware(connection)),
 })
 ```
 
@@ -157,17 +160,19 @@ trades/
     └── TradesPanel.container.tsx
 ```
 
-**Data Flow**:
+**Redux Thunk Data Flow**:
 
 ```
-WebSocket Message → Middleware → Action → Reducer → Selector → Component
-     │                │           │         │          │         │
-     │                │           │         │          │         └─ UI Update
-     │                │           │         │          └─ Memoized Access
-     │                │           │         └─ Immutable Update
-     │                │           └─ Type-safe Payload
-     │                └─ Message Parsing
-     └─ Raw Market Data
+User Action → Redux Thunk → Bitfinex API → WebSocket → Middleware → Reducer → Selector → Component
+     │            │             │            │           │            │          │         │
+     │            │             │            │           │            │          │         └─ UI Update
+     │            │             │            │           │            │          └─ Memoized Access
+     │            │             │            │           │            └─ Immutable Update
+     │            │             │            │           └─ Message Parsing
+     │            │             │            └─ Real-time Data
+     │            │             └─ Subscription Request
+     │            └─ Async Operation
+     └─ Component Interaction
 ```
 
 **Performance Optimizations**:
@@ -336,14 +341,15 @@ const wsMiddleware: Middleware = (store) => (next) => (action) => {
 
 ## 🔄 Data Flow Architecture
 
-### Request Flow (Subscription)
+### Redux Thunk Subscription Flow
 
 ```
-User Action → Component → Redux Action → Async Thunk → WebSocket Send
-    │             │           │             │              │
-    │             │           │             │              └─ Server Request
-    │             │           │             └─ Connection Management
-    │             │           └─ Type-safe Payload
+User Action → Component → Redux Thunk → Bitfinex API → WebSocket Send → Server Response
+    │             │           │             │              │              │
+    │             │           │             │              │              └─ Subscription Ack
+    │             │           │             │              └─ Channel Subscribe
+    │             │           │             └─ Message Format
+    │             │           └─ Async Operation
     │             └─ Event Handler
     └─ UI Interaction
 ```

@@ -1,27 +1,32 @@
 # 🚀 CryptoApp
 
-A modern, real-time cryptocurrency trading dashboard built with React, TypeScript, and Redux Toolkit.
+A comprehensive real-time cryptocurrency trading dashboard built with React, TypeScript, and Redux Toolkit.
 
 ![Logo](./public/crypto-app.png)
 
 ## ✨ Features
 
-- **Real-time Data**: Live cryptocurrency prices, trades, and market data via WebSocket
+- **Bitfinex API Integration**: Real-time cryptocurrency data via Bitfinex WebSocket API v2
+- **Redux Thunk Async Operations**: Efficient async subscription management and data fetching
 - **Interactive Charts**: Candlestick charts with Highcharts for technical analysis
-- **Market Overview**: Ticker displays with price changes and trends
-- **Trade History**: Real-time trade feed with updates
+- **Order Book**: Real-time order book with bid/ask visualization
+- **Depth Chart**: Market depth visualization with interactive charts
+- **Market Overview**: Comprehensive ticker displays with price changes and trends
+- **Trade History**: Real-time trade feed with animated updates
+- **Performance Monitoring**: Connection latency and diagnostics
 - **Responsive Design**: Modern dark theme with smooth animations
 - **Type Safety**: Full TypeScript implementation
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 18, TypeScript, Vite
-- **State Management**: Redux Toolkit with RTK Query
+- **Frontend**: React 19, TypeScript, Vite
+- **State Management**: Redux Toolkit with Redux Thunk for async operations
+- **API Integration**: Bitfinex WebSocket API v2 (wss://api-pub.bitfinex.com/ws/2)
 - **Styling**: Styled Components with custom theme
 - **Charts**: Highcharts & Highcharts React
-- **WebSocket**: Custom connection management
-- **Icons**: Material Icons
-- **Data Grid**: AG Grid (Quartz Dark theme)
+- **Async Operations**: Redux Thunk for subscription management and data streaming
+- **Data Grid**: AG Grid Community
+- **Utilities**: Lodash, Luxon, Numeral
 
 ## 🚀 Getting Started
 
@@ -62,49 +67,92 @@ A modern, real-time cryptocurrency trading dashboard built with React, TypeScrip
 src/
 ├── core/                 # Core utilities and components
 │   ├── components/       # Reusable UI components
-│   └── transport/        # WebSocket connection management
-├── modules/              # Feature modules
-│   ├── app/             # App initialization
-│   ├── candles/         # Candlestick chart functionality
-│   ├── redux/           # Store configuration
-│   ├── reference-data/  # Currency pairs data
-│   ├── tickers/         # Price ticker components
-│   └── trades/          # Trade history
-├── theme/               # Global styling and theme
-└── App.tsx              # Main application component
+│   │   ├── AnimatedCube/ # 3D animated loading cube
+│   │   ├── Diagnostics/  # Connection diagnostics
+│   │   ├── LineChart/    # Mini line charts
+│   │   ├── Loading/      # Loading states
+│   │   ├── TrendIndicator/ # Price trend arrows
+│   │   └── Widget/       # Container components
+│   ├── hooks/           # Custom React hooks
+│   ├── transport/       # WebSocket connection management
+│   └── utils.ts         # Utility functions
+├── modules/             # Feature modules
+│   ├── app/            # App initialization and state
+│   ├── book/           # Order book and depth chart
+│   ├── candles/        # Candlestick chart functionality
+│   ├── common/         # Shared animated components
+│   ├── ping/           # Connection latency monitoring
+│   ├── redux/          # Store configuration
+│   ├── reference-data/ # Currency pairs data
+│   ├── selection/      # Selected pair state
+│   ├── tickers/        # Price ticker components
+│   └── trades/         # Trade history
+├── theme/              # Global styling, fonts, and theme
+└── App.tsx             # Main application component
 ```
 
 ## 🎨 Features Overview
 
-### Real-time Market Data
+### Bitfinex API Integration
 
-- Live price updates from Bitfinex WebSocket API
+- Direct integration with Bitfinex WebSocket API v2
+- Redux Thunk async actions for channel subscriptions (trades, tickers, candles, book)
 - Automatic reconnection with exponential backoff
 - Efficient state management with Redux Toolkit
+- Real-time data streaming for trades, order book, and market data
 
 ### Interactive Charts
 
 - Candlestick charts with zoom and navigation
-- Dark theme integration
-- Historical data visualization
-- Responsive design
+- Market depth visualization
+- Mini price trend charts in tickers
+- Dark theme integration with custom styling
+
+### Order Book & Trading
+
+- Real-time order book with bid/ask spreads
+- Market depth chart visualization
+- Price level aggregation
+- Color-coded buy/sell orders
+
+### Performance & Monitoring
+
+- Connection latency monitoring
+- WebSocket diagnostics panel
+- Animated loading states
+- Update highlighting for price changes
 
 ### Modern UI/UX
 
-- Dark theme with sparkling header effects
-- Smooth hover animations
-- Grid-based layout
-- Material Design icons
+- Comprehensive grid-based layout
+- Smooth animations and transitions
+- Custom styled components
+- Responsive design patterns
 
 ## 🔧 Configuration
 
-### WebSocket Connection
+### Bitfinex API Configuration
 
-The app connects to Bitfinex WebSocket API:
+The app uses Redux Thunk for async Bitfinex API operations:
 
 ```typescript
-// Default endpoint
+// Bitfinex WebSocket API v2
 wss://api-pub.bitfinex.com/ws/2
+
+// Redux Thunk async subscription example
+export const tradeSubscribeToSymbol = createAsyncThunk(
+  'SUBSCRIBE_TO_TRADES',
+  async ({ symbol }: SubscribePayload, { extra }) => {
+    const { connection } = extra as { connection: Connection }
+    const msg = {
+      event: 'subscribe',
+      channel: 'trades',
+      symbol: `t${symbol}`
+    }
+    connection.send(JSON.stringify(msg))
+    return msg
+  }
+)
 ```
 
 ### Theme Customization
@@ -112,35 +160,45 @@ wss://api-pub.bitfinex.com/ws/2
 Modify colors in `src/theme/style.ts`:
 
 ```typescript
-export default {
-  BackgroundColor: "#1b1e2b",
-  White: "#ffffff",
-  Positive: "#00d4aa",
-  Negative: "#ff6b6b",
+const Palette = {
+  BackgroundColor: "#1f2936",
+  White: "#FFF",
+  Positive: "#00AD08",
+  Negative: "#FF264D",
+  Bid: "#00AD08",
+  Ask: "#FF264D",
+  Orange: "#FFA41B",
 }
 ```
 
 ## 📦 Available Scripts
 
 - `npm run dev` - Start development server
-- `npm run build` - Build for production
+- `npm run build` - Build for production (TypeScript + Vite)
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
+- `npm run format` - Format code with Prettier
 
 ## 🌟 Key Components
 
-- **CandlesChart**: Interactive candlestick charts
-- **Ticker**: Real-time price display with trend indicators
-- **TradesPanel**: Live trade feed
-- **Connection Management**: Robust WebSocket handling
+- **CandlesChart**: Interactive candlestick charts with Highcharts
+- **Market**: Comprehensive market data display
+- **Tickers**: Grid of currency pairs with mini charts
+- **Trades**: Real-time trade feed with animations
+- **Book**: Order book with bid/ask visualization
+- **DepthChart**: Market depth visualization
+- **Diagnostics**: Connection monitoring and latency display
+- **AnimatedContent**: Smooth content transitions
 
 ## 🔮 Future Enhancements
 
-- [ ] Order book visualization
-- [ ] Portfolio tracking
-- [ ] Price alerts
+- [ ] Portfolio tracking and management
+- [ ] Price alerts and notifications
 - [ ] Multiple exchange support
-- [ ] Mobile responsive improvements
+- [ ] Advanced technical indicators
+- [ ] Trading interface
+- [ ] Historical data analysis
+- [ ] Mobile app version
 
 ## 📄 License
 

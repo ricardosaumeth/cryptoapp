@@ -147,9 +147,9 @@ describe("tradesSlice", () => {
     price: 45000,
   }
 
-  describe("updateTrades", () => {
+  describe("tradesSnapshotReducer", () => {
     it("should update trades for currency pair", () => {
-      const action = updateTrades({
+      const action = tradesSnapshotReducer({
         currencyPair: "BTCUSD",
         trades: [mockTrade],
       })
@@ -174,14 +174,14 @@ describe("tradesSlice", () => {
     })
   })
 
-  describe("addTrade", () => {
+  describe("tradesUpdateReducer", () => {
     it("should add new trade to existing list", () => {
       const existingState = {
         BTCUSD: [mockTrade],
       }
 
       const newTrade = { ...mockTrade, id: 789, timestamp: 1640995300000 }
-      const action = addTrade({ currencyPair: "BTCUSD", trade: newTrade })
+      const action = tradesUpdateReducer({ currencyPair: "BTCUSD", trade: newTrade })
 
       const result = tradesSlice.reducer(existingState, action)
 
@@ -497,13 +497,14 @@ describe('CandlesChart Component', () => {
 
 ## 🔗 Integration Testing
 
-### WebSocket Integration Tests
+### Redux Thunk Integration Tests
 
 ```typescript
 // src/core/transport/__tests__/integration.test.ts
 import { Server } from "mock-socket"
-import { SocketIOConnectionProxy } from "../SocketIOConnectionProxy"
+import { WsConnectionProxy } from "../WsConnectionProxy"
 import { Connection } from "../Connection"
+import { bootstrapApp } from "../../modules/app/slice"
 
 describe("WebSocket Integration", () => {
   let mockServer: Server
@@ -512,7 +513,7 @@ describe("WebSocket Integration", () => {
 
   beforeEach(() => {
     mockServer = new Server(mockUrl)
-    const proxy = new SocketIOConnectionProxy(mockUrl)
+    const proxy = new WsConnectionProxy(mockUrl)
     connection = new Connection(proxy)
   })
 
@@ -646,15 +647,16 @@ describe("WebSocket Integration", () => {
 })
 ```
 
-### Redux Integration Tests
+### Redux Thunk Integration Tests
 
 ```typescript
 // src/modules/__tests__/integration.test.ts
 import { configureStore } from "@reduxjs/toolkit"
 import { tradesSlice } from "../trades/slice"
-import { tickersSlice } from "../tickers/slice"
-import { candlesSlice } from "../candles/slice"
-import { subscriptionsSlice } from "../subscriptions/slice"
+import { tickerSlice } from "../tickers/slice"
+import { candleSlice } from "../candles/slice"
+import { subscriptionsSlice } from "../../core/transport/slice"
+import { bootstrapApp } from "../app/slice"
 
 describe("Redux Integration", () => {
   let store: ReturnType<typeof configureStore>
@@ -662,11 +664,22 @@ describe("Redux Integration", () => {
   beforeEach(() => {
     store = configureStore({
       reducer: {
+        app: appBootstrapSlice.reducer,
         trades: tradesSlice.reducer,
-        tickers: tickersSlice.reducer,
-        candles: candlesSlice.reducer,
+        ticker: tickerSlice.reducer,
+        candles: candleSlice.reducer,
         subscriptions: subscriptionsSlice.reducer,
+        refData: refDataSlice.reducer,
+        selection: selectionSlice.reducer,
+        book: bookSlice.reducer,
+        ping: pingSlice.reducer,
       },
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          thunk: {
+            extraArgument: { connection: mockConnection },
+          },
+        }),
     })
   })
 

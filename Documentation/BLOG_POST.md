@@ -20,11 +20,11 @@ Ever wondered how trading platforms like Binance or Coinbase display real-time c
 
 ### Why These Technologies?
 
-**React 18 + TypeScript**: Type safety prevents runtime errors in financial data
-**Redux Toolkit**: Manages complex real-time state efficiently  
+**React 19 + TypeScript**: Type safety prevents runtime errors in financial data
+**Redux Toolkit + Thunk**: Manages async Bitfinex API operations efficiently  
+**Bitfinex WebSocket API v2**: Direct integration for real-time market data
 **Styled Components**: Dynamic theming based on market conditions
 **Highcharts**: Professional-grade financial charts
-**WebSocket**: Sub-second data updates from Bitfinex API
 
 ## 🚀 The Journey: From Zero to Trading Dashboard
 
@@ -49,48 +49,64 @@ src/modules/
 
 ### Phase 2: Real-Time Data Pipeline (30 minutes)
 
-Here's where it gets interesting. Most tutorials use fake data, but we're connecting to **Bitfinex's live WebSocket API** - the same data powering million-dollar trades.
+Here's where it gets interesting. Most tutorials use fake data, but we're using **Redux Thunk** to manage **Bitfinex's live WebSocket API v2** - the same data powering million-dollar trades.
 
-**The Challenge**: WebSockets can disconnect. Professional apps need bulletproof reconnection.
+**The Challenge**: Async subscriptions need proper state management. Professional apps use Redux Thunk.
 
 ```typescript
-// Our secret sauce: Exponential backoff reconnection
-private connect(): void {
-  this.socket = new WebSocket(this.realm)
-
-  this.socket.onclose = () => {
-    if (this.shouldReconnect) {
-      const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts)
-      setTimeout(() => this.connect(), delay)
+// Redux Thunk for Bitfinex API subscriptions
+export const tradeSubscribeToSymbol = createAsyncThunk(
+  'SUBSCRIBE_TO_TRADES',
+  async ({ symbol }: SubscribePayload, { extra }) => {
+    const { connection } = extra as { connection: Connection }
+    const msg = {
+      event: 'subscribe',
+      channel: 'trades',
+      symbol: `t${symbol}`
     }
+    connection.send(JSON.stringify(msg))
+    return msg
   }
-}
+)
 ```
 
-**Why This Matters**: Your users won't lose money due to connection drops.
+**Why This Matters**: Redux Thunk handles async operations cleanly and predictably.
 
 ### Phase 3: State Management That Scales (25 minutes)
 
-Financial apps have complex state requirements. We need to:
+Financial apps have complex async state requirements. We need to:
 
-- Handle thousands of price updates per second
+- Handle async Bitfinex API subscriptions
+- Manage thousands of price updates per second
 - Maintain chronological order of trades
 - Update charts without re-rendering everything
 
-**Redux Toolkit Solution**:
+**Redux Thunk + Toolkit Solution**:
 
 ```typescript
-// Efficient trade updates with automatic sorting
-addTrade: (state, action) => {
-  const { currencyPair, trade } = action.payload
-  const trades = state[currencyPair] ?? (state[currencyPair] = [])
-
-  trades.push(trade)
-  trades.sort((a, b) => a.timestamp - b.timestamp) // Always chronological
-}
+// Bootstrap app with staggered subscriptions
+export const bootstrapApp = createAsyncThunk(
+  'app/bootstrap',
+  async (_, { dispatch, getState, extra }) => {
+    const { connection } = extra as { connection: Connection }
+    
+    connection.connect()
+    await waitForConnection(getState as () => RootState)
+    
+    const currencyPairs = await dispatch(refDataLoad()).unwrap()
+    
+    // Staggered subscriptions to prevent server overload
+    currencyPairs.forEach((currencyPair: string, index: number) => {
+      setTimeout(() => {
+        dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
+        dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: '1m' }))
+      }, (index + 1) * 2000)
+    })
+  }
+)
 ```
 
-**Performance Insight**: We use Immer under the hood, so these "mutations" are actually immutable updates.
+**Performance Insight**: Redux Thunk manages async operations while Immer handles immutable updates.
 
 ### Phase 4: Professional Charts (20 minutes)
 
@@ -158,13 +174,16 @@ We use **IBM Plex Sans** - the same font family used by major financial institut
 
 ## ⚡ Performance Optimizations
 
-### WebSocket Efficiency
+### Redux Thunk Efficiency
 
 ```typescript
-// Batch updates to prevent UI thrashing
-setTimeout(() => {
-  dispatch(tickerSubscribeToSymbol({ symbol: `t${pair}` }))
-}, index * 200) // Stagger subscriptions
+// Staggered async subscriptions to prevent server overload
+currencyPairs.forEach((currencyPair: string, index: number) => {
+  setTimeout(() => {
+    dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
+    dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: '1m' }))
+  }, (index + 1) * SUBSCRIPTION_TIMEOUT_IN_MS)
+})
 ```
 
 ### Chart Performance

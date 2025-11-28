@@ -20,11 +20,15 @@ _Complete reference for all APIs, components, and interfaces in CryptoApp_
 
 ```typescript
 interface RootState {
+  app: AppState
   trades: TradesState
-  tickers: TickerState
+  ticker: TickerState
   candles: CandlesState
   subscriptions: SubscriptionState
   refData: RefDataState
+  selection: SelectionState
+  book: BookState
+  ping: PingState
 }
 ```
 
@@ -48,11 +52,11 @@ interface Trade {
 #### Actions
 
 ```typescript
-// Update entire trade list for a currency pair
-updateTrades(payload: { currencyPair: string; trades: Trade[] })
+// Snapshot of trades for a currency pair (initial load)
+tradesSnapshotReducer(payload: { currencyPair: string; trades: Trade[] })
 
-// Add or update single trade
-addTrade(payload: { currencyPair: string; trade: Trade })
+// Update single trade (real-time update)
+tradesUpdateReducer(payload: { currencyPair: string; trade: Trade })
 ```
 
 #### Selectors
@@ -108,8 +112,9 @@ interface TickerData {
 // Update ticker data
 updateTicker(payload: { symbol: string; data: number[] })
 
-// Bitfinex data format: [BID, BID_SIZE, ASK, ASK_SIZE, DAILY_CHANGE,
-//                        DAILY_CHANGE_RELATIVE, LAST_PRICE, VOLUME, HIGH, LOW]
+// Bitfinex ticker data format: [CHANNEL_ID, [BID, BID_SIZE, ASK, ASK_SIZE, 
+//                               DAILY_CHANGE, DAILY_CHANGE_RELATIVE, LAST_PRICE, 
+//                               VOLUME, HIGH, LOW]]
 ```
 
 #### Selectors
@@ -152,10 +157,10 @@ type CandleTuple = [number, number, number, number, number, number]
 
 ```typescript
 // Load initial candle data (snapshot)
-candlesSnapshot(payload: { currencyPair: string; candles: CandleTuple[] })
+candlesSnapshotReducer(payload: { lookupKey: string; candles: CandleTuple[] })
 
 // Update single candle (real-time update)
-candlesUpdate(payload: { currencyPair: string; candle: CandleTuple })
+candlesUpdateReducer(payload: { lookupKey: string; candle: CandleTuple })
 ```
 
 #### Selectors
@@ -213,14 +218,17 @@ subscribeToChannelAck(payload: {
 #### Async Thunks
 
 ```typescript
-// Subscribe to trades
+// Subscribe to trades (Redux Thunk)
 tradeSubscribeToSymbol(payload: { symbol: string }): AsyncThunk
 
-// Subscribe to ticker
+// Subscribe to ticker (Redux Thunk)
 tickerSubscribeToSymbol(payload: { symbol: string }): AsyncThunk
 
-// Subscribe to candles
-candleSubscribeToSymbol(payload: { symbol: string; timeframe?: string }): AsyncThunk
+// Subscribe to candles (Redux Thunk)
+candlesSubscribeToSymbol(payload: { symbol: string; timeframe?: string }): AsyncThunk
+
+// Subscribe to order book (Redux Thunk)
+bookSubscribeToSymbol(payload: { symbol: string; prec?: string }): AsyncThunk
 ```
 
 ---
