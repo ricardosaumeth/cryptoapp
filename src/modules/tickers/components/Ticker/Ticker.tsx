@@ -1,7 +1,7 @@
 import { Container, CurrencyPair, Price, RelativeChange, Change } from "./Ticker.styled"
-import UpdateHighlight from "../../../../core/components/update-highlight/UpdateHighlight"
+import UpdateHighlight from "../../../../core/components/UpdateHighlight/UpdateHighlight"
 import { formatCurrencyPair, formatPrice } from "../../../reference-data/utils"
-import TrendIndicator from "../../../../core/components/trend-indicator"
+import TrendIndicator from "../../../../core/components/TrenIndicator"
 
 export interface Props {
   currencyPair: string

@@ -2,8 +2,9 @@ import { AgGridReact } from "ag-grid-react"
 import type { ColDef } from "ag-grid-community"
 import { priceFormatter, volumeFormatter } from "../../../ag-grid/formatter"
 import { type Ticker } from "../../types/Ticker"
-import PriceChartRenderer from "./PriceChart"
+import PriceChartRenderer from "./PriceChartRenderer"
 import { formatCurrencyPair } from "../../../reference-data/utils"
+import PriceRenderer from "./PriceRenderer"
 import { Container } from "./Market.styled"
 import Palette from "../../../../theme/style"
 
@@ -32,9 +33,12 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
       width: 95,
       cellStyle: () => ({
         color: Palette.Bid,
+        display: "flex",
+        "justify-content": "flex-end",
       }),
       type: "numericColumn",
       valueFormatter: priceFormatter,
+      cellRenderer: "priceRenderer",
     },
     {
       headerName: "Ask Price",
@@ -44,6 +48,7 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
         color: Palette.Ask,
       }),
       valueFormatter: priceFormatter,
+      cellRenderer: "priceRenderer",
     },
     {
       headerName: "Volume",
@@ -55,7 +60,7 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
       headerName: "",
       field: "prices",
       cellRenderer: "priceChartRenderer",
-      width: 63,
+      width: 66,
       cellStyle: () => ({
         paddingLeft: 0,
         paddingRight: 0,
@@ -83,6 +88,7 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
         }}
         components={{
           priceChartRenderer: PriceChartRenderer,
+          priceRenderer: PriceRenderer,
         }}
       ></AgGridReact>
     </Container>

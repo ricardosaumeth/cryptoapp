@@ -20,7 +20,7 @@ const Book = ({ orders }: Props) => {
     {
       headerName: "Bid Amount",
       field: "bid.amount",
-      width: 140,
+      width: 145,
       valueFormatter: amountFormatter,
       cellRenderer: bidAmountRenderer,
     },
@@ -46,7 +46,7 @@ const Book = ({ orders }: Props) => {
     {
       headerName: "Ask Amount",
       field: "ask.amount",
-      width: 140,
+      width: 145,
       valueFormatter: (params) => amountFormatter({ value: Math.abs(params.value) }),
       cellRenderer: askAmountRenderer,
     },
