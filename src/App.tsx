@@ -26,6 +26,7 @@ import { GithubLink } from "./GithubLink"
 import Widget from "./core/components/Widget"
 import Diagnostics from "./core/components/Diagnostics"
 import Latency from "./modules/ping/components/Latency"
+import AnimatedContent from "./modules/common/AnimatedContent"
 
 const store = createStore()
 
@@ -60,7 +61,9 @@ function AppContent() {
         </MarketPanel>
         <TradesPanel>
           <Widget title={"Trades"}>
-            <Trades />
+            <AnimatedContent>
+              <Trades />
+            </AnimatedContent>
           </Widget>
         </TradesPanel>
         <CandlesPanel>
@@ -68,12 +71,16 @@ function AppContent() {
         </CandlesPanel>
         <BookPanel>
           <Widget title={"Book"}>
-            <Book />
+            <AnimatedContent>
+              <Book />
+            </AnimatedContent>
           </Widget>
         </BookPanel>
         <DepthPanel>
           <Widget title={"Depth"}>
-            <DepthChart />
+            <AnimatedContent>
+              <DepthChart />
+            </AnimatedContent>
           </Widget>
         </DepthPanel>
         <Footer>

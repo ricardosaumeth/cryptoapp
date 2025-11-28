@@ -1,13 +1,17 @@
+import { useEffect, useState } from "react"
 import { AgGridReact } from "ag-grid-react"
-import { type ColDef } from "ag-grid-community"
+import { debounce } from "lodash"
+import type { ColDef, GridApi } from "ag-grid-community"
 import { useThrottle } from "../../../../core/hooks/useThrottle"
 import { priceFormatter, amountFormatter } from "../../../ag-grid/formatter"
 import { Container } from "./Book.styled"
-//import Loading from "../../../../core/components/Loading";
+import Loading from "../../../../core/components/Loading"
 import { type Order } from "../../types/Order"
 import Palette from "../../../../theme/style"
 import { bidAmountRenderer, askAmountRenderer } from "./renderers"
 import Stale from "../../../../core/components/Stale"
+
+const DEBOUNCE_RESIZE_IN_MS = 200
 
 export interface Props {
   orders: { bid: Order; ask: Order }[]
@@ -15,7 +19,7 @@ export interface Props {
 }
 
 const Book = ({ orders, isStale }: Props) => {
-  //const [gridApi, setGridApi] = useState<GridApi | undefined>()
+  const [gridApi, setGridApi] = useState<GridApi | undefined>()
 
   const throttledOrders = useThrottle<{ bid: Order; ask: Order }[]>(orders, 100)
   const columnDefs: ColDef[] = [
@@ -54,6 +58,22 @@ const Book = ({ orders, isStale }: Props) => {
     },
   ]
 
+  useEffect(() => {
+    if (gridApi) {
+      gridApi.sizeColumnsToFit()
+    }
+
+    const handleResize = debounce(() => {
+      if (gridApi) {
+        gridApi.sizeColumnsToFit()
+      }
+    }, DEBOUNCE_RESIZE_IN_MS)
+
+    window.addEventListener("resize", handleResize)
+
+    return () => window.removeEventListener("resize", handleResize)
+  }, [gridApi])
+
   //useGridResize(gridApi);
 
   return (
@@ -64,13 +84,14 @@ const Book = ({ orders, isStale }: Props) => {
         rowData={throttledOrders}
         getRowId={({ data }) => [data.bid?.id, data.ask?.id].join("#")}
         suppressHorizontalScroll={true}
-        // onGridReady={(event) => {
-        //   setGridApi(event.api)
-        // }}
-        //noRowsOverlayComponent={"customLoadingOverlay"}
-        // frameworkComponents={{
-        //   customLoadingOverlay: Loading,
-        // }}
+        gridOptions={{ localeText: { noRowsToShow: "Loading..." } }}
+        onGridReady={(event) => {
+          setGridApi(event.api)
+        }}
+        noRowsOverlayComponent={"customLoadingOverlay"}
+        components={{
+          customLoadingOverlay: Loading,
+        }}
       ></AgGridReact>
     </Container>
   )

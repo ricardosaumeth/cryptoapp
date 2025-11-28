@@ -6,7 +6,7 @@ import { Container } from "./Trades.styled"
 import Palette from "../../../theme/style"
 import { useThrottle } from "../../../core/hooks/useThrottle"
 // import { useGridResize } from "../../../core/hooks/useGridResize";
-// import Loading from "../../../core/components/Loading";
+import Loading from "../../../core/components/Loading"
 import { amountFormatter, priceFormatter, timeFormatter } from "../../ag-grid/formatter"
 import Stale from "../../../core/components/Stale"
 
@@ -61,26 +61,16 @@ const Trades = memo(({ trades, isStale }: Props) => {
   return (
     <Container className="ag-theme-quartz-dark">
       {isStale && <Stale />}
-      {/* <AgGridReact
-        columnDefs={columnDefs}
-        rowData={throttledTrades}
-        getRowId={getRowId}
-        animateRows={false}
-        onGridReady={event => event.api.sizeColumnsToFit()}
-      /> */}
-      {/* {isStale && <Stale />} */}
       <AgGridReact
         columnDefs={columnDefs}
         rowData={throttledTrades}
         getRowId={getRowId}
         suppressHorizontalScroll={true}
-        //</Container>onGridReady={(event) => {
-        //setGridApi(event.api);
-        //}}
-        //noRowsOverlayComponent={"customLoadingOverlay"}
-        //frameworkComponents={{
-        //customLoadingOverlay: Loading,
-        //}}
+        gridOptions={{ localeText: { noRowsToShow: "Loading..." } }}
+        noRowsOverlayComponent={"customLoadingOverlay"}
+        components={{
+          customLoadingOverlay: Loading,
+        }}
       ></AgGridReact>
     </Container>
   )

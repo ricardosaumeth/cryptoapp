@@ -2,10 +2,11 @@ import { useState, useEffect } from "react"
 import * as Highcharts from "highcharts"
 import HighchartsReact from "highcharts-react-official"
 import { useThrottle } from "../../../../core/hooks/useThrottle"
+import Stale from "../../../../core/components/Stale"
+import Loading from "../../../../core/components/Loading"
 import { Container } from "./DepthChart.styled"
 import Palette from "../../../../theme/style"
 import "../../../../theme/Highchart"
-import Stale from "../../../../core/components/Stale"
 
 interface Depth {
   bids: { price: number; depth: number }[]
@@ -19,6 +20,7 @@ export interface Props {
 
 const DepthChart = ({ depth, isStale }: Props) => {
   const throttledDepth = useThrottle<Depth>(depth, 500)
+  const [isLoading, setIsLoading] = useState(true)
   const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
     chart: {
       type: "area",
@@ -79,6 +81,7 @@ const DepthChart = ({ depth, isStale }: Props) => {
 
   useEffect(() => {
     const { bids, asks } = throttledDepth
+    setIsLoading(bids.length === 0 && asks.length === 0)
 
     setChartOptions({
       xAxis: {
@@ -110,6 +113,7 @@ const DepthChart = ({ depth, isStale }: Props) => {
   return (
     <Container>
       {isStale && <Stale />}
+      {isLoading && <Loading />}
       <HighchartsReact highcharts={Highcharts} options={chartOptions} constructorType={"chart"} />
     </Container>
   )

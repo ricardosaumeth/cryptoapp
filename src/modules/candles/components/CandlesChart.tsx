@@ -5,6 +5,7 @@ import HighchartsReact from "highcharts-react-official"
 import { type Candle } from "../types/Candle"
 import { formatCurrencyPair } from "../../reference-data/utils"
 import Stale from "../../../core/components/Stale"
+import Loading from "../../../core/components/Loading"
 import Palette from "../../../theme/style"
 import "../../../theme/Highchart"
 
@@ -15,6 +16,7 @@ export interface Props {
 }
 
 const CandlesChart = ({ candles, currencyPair, isStale }: Props) => {
+  const [isLoading, setIsLoading] = useState(true)
   const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
     time: {
       useUTC: false,
@@ -63,6 +65,8 @@ const CandlesChart = ({ candles, currencyPair, isStale }: Props) => {
   } as Highcharts.Options)
 
   useEffect(() => {
+    setIsLoading(candles.length === 0)
+
     if (candles && candles.length > 0) {
       const ohlc = candles.map(({ timestamp, open, high, low, close }) => [
         timestamp,
@@ -106,6 +110,7 @@ const CandlesChart = ({ candles, currencyPair, isStale }: Props) => {
   return (
     <Container>
       {isStale && <Stale />}
+      {isLoading && <Loading />}
       <HighchartsReact
         highcharts={Highcharts}
         options={chartOptions}

@@ -4,6 +4,7 @@ import { priceFormatter, volumeFormatter } from "../../../ag-grid/formatter"
 import { type Ticker } from "../../types/Ticker"
 import PriceChartRenderer from "./PriceChartRenderer"
 import { formatCurrencyPair } from "../../../reference-data/utils"
+import Loading from "../../../../core/components/Loading"
 import PriceRenderer from "./PriceRenderer"
 import { Container } from "./Market.styled"
 import Palette from "../../../../theme/style"
@@ -86,9 +87,11 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
         onRowClicked={(event) => {
           onClick(event.data.currencyPair)
         }}
+        noRowsOverlayComponent={"customLoadingOverlay"}
         components={{
           priceChartRenderer: PriceChartRenderer,
           priceRenderer: PriceRenderer,
+          customLoadingOverlay: Loading,
         }}
       ></AgGridReact>
     </Container>

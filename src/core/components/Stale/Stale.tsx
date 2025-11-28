@@ -1,9 +1,10 @@
-import { Container, Content } from "./Stale.styled"
+import Loading from "../Loading"
+import { Container } from "./Stale.styled"
 
 const Stale = () => {
   return (
     <Container>
-      <Content>Stale...</Content>
+      <Loading title={"Stale..."}></Loading>
     </Container>
   )
 }

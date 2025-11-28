@@ -6,6 +6,7 @@ import {
   RowStyleModule,
   ColumnAutoSizeModule,
   RowApiModule,
+  LocaleModule,
 } from "ag-grid-community"
 
 const AG_GRID_MODULES = [
@@ -15,6 +16,7 @@ const AG_GRID_MODULES = [
   RowStyleModule,
   ColumnAutoSizeModule,
   RowApiModule,
+  LocaleModule,
 ]
 
 export const initializeAgGrid = () => {
