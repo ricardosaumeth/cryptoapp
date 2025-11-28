@@ -10,7 +10,7 @@ export const Container = styled.div`
   }
 
   .selected-row {
-    font-family: FiraSans-Medium;
+    font-weight: 700;
     background-color: ${Palette.BackgroundColorOnHover};
   }
 `

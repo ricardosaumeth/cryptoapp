@@ -43,6 +43,11 @@ export default function createStore() {
     console.log("Connected")
   })
 
+  connection.onClose(() => {
+    store.dispatch(changeConnectionStatus(ConnectionStatus.Disconnected))
+    console.log("Disconnected")
+  })
+
   return store
 }
 

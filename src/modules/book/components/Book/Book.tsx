@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { AgGridReact } from "ag-grid-react"
-import { debounce } from "lodash"
 import type { ColDef, GridApi } from "ag-grid-community"
 import { useThrottle } from "../../../../core/hooks/useThrottle"
 import { priceFormatter, amountFormatter } from "../../../ag-grid/formatter"
@@ -10,8 +9,7 @@ import { type Order } from "../../types/Order"
 import Palette from "../../../../theme/style"
 import { bidAmountRenderer, askAmountRenderer } from "./renderers"
 import Stale from "../../../../core/components/Stale"
-
-const DEBOUNCE_RESIZE_IN_MS = 200
+import { useGridResize } from "../../../../core/hooks/useGridResize"
 
 export interface Props {
   orders: { bid: Order; ask: Order }[]
@@ -58,23 +56,7 @@ const Book = ({ orders, isStale }: Props) => {
     },
   ]
 
-  useEffect(() => {
-    if (gridApi) {
-      gridApi.sizeColumnsToFit()
-    }
-
-    const handleResize = debounce(() => {
-      if (gridApi) {
-        gridApi.sizeColumnsToFit()
-      }
-    }, DEBOUNCE_RESIZE_IN_MS)
-
-    window.addEventListener("resize", handleResize)
-
-    return () => window.removeEventListener("resize", handleResize)
-  }, [gridApi])
-
-  //useGridResize(gridApi);
+  useGridResize(gridApi)
 
   return (
     <Container className="ag-theme-quartz-dark">

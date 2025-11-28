@@ -1,10 +1,12 @@
+import { useState, useEffect } from "react"
 import { AgGridReact } from "ag-grid-react"
-import type { ColDef } from "ag-grid-community"
+import type { ColDef, GridApi, IRowNode } from "ag-grid-community"
 import { priceFormatter, volumeFormatter } from "../../../ag-grid/formatter"
 import { type Ticker } from "../../types/Ticker"
 import PriceChartRenderer from "./PriceChartRenderer"
 import { formatCurrencyPair } from "../../../reference-data/utils"
 import Loading from "../../../../core/components/Loading"
+import { useGridResize } from "../../../../core/hooks/useGridResize"
 import PriceRenderer from "./PriceRenderer"
 import { Container } from "./Market.styled"
 import Palette from "../../../../theme/style"
@@ -21,6 +23,8 @@ export interface DispatchProps {
 export type Props = StateProps & DispatchProps
 
 const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
+  const [gridApi, setGridApi] = useState<GridApi | undefined>()
+
   const columnDefs: ColDef[] = [
     {
       headerName: "Ccy",
@@ -35,7 +39,7 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
       cellStyle: () => ({
         color: Palette.Bid,
         display: "flex",
-        "justify-content": "flex-end",
+        justifiedContent: "flex-end",
       }),
       type: "numericColumn",
       valueFormatter: priceFormatter,
@@ -69,6 +73,26 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
     },
   ]
 
+  useEffect(() => {
+    if (gridApi) {
+      const nodesToRefresh: IRowNode[] = []
+      gridApi.forEachNode(function (node) {
+        const shouldSelect = node.data.currencyPair === selectedCurrencyPair
+        if (node.isSelected()) {
+          nodesToRefresh.push(node)
+        } else if (shouldSelect) {
+          nodesToRefresh.push(node)
+        }
+        node.setSelected(shouldSelect)
+      })
+      gridApi.redrawRows({
+        rowNodes: nodesToRefresh,
+      })
+    }
+  }, [gridApi, selectedCurrencyPair])
+
+  useGridResize(gridApi)
+
   const rowClassRules = {
     "selected-row": (params: any) => params.data.currencyPair === selectedCurrencyPair,
   }
@@ -82,7 +106,7 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
         getRowId={(params) => params.data.currencyPair}
         suppressHorizontalScroll={true}
         onGridReady={(event) => {
-          event.api.sizeColumnsToFit()
+          setGridApi(event.api)
         }}
         onRowClicked={(event) => {
           onClick(event.data.currencyPair)

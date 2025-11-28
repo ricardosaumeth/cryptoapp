@@ -4,11 +4,14 @@ import { Container as TickerContainer } from "../Ticker/Ticker.styled"
 
 export type ScrollDirection = "left" | "right"
 
-export const Container = styled.div`
+export const Container = styled.div<{
+  $itemCount: number
+}>`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-  gap: 10px;
+  grid-template-columns: ${({ $itemCount }) => `repeat(${$itemCount}, minmax(240px, 1fr))`};
+  width: 100%;
 `
+
 export const TickerWrapper = styled.div<{
   $index: number
   $itemCount: number
@@ -22,10 +25,10 @@ export const TickerWrapper = styled.div<{
       const scaleFactor = 1 - (indexThreshold - val) / 10
 
       return `
-          @keyframes slide-in-${index} {
-              100% { transform: scale(${scaleFactor}, ${scaleFactor}) translateX(0%);; }
-          }
-          `
+            @keyframes slide-in-${index} {
+                100% { transform: scale(${scaleFactor}, ${scaleFactor}) translateX(0%);; }
+            }
+            `
     })
 
     return animations.reduce((acc, a) => (acc += a), "")

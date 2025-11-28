@@ -103,8 +103,6 @@ export const Header = styled.div`
 export const TickersPanel = styled.div`
   grid-area: tickers;
   overflow: hidden;
-  width: 1200px;
-  margin: 0 auto;
 `
 
 export const MarketPanel = styled.div`

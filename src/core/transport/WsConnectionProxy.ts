@@ -5,6 +5,7 @@ export class WsConnectionProxy implements ConnectionProxy {
   private onConnectFn?: () => void
   private onReceivedFn?: (data?: any) => void
   private onErrorFn?: (error: any) => void
+  private onCloseFn?: () => void
   private reconnectAttempts = 0
   private maxReconnectAttempts = 5
   private reconnectDelay = 1000
@@ -42,6 +43,8 @@ export class WsConnectionProxy implements ConnectionProxy {
         setTimeout(() => this.connect(), this.reconnectDelay * this.reconnectAttempts)
       }
     }
+
+    this.socket.onclose = () => this.onCloseFn && this.onCloseFn()
   }
 
   stop(): void {
@@ -55,6 +58,8 @@ export class WsConnectionProxy implements ConnectionProxy {
   send(message: any): void {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       this.socket.send(message)
+    } else {
+      console.warn(`Fail to send message as WS is in ${this.socket?.readyState} state`)
     }
   }
 
@@ -68,5 +73,9 @@ export class WsConnectionProxy implements ConnectionProxy {
 
   onError(callback: (error: any) => void): void {
     this.onErrorFn = callback
+  }
+
+  onClose(callback: () => void): void {
+    this.onCloseFn = callback
   }
 }

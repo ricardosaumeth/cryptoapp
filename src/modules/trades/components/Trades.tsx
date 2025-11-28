@@ -1,14 +1,14 @@
-import { useMemo, memo } from "react"
+import { useMemo, memo, useState } from "react"
 import { AgGridReact } from "ag-grid-react"
-import type { ColDef } from "ag-grid-community"
+import type { ColDef, GridApi } from "ag-grid-community"
 import type { Trade } from "../types/Trade"
 import { Container } from "./Trades.styled"
 import Palette from "../../../theme/style"
 import { useThrottle } from "../../../core/hooks/useThrottle"
-// import { useGridResize } from "../../../core/hooks/useGridResize";
+import Stale from "../../../core/components/Stale"
+import { useGridResize } from "../../../core/hooks/useGridResize"
 import Loading from "../../../core/components/Loading"
 import { amountFormatter, priceFormatter, timeFormatter } from "../../ag-grid/formatter"
-import Stale from "../../../core/components/Stale"
 
 export interface Props {
   trades: Trade[]
@@ -17,6 +17,7 @@ export interface Props {
 
 const Trades = memo(({ trades, isStale }: Props) => {
   const throttledTrades = useThrottle<Trade[]>(trades, 500)
+  const [gridApi, setGridApi] = useState<GridApi | undefined>()
   const columnDefs: ColDef[] = useMemo(
     () => [
       {
@@ -54,7 +55,7 @@ const Trades = memo(({ trades, isStale }: Props) => {
     []
   )
 
-  //useGridResize(gridApi);
+  useGridResize(gridApi)
 
   const getRowId = useMemo(() => (params: any) => `${params.data.id}`, [])
 
@@ -70,6 +71,9 @@ const Trades = memo(({ trades, isStale }: Props) => {
         noRowsOverlayComponent={"customLoadingOverlay"}
         components={{
           customLoadingOverlay: Loading,
+        }}
+        onGridReady={(event) => {
+          setGridApi(event.api)
         }}
       ></AgGridReact>
     </Container>
