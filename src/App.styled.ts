@@ -136,4 +136,6 @@ export const Footer = styled.div`
   grid-area: footer;
   font-family: FiraSans-Medium;
   padding: 0 10px;
+  display: flex;
+  justify-content: flex-end;
 `

@@ -25,6 +25,7 @@ import { getTicker } from "./modules/tickers/selectors"
 import { GithubLink } from "./GithubLink"
 import Widget from "./core/components/Widget"
 import Diagnostics from "./core/components/Diagnostics"
+import Latency from "./modules/ping/components/Latency"
 
 const store = createStore()
 
@@ -76,6 +77,7 @@ function AppContent() {
           </Widget>
         </DepthPanel>
         <Footer>
+          <Latency />
           <Diagnostics />
         </Footer>
       </Content>

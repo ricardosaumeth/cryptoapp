@@ -7,6 +7,7 @@ import { tickerSlice } from "../tickers/slice"
 import { candleSlice } from "../candles/slice"
 import { selectionSlice } from "../selection/slice"
 import { bookSlice } from "../book/slice"
+import { pingSlice, startPing } from "../ping/slice"
 import { WsConnectionProxy } from "../../core/transport/WsConnectionProxy"
 import { Connection } from "../../core/transport/Connection"
 import { createWsMiddleware } from "../../core/transport/wsMiddleware"
@@ -26,6 +27,7 @@ export default function createStore() {
       candles: candleSlice.reducer,
       selection: selectionSlice.reducer,
       book: bookSlice.reducer,
+      ping: pingSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
@@ -37,6 +39,7 @@ export default function createStore() {
 
   connection.onConnect(() => {
     store.dispatch(changeConnectionStatus(ConnectionStatus.Connected))
+    store.dispatch(startPing())
     console.log("Connected")
   })
 

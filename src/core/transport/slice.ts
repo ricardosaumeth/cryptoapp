@@ -15,7 +15,7 @@ export type requestSubscribeToChannelAck = {
 
 export interface SubscriptionState {
   [channelId: number]: {
-    isStale?: boolean
+    isStale: boolean
     channel: string
     request: requestSubscribeToChannelAck
   }
@@ -115,7 +115,7 @@ export const subscriptionsSlice = createSlice({
       }>
     ) => {
       const { channelId, channel, request } = action.payload
-      state[channelId] = { channel, request }
+      state[channelId] = { channel, request, isStale: true }
     },
     unSubscribeToChannelAck: (
       state,
@@ -125,6 +125,17 @@ export const subscriptionsSlice = createSlice({
     ) => {
       const { channelId } = action.payload
       delete state[channelId]
+    },
+    updateStaleSubscription: (
+      state,
+      action: PayloadAction<{
+        channelId: number
+      }>
+    ) => {
+      const { channelId } = action.payload
+      if (state[channelId]) {
+        state[channelId]!.isStale = false
+      }
     },
   },
   extraReducers: (builder) => {
@@ -147,6 +158,10 @@ export const subscriptionsSlice = createSlice({
   },
 })
 
-export const { changeConnectionStatus, subscribeToChannelAck, unSubscribeToChannelAck } =
-  subscriptionsSlice.actions
+export const {
+  changeConnectionStatus,
+  subscribeToChannelAck,
+  unSubscribeToChannelAck,
+  updateStaleSubscription,
+} = subscriptionsSlice.actions
 export default subscriptionsSlice.reducer

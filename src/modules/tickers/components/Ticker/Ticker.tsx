@@ -27,7 +27,7 @@ const Ticker = ({
     <Container onClick={onClick} $isActive={!!isActive}>
       <CurrencyPair>{formatCurrencyPair(currencyPair)}</CurrencyPair>
       <Price>
-        <UpdateHighlight value={formatPrice(lastPrice)} />
+        <UpdateHighlight value={formatPrice(lastPrice)} effect="zoom" />
       </Price>
       <RelativeChange $isPositive={isPositiveChange}>
         <TrendIndicator value={dailyChangeRelative} />

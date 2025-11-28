@@ -7,12 +7,14 @@ import { Container } from "./Book.styled"
 import { type Order } from "../../types/Order"
 import Palette from "../../../../theme/style"
 import { bidAmountRenderer, askAmountRenderer } from "./renderers"
+import Stale from "../../../../core/components/Stale"
 
 export interface Props {
   orders: { bid: Order; ask: Order }[]
+  isStale?: boolean
 }
 
-const Book = ({ orders }: Props) => {
+const Book = ({ orders, isStale }: Props) => {
   //const [gridApi, setGridApi] = useState<GridApi | undefined>()
 
   const throttledOrders = useThrottle<{ bid: Order; ask: Order }[]>(orders, 100)
@@ -56,7 +58,7 @@ const Book = ({ orders }: Props) => {
 
   return (
     <Container className="ag-theme-quartz-dark">
-      {/* {isStale && <Stale />} */}
+      {isStale && <Stale />}
       <AgGridReact
         columnDefs={columnDefs}
         rowData={throttledOrders}

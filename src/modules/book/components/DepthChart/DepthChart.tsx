@@ -5,6 +5,7 @@ import { useThrottle } from "../../../../core/hooks/useThrottle"
 import { Container } from "./DepthChart.styled"
 import Palette from "../../../../theme/style"
 import "../../../../theme/Highchart"
+import Stale from "../../../../core/components/Stale"
 
 interface Depth {
   bids: { price: number; depth: number }[]
@@ -13,9 +14,10 @@ interface Depth {
 
 export interface Props {
   depth: Depth
+  isStale: boolean
 }
 
-const DepthChart = ({ depth }: Props) => {
+const DepthChart = ({ depth, isStale }: Props) => {
   const throttledDepth = useThrottle<Depth>(depth, 500)
   const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
     chart: {
@@ -107,6 +109,7 @@ const DepthChart = ({ depth }: Props) => {
 
   return (
     <Container>
+      {isStale && <Stale />}
       <HighchartsReact highcharts={Highcharts} options={chartOptions} constructorType={"chart"} />
     </Container>
   )

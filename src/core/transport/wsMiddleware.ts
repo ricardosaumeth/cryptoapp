@@ -5,6 +5,7 @@ import { updateTicker } from "../../modules/tickers/slice"
 import {
   subscribeToChannelAck,
   unSubscribeToChannelAck,
+  updateStaleSubscription,
   type requestSubscribeToChannelAck,
 } from "./slice"
 import { candlesSnapshotReducer, candlesUpdateReducer } from "../../modules/candles/slice"
@@ -12,6 +13,7 @@ import { bookSnapshotReducer, bookUpdateReducer } from "../../modules/book/slice
 import { Channel } from "./types/Channels"
 import type { RawTrade, Trade } from "../../modules/trades/types/Trade"
 import { getLookupKey } from "../../modules/candles/utils"
+import { handlePong } from "../../modules/ping/slice"
 
 const handleSubscriptionAck = (parsedData: any, store: any) => {
   const { chanId: channelId, channel, event, symbol, key, prec } = parsedData
@@ -124,6 +126,8 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
       } else if (parsedData.event === "unsubscribed") {
         handleUnSubscriptionAck(parsedData, store)
         return
+      } else if (parsedData.event === "pong") {
+        store.dispatch(handlePong())
       }
 
       if (Array.isArray(parsedData) && parsedData[1] === "hb") {
@@ -133,6 +137,7 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
       if (Array.isArray(parsedData)) {
         const [channelId] = parsedData
         const subscription = store.getState().subscriptions[channelId]
+        store.dispatch(updateStaleSubscription({ channelId }))
 
         switch (subscription?.channel) {
           case Channel.TRADES:

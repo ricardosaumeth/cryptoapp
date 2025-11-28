@@ -8,12 +8,14 @@ import { useThrottle } from "../../../core/hooks/useThrottle"
 // import { useGridResize } from "../../../core/hooks/useGridResize";
 // import Loading from "../../../core/components/Loading";
 import { amountFormatter, priceFormatter, timeFormatter } from "../../ag-grid/formatter"
+import Stale from "../../../core/components/Stale"
 
 export interface Props {
   trades: Trade[]
+  isStale: boolean
 }
 
-const Trades = memo(({ trades }: Props) => {
+const Trades = memo(({ trades, isStale }: Props) => {
   const throttledTrades = useThrottle<Trade[]>(trades, 500)
   const columnDefs: ColDef[] = useMemo(
     () => [
@@ -58,6 +60,7 @@ const Trades = memo(({ trades }: Props) => {
 
   return (
     <Container className="ag-theme-quartz-dark">
+      {isStale && <Stale />}
       {/* <AgGridReact
         columnDefs={columnDefs}
         rowData={throttledTrades}

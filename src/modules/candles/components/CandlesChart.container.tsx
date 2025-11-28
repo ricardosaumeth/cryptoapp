@@ -6,6 +6,8 @@ import { getCandles } from "../selectors"
 import type { Candle } from "../types/Candle"
 import type { RootState } from "../../redux/store"
 import { DEFAULT_TIMEFRAME } from "../../app/slice"
+import { getIsSubscriptionStale, getSubscriptionId } from "../../../core/transport/selectors"
+import { Channel } from "../../../core/transport/types/Channels"
 
 const CandlesChartContainer = () => {
   const selectedCurrencyPair = useSelector(getSelectedCurrencyPair)
@@ -19,8 +21,12 @@ const CandlesChartContainer = () => {
   )
 
   const candles = useSelector(selectCandles)
+  const subscriptionId = useSelector((state: RootState) => getSubscriptionId(state)(Channel.BOOK))
+  const isStale = useSelector((state: RootState) =>
+    subscriptionId ? getIsSubscriptionStale(state)(subscriptionId) : false
+  )
 
-  return <CandlesChart candles={candles} currencyPair={selectedCurrencyPair} />
+  return <CandlesChart candles={candles} currencyPair={selectedCurrencyPair} isStale={isStale} />
 }
 
 export default CandlesChartContainer
