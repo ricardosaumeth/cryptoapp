@@ -249,7 +249,10 @@ export const tradesSlice = createSlice({
   name: "trades",
   initialState,
   reducers: {
-    tradesSnapshotReducer: (state, action: PayloadAction<{ currencyPair: string; trades: Trade[] }>) => {
+    tradesSnapshotReducer: (
+      state,
+      action: PayloadAction<{ currencyPair: string; trades: Trade[] }>
+    ) => {
       const { currencyPair, trades } = action.payload
       state[currencyPair] = trades
     },

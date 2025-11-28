@@ -137,17 +137,17 @@ The app uses Redux Thunk for async Bitfinex API operations:
 
 ```typescript
 // Bitfinex WebSocket API v2
-wss://api-pub.bitfinex.com/ws/2
+//api-pub.bitfinex.com/ws/2
 
 // Redux Thunk async subscription example
-export const tradeSubscribeToSymbol = createAsyncThunk(
-  'SUBSCRIBE_TO_TRADES',
+wss: export const tradeSubscribeToSymbol = createAsyncThunk(
+  "SUBSCRIBE_TO_TRADES",
   async ({ symbol }: SubscribePayload, { extra }) => {
     const { connection } = extra as { connection: Connection }
     const msg = {
-      event: 'subscribe',
-      channel: 'trades',
-      symbol: `t${symbol}`
+      event: "subscribe",
+      channel: "trades",
+      symbol: `t${symbol}`,
     }
     connection.send(JSON.stringify(msg))
     return msg

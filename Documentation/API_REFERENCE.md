@@ -112,8 +112,8 @@ interface TickerData {
 // Update ticker data
 updateTicker(payload: { symbol: string; data: number[] })
 
-// Bitfinex ticker data format: [CHANNEL_ID, [BID, BID_SIZE, ASK, ASK_SIZE, 
-//                               DAILY_CHANGE, DAILY_CHANGE_RELATIVE, LAST_PRICE, 
+// Bitfinex ticker data format: [CHANNEL_ID, [BID, BID_SIZE, ASK, ASK_SIZE,
+//                               DAILY_CHANGE, DAILY_CHANGE_RELATIVE, LAST_PRICE,
 //                               VOLUME, HIGH, LOW]]
 ```
 

@@ -56,13 +56,13 @@ Here's where it gets interesting. Most tutorials use fake data, but we're using 
 ```typescript
 // Redux Thunk for Bitfinex API subscriptions
 export const tradeSubscribeToSymbol = createAsyncThunk(
-  'SUBSCRIBE_TO_TRADES',
+  "SUBSCRIBE_TO_TRADES",
   async ({ symbol }: SubscribePayload, { extra }) => {
     const { connection } = extra as { connection: Connection }
     const msg = {
-      event: 'subscribe',
-      channel: 'trades',
-      symbol: `t${symbol}`
+      event: "subscribe",
+      channel: "trades",
+      symbol: `t${symbol}`,
     }
     connection.send(JSON.stringify(msg))
     return msg
@@ -86,21 +86,24 @@ Financial apps have complex async state requirements. We need to:
 ```typescript
 // Bootstrap app with staggered subscriptions
 export const bootstrapApp = createAsyncThunk(
-  'app/bootstrap',
+  "app/bootstrap",
   async (_, { dispatch, getState, extra }) => {
     const { connection } = extra as { connection: Connection }
-    
+
     connection.connect()
     await waitForConnection(getState as () => RootState)
-    
+
     const currencyPairs = await dispatch(refDataLoad()).unwrap()
-    
+
     // Staggered subscriptions to prevent server overload
     currencyPairs.forEach((currencyPair: string, index: number) => {
-      setTimeout(() => {
-        dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
-        dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: '1m' }))
-      }, (index + 1) * 2000)
+      setTimeout(
+        () => {
+          dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
+          dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: "1m" }))
+        },
+        (index + 1) * 2000
+      )
     })
   }
 )
@@ -179,10 +182,13 @@ We use **IBM Plex Sans** - the same font family used by major financial institut
 ```typescript
 // Staggered async subscriptions to prevent server overload
 currencyPairs.forEach((currencyPair: string, index: number) => {
-  setTimeout(() => {
-    dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
-    dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: '1m' }))
-  }, (index + 1) * SUBSCRIPTION_TIMEOUT_IN_MS)
+  setTimeout(
+    () => {
+      dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
+      dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: "1m" }))
+    },
+    (index + 1) * SUBSCRIPTION_TIMEOUT_IN_MS
+  )
 })
 ```
 

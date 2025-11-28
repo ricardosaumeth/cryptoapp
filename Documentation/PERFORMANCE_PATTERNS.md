@@ -72,21 +72,24 @@ const trades = useSelector(getTrades(symbol))
 
 ```typescript
 export const bootstrapApp = createAsyncThunk(
-  'app/bootstrap',
+  "app/bootstrap",
   async (_, { dispatch, getState, extra }) => {
     const { connection } = extra as { connection: Connection }
-    
+
     connection.connect()
     await waitForConnection(getState as () => RootState)
-    
+
     const currencyPairs = await dispatch(refDataLoad()).unwrap()
-    
+
     // Staggered subscriptions to prevent server overload
     currencyPairs.forEach((currencyPair: string, index: number) => {
-      setTimeout(() => {
-        dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
-        dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: '1m' }))
-      }, (index + 1) * SUBSCRIPTION_TIMEOUT_IN_MS)
+      setTimeout(
+        () => {
+          dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
+          dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: "1m" }))
+        },
+        (index + 1) * SUBSCRIPTION_TIMEOUT_IN_MS
+      )
     })
   }
 )
