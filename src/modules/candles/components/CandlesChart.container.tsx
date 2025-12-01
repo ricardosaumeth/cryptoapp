@@ -21,7 +21,7 @@ const CandlesChartContainer = () => {
   )
 
   const candles = useSelector(selectCandles)
-  const subscriptionId = useSelector((state: RootState) => getSubscriptionId(state)(Channel.BOOK))
+  const subscriptionId = useSelector((state: RootState) => getSubscriptionId(state)(Channel.Candle))
   const isStale = useSelector((state: RootState) =>
     subscriptionId ? getIsSubscriptionStale(state)(subscriptionId) : false
   )
