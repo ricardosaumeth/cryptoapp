@@ -1,7 +1,7 @@
-import * as Highcharts from "highcharts/highstock"
+import Highcharts from "highcharts/highstock"
 import Palette from "./style"
 
-const theme = ((Highcharts as any).theme = {
+const theme = {
   colors: [
     "#2b908f",
     "#90ee7e",
@@ -228,6 +228,6 @@ const theme = ((Highcharts as any).theme = {
     trackBackgroundColor: "#404043",
     trackBorderColor: "#404043",
   },
-})
+}
 
 Highcharts.setOptions(theme as unknown as Highcharts.Options)
