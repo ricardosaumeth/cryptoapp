@@ -91,9 +91,9 @@ export const getVisibleCurrencyPairTickers = createSelector(
 
     // Pick a few currency pairs on each side of the selected one
     if (selectedCurrencyPairIndex >= 0) {
-      currencyPairs = range(selectedCurrencyPairIndex - 2, selectedCurrencyPairIndex + 3).map(
-        (index) => getValueAt(allCurrencyPairs)(index)
-      )
+      currencyPairs = range(selectedCurrencyPairIndex - 2, selectedCurrencyPairIndex + 3)
+        .map((index) => getValueAt(allCurrencyPairs)(index))
+        .filter((pair): pair is string => pair !== undefined)
     }
 
     return {
