@@ -4,30 +4,18 @@ import { Channel } from "./types/Channels"
 
 const subscriptionsSelector = (state: RootState) => state.subscriptions
 
-export const getSubscriptions = createSelector(
-  subscriptionsSelector,
-  (subscriptions) => subscriptions
-)
-
 export const getSubscriptionId = createSelector(
-  getSubscriptions,
-  (subscriptions) => (channel: Channel) => {
-    if (Object.keys(subscriptions).length === 1) {
-      return 0.0
-    }
-
+  [subscriptionsSelector, (_: RootState, channel: Channel) => channel],
+  (subscriptions, channel) => {
     const channelIds = Object.keys(subscriptions)
-      .filter((key) => !isNaN(Number(key))) // avoid NaN from wsConnectionStatus
+      .filter((key) => !isNaN(Number(key)))
       .map(Number)
 
-    return channelIds.find((channelId) => {
-      const sub = subscriptions[channelId]
-      return sub?.channel === channel
-    })
+    return channelIds.find((id) => subscriptions[id]?.channel === channel)
   }
 )
 
 export const getIsSubscriptionStale = createSelector(
-  getSubscriptions,
-  (subscriptions) => (subscriptionId: number) => Boolean(subscriptions[subscriptionId]?.isStale)
+  [subscriptionsSelector, (_: RootState, subscriptionId: number) => subscriptionId],
+  (subscriptions, subscriptionId) => Boolean(subscriptions[subscriptionId]?.isStale)
 )

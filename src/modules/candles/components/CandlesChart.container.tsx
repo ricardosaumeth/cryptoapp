@@ -21,11 +21,9 @@ const CandlesChartContainer = () => {
   )
 
   const candles = useSelector(selectCandles)
-  const subscriptionId = useSelector((state: RootState) =>
-    getSubscriptionId(state)(Channel.CANDLES)
-  )
+  const subscriptionId = useSelector((state: RootState) => getSubscriptionId(state, Channel.BOOK))
   const isStale = useSelector((state: RootState) =>
-    subscriptionId ? getIsSubscriptionStale(state)(subscriptionId) : false
+    subscriptionId ? getIsSubscriptionStale(state, subscriptionId) : false
   )
 
   return <CandlesChart candles={candles} currencyPair={selectedCurrencyPair} isStale={isStale} />

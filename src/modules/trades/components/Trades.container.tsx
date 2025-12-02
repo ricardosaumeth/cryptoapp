@@ -18,9 +18,9 @@ const TradesContainer = () => {
   )
 
   const trades = useSelector(selectTradesMemo)
-  const subscriptionId = useSelector((state: RootState) => getSubscriptionId(state)(Channel.BOOK))
+  const subscriptionId = useSelector((state: RootState) => getSubscriptionId(state, Channel.BOOK))
   const isStale = useSelector((state: RootState) =>
-    subscriptionId ? getIsSubscriptionStale(state)(subscriptionId) : false
+    subscriptionId ? getIsSubscriptionStale(state, subscriptionId) : false
   )
 
   return <Trades trades={trades} isStale={isStale} />

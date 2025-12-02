@@ -20,9 +20,9 @@ const BookContainer = () => {
   )
 
   const orders = useSelector(selectOrders)
-  const subscriptionId = useSelector((state: RootState) => getSubscriptionId(state)(Channel.BOOK))
+  const subscriptionId = useSelector((state: RootState) => getSubscriptionId(state, Channel.BOOK))
   const isStale = useSelector((state: RootState) =>
-    subscriptionId ? getIsSubscriptionStale(state)(subscriptionId) : false
+    subscriptionId ? getIsSubscriptionStale(state, subscriptionId) : false
   )
 
   return <Book orders={orders} isStale={isStale} />
