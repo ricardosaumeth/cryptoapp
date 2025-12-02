@@ -1,5 +1,5 @@
-import { candlesSnapshotReducer, candlesUpdateReducer } from '../../../modules/candles/slice'
-import { getLookupKey } from '../../../modules/candles/utils'
+import { candlesSnapshotReducer, candlesUpdateReducer } from "../../../modules/candles/slice"
+import { getLookupKey } from "../../../modules/candles/utils"
 
 export const handleCandlesData = (parsedData: any[], subscription: any, dispatch: any) => {
   const { key } = subscription.request

@@ -1,5 +1,5 @@
-import { tradesSnapshotReducer, tradesUpdateReducer } from '../../../modules/trades/slice'
-import type { RawTrade, Trade } from '../../../modules/trades/types/Trade'
+import { tradesSnapshotReducer, tradesUpdateReducer } from "../../../modules/trades/slice"
+import type { RawTrade, Trade } from "../../../modules/trades/types/Trade"
 
 export const handleTradesData = (parsedData: any[], subscription: any, dispatch: any) => {
   const currencyPair = subscription.request.symbol.slice(1)

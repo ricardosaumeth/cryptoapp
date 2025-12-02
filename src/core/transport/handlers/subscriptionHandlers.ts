@@ -1,5 +1,9 @@
-import { subscribeToChannelAck, unSubscribeToChannelAck, type requestSubscribeToChannelAck } from '../slice'
-import { Channel } from '../types/Channels'
+import {
+  subscribeToChannelAck,
+  unSubscribeToChannelAck,
+  type requestSubscribeToChannelAck,
+} from "../slice"
+import { Channel } from "../types/Channels"
 
 export const handleSubscriptionAck = (parsedData: any, store: any) => {
   const { chanId: channelId, channel, event, symbol, key, prec } = parsedData

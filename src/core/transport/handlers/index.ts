@@ -1,5 +1,5 @@
-export { handleSubscriptionAck, handleUnSubscriptionAck } from './subscriptionHandlers'
-export { handleTradesData } from './tradesHandler'
-export { handleTickerData } from './tickerHandler'
-export { handleCandlesData } from './candlesHandler'
-export { handleBookData } from './bookHandler'
+export { handleSubscriptionAck, handleUnSubscriptionAck } from "./subscriptionHandlers"
+export { handleTradesData } from "./tradesHandler"
+export { handleTickerData } from "./tickerHandler"
+export { handleCandlesData } from "./candlesHandler"
+export { handleBookData } from "./bookHandler"
