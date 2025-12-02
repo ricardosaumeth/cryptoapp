@@ -18,7 +18,7 @@ import {
   DepthPanel,
   Footer,
 } from "./App.styled"
-import { bootstrapApp, updateTitle } from "./modules/app/slice"
+import { bootstrapApp } from "./modules/app/slice"
 import Book from "./modules/book/components/Book"
 import { getSelectedCurrencyPair } from "./modules/selection/selectors"
 import { getTicker } from "./modules/tickers/selectors"
@@ -27,6 +27,7 @@ import Widget from "./core/components/Widget"
 import Diagnostics from "./core/components/Diagnostics"
 import Latency from "./modules/ping/components/Latency"
 import AnimatedContent from "./modules/common/AnimatedContent"
+import { parseCurrencyPair } from "./modules/reference-data/utils"
 
 const store = createStore()
 
@@ -34,17 +35,18 @@ function AppContent() {
   const link = "https://github.com/ricardosaumeth/cryptoapp"
   const dispatch = useDispatch<AppDispatch>()
   const currencyPair = useSelector(getSelectedCurrencyPair)
-  const ticker = useSelector(getTicker)(currencyPair)
+  const tickerLastPrice = useSelector(getTicker)(currencyPair)?.lastPrice
 
   useEffect(() => {
     dispatch(bootstrapApp())
   }, [dispatch])
 
   useEffect(() => {
-    if (currencyPair && ticker) {
-      dispatch(updateTitle({ currencyPair, lastPrice: ticker.lastPrice! }))
+    if (currencyPair && tickerLastPrice) {
+      const [, counter] = parseCurrencyPair(currencyPair)
+      document.title = `(${tickerLastPrice?.toFixed(2)} ${counter}) Crypto App`
     }
-  }, [currencyPair, ticker])
+  }, [currencyPair, tickerLastPrice])
 
   return (
     <Container>

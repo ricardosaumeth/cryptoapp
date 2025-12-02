@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
+import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import {
   tradeSubscribeToSymbol,
   bookSubscribeToSymbol,
@@ -20,8 +20,6 @@ export const selectCurrencyPair = createAsyncThunk(
   "selection/selectCurrencyPair",
   async ({ currencyPair }: { currencyPair: string }, { dispatch, getState, rejectWithValue }) => {
     try {
-      dispatch(selectionSlice.actions.setCurrencyPair(currencyPair))
-
       const state = getState() as RootState
       const previousPair = state.selection.currencyPair
 
@@ -43,6 +41,9 @@ export const selectCurrencyPair = createAsyncThunk(
         // individual failures, ensuring cleanup always happens.
         await Promise.allSettled(unsubPromises)
       }
+
+      dispatch(selectionSlice.actions.setCurrencyPair({ currencyPair }))
+
       // The original code returned immediately while setTimeout was still pending,
       // creating a race condition. The new version properly waits for the timeout
       // to complete before resolving.
@@ -63,8 +64,9 @@ export const selectionSlice = createSlice({
   name: "selection",
   initialState,
   reducers: {
-    setCurrencyPair: (state, action) => {
-      state.currencyPair = action.payload
+    setCurrencyPair: (state, action: PayloadAction<{ currencyPair: string }>) => {
+      const { currencyPair } = action.payload
+      state.currencyPair = currencyPair
     },
   },
 })

@@ -1,11 +1,10 @@
-import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit"
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { refDataLoad } from "../reference-data/slice"
 import { candlesSubscribeToSymbol, tickerSubscribeToSymbol } from "../../core/transport/slice"
 import type { Connection } from "../../core/transport/Connection"
 import type { RootState } from "../redux/store"
 import { ConnectionStatus } from "../../core/transport/types/ConnectionStatus"
 import { selectCurrencyPair } from "../selection/slice"
-import { parseCurrencyPair } from "../reference-data/utils"
 
 export const DEFAULT_TIMEFRAME = "1m"
 export const SUBSCRIPTION_TIMEOUT_IN_MS = 2000
@@ -54,13 +53,7 @@ export const bootstrapApp = createAsyncThunk(
 export const appBootstrapSlice = createSlice({
   name: "app/bootstrap",
   initialState: {},
-  reducers: {
-    updateTitle: (_state, action: PayloadAction<{ currencyPair: string; lastPrice: number }>) => {
-      const { currencyPair, lastPrice } = action.payload
-      const [, counter] = parseCurrencyPair(currencyPair)
-      document.title = `(${lastPrice?.toFixed(2)} ${counter}) Crypto App`
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder.addCase(bootstrapApp.fulfilled, (_state, _action) => {
       console.log(`Bootstrap App successfully`)
@@ -68,5 +61,5 @@ export const appBootstrapSlice = createSlice({
   },
 })
 
-export const { updateTitle } = appBootstrapSlice.actions
+export const {} = appBootstrapSlice.actions
 export default appBootstrapSlice.reducer
