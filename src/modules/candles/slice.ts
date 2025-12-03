@@ -1,7 +1,8 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { Candle, CandleTuple } from "./types/Candle"
+import { config } from "../../config/env"
 
-const MAX_CANDLES = 1000
+const MAX_CANDLES = config.MAX_CANDLES
 
 type SymbolState = Candle[]
 
@@ -64,7 +65,10 @@ export const candleSlice = createSlice({
         state[lookupKey] = []
       }
 
-      state[lookupKey] = state[lookupKey]!.slice(0, MAX_CANDLES) // restrict number of candles so we don't eventully fill up the memory
+      // Keep only recent candles to prevent memory issues
+      if (state[lookupKey]!.length > MAX_CANDLES) {
+        state[lookupKey] = state[lookupKey]!.slice(-MAX_CANDLES)
+      }
     },
   },
 })

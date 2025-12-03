@@ -1,7 +1,8 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { Trade } from "./types/Trade"
+import { config } from "../../config/env"
 
-export const MAX_TRADES = 100
+export const MAX_TRADES = config.MAX_TRADES
 
 interface TradesState {
   [currencyPair: string]: Trade[]
@@ -33,7 +34,10 @@ export const tradesSlice = createSlice({
         trades.sort((a, b) => a.timestamp - b.timestamp)
       }
 
-      trades.slice(0, MAX_TRADES) // only keep the top x trades, so we don't eventually fill up the memory
+      // Keep only recent trades to prevent memory issues
+      if (trades.length > MAX_TRADES) {
+        trades.splice(0, trades.length - MAX_TRADES)
+      }
     },
   },
 })

@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { Provider, useDispatch, useSelector } from "react-redux"
-import createStore, { type AppDispatch } from "./modules/redux/store"
+import { getStore, type AppDispatch } from "./modules/redux/store"
 import Trades from "./modules/trades/components"
 import Tickers from "./modules/tickers/components/Tickers"
 import Market from "./modules/tickers/components/Market"
@@ -29,7 +29,7 @@ import Latency from "./modules/ping/components/Latency"
 import AnimatedContent from "./modules/common/AnimatedContent"
 import { parseCurrencyPair } from "./modules/reference-data/utils"
 
-const store = createStore()
+const store = getStore()
 
 function AppContent() {
   const link = "https://github.com/ricardosaumeth/cryptoapp"

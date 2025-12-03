@@ -12,11 +12,14 @@ import { WsConnectionProxy } from "../../core/transport/WsConnectionProxy"
 import { Connection } from "../../core/transport/Connection"
 import { createWsMiddleware } from "../../core/transport/wsMiddleware"
 import { ConnectionStatus } from "../../core/transport/types/ConnectionStatus"
+import { config } from "../../config/env"
 
-const connectionProxy = new WsConnectionProxy("wss://api-pub.bitfinex.com/ws/2")
+const connectionProxy = new WsConnectionProxy(config.BITFINEX_WS_URL)
 export const connection = new Connection(connectionProxy)
 
-export default function createStore() {
+let storeInstance: ReturnType<typeof createStore> | null = null
+
+function createStore() {
   const store = configureStore({
     reducer: {
       app: appBootstrapSlice.reducer,
@@ -50,6 +53,15 @@ export default function createStore() {
 
   return store
 }
+
+export const getStore = () => {
+  if (!storeInstance) {
+    storeInstance = createStore()
+  }
+  return storeInstance
+}
+
+export default getStore
 
 export type RootState = ReturnType<ReturnType<typeof createStore>["getState"]>
 export type AppDispatch = ReturnType<typeof createStore>["dispatch"]
