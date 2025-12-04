@@ -9,7 +9,8 @@ _Complete reference for all APIs, components, and interfaces in CryptoApp_
 - [Redux Store API](#redux-store-api)
 - [Component API](#component-api)
 - [WebSocket API](#websocket-api)
-- [Utility Functions](#utility-functions)
+- [Configuration API](#configuration-api)
+- [Testing API](#testing-api)
 - [Type Definitions](#type-definitions)
 
 ---
@@ -30,6 +31,31 @@ interface RootState {
   book: BookState
   ping: PingState
 }
+```
+
+### Store Configuration
+
+```typescript
+// src/modules/redux/store.ts
+const store = configureStore({
+  reducer: {
+    app: appBootstrapSlice.reducer,
+    trades: tradesSlice.reducer,
+    subscriptions: subscriptionsSlice.reducer,
+    refData: refDataSlice.reducer,
+    ticker: tickerSlice.reducer,
+    candles: candleSlice.reducer,
+    selection: selectionSlice.reducer,
+    book: bookSlice.reducer,
+    ping: pingSlice.reducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      thunk: {
+        extraArgument: { connection }, // Dependency injection
+      },
+    }).concat(createWsMiddleware(connection)),
+})
 ```
 
 ### Trades Module
@@ -57,6 +83,21 @@ tradesSnapshotReducer(payload: { currencyPair: string; trades: Trade[] })
 
 // Update single trade (real-time update)
 tradesUpdateReducer(payload: { currencyPair: string; trade: Trade })
+
+// Memory management with configurable limits
+// Automatically limits trades to MAX_TRADES (default: 1000)
+```
+
+#### Memory Management
+
+```typescript
+// Configurable via environment variables
+MAX_TRADES = Number(import.meta.env["VITE_MAX_TRADES"]) || 1000
+
+// Automatic cleanup in reducers
+if (trades.length > MAX_TRADES) {
+  trades.splice(0, trades.length - MAX_TRADES)
+}
 ```
 
 #### Selectors
@@ -218,8 +259,8 @@ subscribeToChannelAck(payload: {
 #### Async Thunks
 
 ```typescript
-// Subscribe to trades (Redux Thunk)
-tradeSubscribeToSymbol(payload: { symbol: string }): AsyncThunk
+// Bootstrap application with staggered subscriptions
+bootstrapApp(): AsyncThunk
 
 // Subscribe to ticker (Redux Thunk)
 tickerSubscribeToSymbol(payload: { symbol: string }): AsyncThunk
@@ -229,6 +270,37 @@ candlesSubscribeToSymbol(payload: { symbol: string; timeframe?: string }): Async
 
 // Subscribe to order book (Redux Thunk)
 bookSubscribeToSymbol(payload: { symbol: string; prec?: string }): AsyncThunk
+
+// Load reference data
+refDataLoad(): AsyncThunk
+```
+
+### Bootstrap Flow
+
+```typescript
+// Staggered subscription management
+export const bootstrapApp = createAsyncThunk(
+  "app/bootstrap",
+  async (_, { dispatch, getState, extra }) => {
+    const { connection } = extra as { connection: Connection }
+
+    connection.connect()
+    await waitForConnection(getState as () => RootState)
+
+    const currencyPairs = await dispatch(refDataLoad()).unwrap()
+
+    // Staggered subscriptions to prevent server overload
+    currencyPairs.forEach((currencyPair: string, index: number) => {
+      setTimeout(
+        () => {
+          dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
+          dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: "1m" }))
+        },
+        (index + 1) * 2000 // 2-second intervals
+      )
+    })
+  }
+)
 ```
 
 ---
@@ -474,6 +546,75 @@ class Connection {
 
 ---
 
+## ⚙️ Configuration API
+
+### Environment Configuration
+
+```typescript
+// src/config/env.ts
+export const config = {
+  BITFINEX_WS_URL: import.meta.env["VITE_BITFINEX_WS_URL"] || "wss://api-pub.bitfinex.com/ws/2",
+  IS_PRODUCTION: import.meta.env.PROD,
+  MAX_TRADES: Number(import.meta.env["VITE_MAX_TRADES"]) || 1000,
+  MAX_CANDLES: Number(import.meta.env["VITE_MAX_CANDLES"]) || 5000,
+}
+```
+
+### Environment Variables
+
+```bash
+# .env configuration
+VITE_BITFINEX_WS_URL=wss://api-pub.bitfinex.com/ws/2
+VITE_MAX_TRADES=1000
+VITE_MAX_CANDLES=5000
+VITE_LOG_LEVEL=info
+```
+
+---
+
+## 🧪 Testing API
+
+### Vitest Configuration
+
+```typescript
+// vitest.config.ts
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: "jsdom",
+    globals: true,
+  },
+})
+```
+
+### Test Scripts
+
+```json
+{
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
+  }
+}
+```
+
+### Testing Utilities
+
+```typescript
+// Example test structure
+import { describe, it, expect } from "vitest"
+import { render, screen } from "@testing-library/react"
+
+describe("Component Tests", () => {
+  it("should render correctly", () => {
+    // Test implementation
+  })
+})
+```
+
+---
+
 ## 🛠️ Utility Functions
 
 ### Date/Time Utilities
@@ -639,77 +780,111 @@ interface AppError {
 
 ## 🔍 Usage Examples
 
-### Complete Component Integration
+### Complete Application Bootstrap
 
 ```typescript
-import React from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { getTrades, getCandles, getTicker } from './selectors'
-import { tradeSubscribeToSymbol } from './actions'
-import { CandlesChart, Ticker, TradesPanel } from './components'
+// Main App.tsx
+import { useEffect } from 'react'
+import { Provider } from 'react-redux'
+import { useAppDispatch } from './modules/redux/hooks'
+import { bootstrapApp } from './modules/app/slice'
+import { getStore } from './modules/redux/store'
 
-const TradingDashboard: React.FC = () => {
-  const dispatch = useDispatch()
-  const currencyPair = 'BTCUSD'
+const store = getStore()
 
-  // Get data from store
-  const trades = useSelector((state: RootState) => getTrades(state, currencyPair))
-  const candles = useSelector((state: RootState) => getCandles(state, currencyPair))
-  const ticker = useSelector((state: RootState) => getTicker(state, `t${currencyPair}`))
+const AppContent = () => {
+  const dispatch = useAppDispatch()
 
-  // Subscribe to data on mount
-  React.useEffect(() => {
-    dispatch(tradeSubscribeToSymbol({ symbol: `t${currencyPair}` }))
-  }, [dispatch, currencyPair])
+  useEffect(() => {
+    dispatch(bootstrapApp()) // Handles all subscriptions
+  }, [dispatch])
 
   return (
-    <div className="trading-dashboard">
-      <Ticker
-        currencyPair={currencyPair}
-        lastPrice={ticker?.lastPrice}
-        dailyChange={ticker?.dailyChange}
-        dailyChangeRelative={ticker?.dailyChangeRelative}
-      />
-
-      <CandlesChart
-        candles={candles}
-        height={400}
-        theme="dark"
-      />
-
-      <TradesPanel
-        trades={trades}
-        maxItems={50}
-        showHeader={true}
-      />
-    </div>
+    <Container>
+      <Header>🚀 CryptoApp</Header>
+      <TickersContainer />
+      <TradesContainer />
+      <CandlesContainer />
+      <BookContainer />
+    </Container>
   )
+}
+
+const App = () => (
+  <Provider store={store}>
+    <AppContent />
+  </Provider>
+)
+```
+
+### WebSocket Handler Integration
+
+```typescript
+// Handler-based message processing
+export const createWsMiddleware = (connection: Connection): Middleware => {
+  return (store) => (next) => (action) => {
+    connection.onReceive((data) => {
+      const parsedData = JSON.parse(data)
+
+      if (parsedData.event === "subscribed") {
+        handleSubscriptionAck(parsedData, store)
+      } else if (Array.isArray(parsedData)) {
+        const [channelId] = parsedData
+        const subscription = store.getState().subscriptions[channelId]
+
+        switch (subscription?.channel) {
+          case Channel.TRADES:
+            handleTradesData(parsedData, subscription, store.dispatch)
+            break
+          case Channel.TICKER:
+            handleTickerData(parsedData, subscription, store.dispatch)
+            break
+          case Channel.CANDLES:
+            handleCandlesData(parsedData, subscription, store.dispatch)
+            break
+          case Channel.BOOK:
+            handleBookData(parsedData, subscription, store.dispatch)
+            break
+        }
+      }
+    })
+
+    return next(action)
+  }
 }
 ```
 
-### Custom Hook Example
+### TypeScript Configuration
 
 ```typescript
-// Custom hook for managing currency pair data
-function useCurrencyPairData(currencyPair: string) {
-  const dispatch = useDispatch()
+// tsconfig.app.json - Enhanced strict mode
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noPropertyAccessFromIndexSignature": true
+  }
+}
+```
 
-  const trades = useSelector((state: RootState) => getTrades(state, currencyPair))
-  const candles = useSelector((state: RootState) => getCandles(state, currencyPair))
-  const ticker = useSelector((state: RootState) => getTicker(state, `t${currencyPair}`))
+### Handler Pattern Example
 
-  const subscribe = React.useCallback(() => {
-    dispatch(tradeSubscribeToSymbol({ symbol: `t${currencyPair}` }))
-    dispatch(tickerSubscribeToSymbol({ symbol: `t${currencyPair}` }))
-    dispatch(candleSubscribeToSymbol({ symbol: `t${currencyPair}`, timeframe: "1M" }))
-  }, [dispatch, currencyPair])
+```typescript
+// Modular message handlers
+export const handleTradesData = (parsedData: any[], subscription: any, dispatch: AppDispatch) => {
+  const currencyPair = subscription.request.symbol.slice(1)
 
-  return {
-    trades,
-    candles,
-    ticker,
-    subscribe,
-    isLoading: !trades.length && !candles.length,
+  if (Array.isArray(parsedData[1])) {
+    // Snapshot data
+    const trades = parsedData[1].map(transformTrade)
+    dispatch(tradesSnapshotReducer({ currencyPair, trades }))
+  } else {
+    // Single trade update
+    const trade = transformTrade(parsedData[1])
+    dispatch(tradesUpdateReducer({ currencyPair, trade }))
   }
 }
 ```
@@ -752,6 +927,34 @@ class ErrorBoundary extends React.Component {
 ---
 
 ## 📊 Performance Considerations
+
+### Memory Management
+
+```typescript
+// Configurable limits prevent memory leaks
+const MAX_TRADES = config.MAX_TRADES // 1000 by default
+const MAX_CANDLES = config.MAX_CANDLES // 5000 by default
+
+// Automatic cleanup in reducers
+if (state[currencyPair].length > MAX_TRADES) {
+  state[currencyPair].splice(0, state[currencyPair].length - MAX_TRADES)
+}
+```
+
+### Staggered Subscriptions
+
+```typescript
+// Prevents server overload with timed subscriptions
+currencyPairs.forEach((currencyPair: string, index: number) => {
+  setTimeout(
+    () => {
+      dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
+      dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: "1m" }))
+    },
+    (index + 1) * 2000 // 2-second intervals
+  )
+})
+```
 
 ### Selector Optimization
 

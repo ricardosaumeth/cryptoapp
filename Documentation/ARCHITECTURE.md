@@ -10,13 +10,16 @@ CryptoApp follows a **modular, event-driven architecture** designed for real-tim
 
 ### Core Principles
 
-- **Redux Thunk Async Operations**: Centralized async subscription management
-- **Bitfinex API Integration**: Direct WebSocket API v2 integration
+- **Redux Toolkit + Thunk**: Modern Redux with async subscription management
+- **Handler-Based Processing**: Modular WebSocket message handlers for maintainability
+- **Bitfinex API Integration**: Direct WebSocket API v2 integration with staggered subscriptions
+- **Memory Management**: Configurable limits preventing memory leaks
 - **Separation of Concerns**: Each module has a single responsibility
 - **Unidirectional Data Flow**: Redux ensures predictable state changes
 - **Real-time First**: Architecture optimized for live data streams
-- **Type Safety**: TypeScript prevents runtime errors in financial calculations
-- **Resilience**: Graceful handling of network failures and data inconsistencies
+- **Type Safety**: Enhanced TypeScript strict mode prevents runtime errors
+- **Testing First**: Comprehensive Vitest testing strategy
+- **Production Ready**: Environment configuration and error handling
 
 ---
 
@@ -74,17 +77,30 @@ CryptoApp follows a **modular, event-driven architecture** designed for real-tim
 ```
 core/
 ├── components/           # Reusable UI components
-│   ├── update-highlight/ # Value change animations
-│   └── trend-indicator/  # Up/down arrows
+│   ├── AnimatedCube/     # 3D loading animations
+│   ├── Diagnostics/      # Connection monitoring
+│   ├── LineChart/        # Mini price charts
+│   ├── Loading/          # Loading states
+│   ├── Stale/            # Stale data indicators
+│   ├── TrendIndicator/   # Up/down arrows
+│   ├── UpdateHighlight/  # Value change animations
+│   └── Widget/           # Container components
 ├── transport/           # WebSocket management
+│   ├── handlers/        # Modular message handlers
+│   │   ├── bookHandler.ts
+│   │   ├── candlesHandler.ts
+│   │   ├── subscriptionHandlers.ts
+│   │   ├── tickerHandler.ts
+│   │   └── tradesHandler.ts
 │   ├── Connection.ts    # Main connection class
-│   ├── SocketIOConnectionProxy.ts  # WebSocket implementation
-│   ├── wsMiddleware.ts  # Redux middleware
+│   ├── WsConnectionProxy.ts  # WebSocket implementation
+│   ├── wsMiddleware.ts  # Redux middleware with handlers
 │   └── types/          # Transport interfaces
-└── utils/              # Helper functions
-    ├── formatters.ts   # Number/date formatting
-    ├── validators.ts   # Data validation
-    └── calculations.ts # Financial calculations
+└── hooks/              # Custom React hooks
+    ├── useGridResize.ts
+    ├── useLatest.ts
+    ├── usePrevious.ts
+    └── useThrottle.ts
 ```
 
 **Key Responsibilities**:
@@ -116,25 +132,43 @@ redux/
 **Store Configuration**:
 
 ```typescript
-const store = configureStore({
-  reducer: {
-    app: appBootstrapSlice.reducer,
-    trades: tradesSlice.reducer,
-    ticker: tickerSlice.reducer,
-    candles: candleSlice.reducer,
-    subscriptions: subscriptionsSlice.reducer,
-    refData: refDataSlice.reducer,
-    selection: selectionSlice.reducer,
-    book: bookSlice.reducer,
-    ping: pingSlice.reducer,
-  },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      thunk: {
-        extraArgument: { connection }, // Dependency injection for async thunks
-      },
-    }).concat(createWsMiddleware(connection)),
-})
+// src/modules/redux/store.ts - Production-ready store
+const connectionProxy = new WsConnectionProxy(config.BITFINEX_WS_URL)
+export const connection = new Connection(connectionProxy)
+
+function createStore() {
+  const store = configureStore({
+    reducer: {
+      app: appBootstrapSlice.reducer,
+      trades: tradesSlice.reducer,
+      subscriptions: subscriptionsSlice.reducer,
+      refData: refDataSlice.reducer,
+      ticker: tickerSlice.reducer,
+      candles: candleSlice.reducer,
+      selection: selectionSlice.reducer,
+      book: bookSlice.reducer,
+      ping: pingSlice.reducer,
+    },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        thunk: {
+          extraArgument: { connection }, // Dependency injection
+        },
+      }).concat(createWsMiddleware(connection)),
+  })
+
+  // Connection event handlers
+  connection.onConnect(() => {
+    store.dispatch(changeConnectionStatus(ConnectionStatus.Connected))
+    store.dispatch(startPing())
+  })
+
+  connection.onClose(() => {
+    store.dispatch(changeConnectionStatus(ConnectionStatus.Disconnected))
+  })
+
+  return store
+}
 ```
 
 **Architecture Benefits**:

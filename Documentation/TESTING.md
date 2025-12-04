@@ -42,14 +42,16 @@ Financial applications require **bulletproof reliability**. Our testing strategy
 ### Dependencies
 
 ```bash
-# Core testing framework
-npm install --save-dev jest @testing-library/react @testing-library/jest-dom
+# Core testing framework - Vitest (modern, fast)
+npm install --save-dev vitest @vitest/ui @vitest/coverage-v8
+npm install --save-dev @testing-library/react @testing-library/jest-dom
+npm install --save-dev jsdom
 
 # WebSocket testing
 npm install --save-dev ws mock-socket
 
 # Redux testing
-npm install --save-dev @reduxjs/toolkit/query/react
+npm install --save-dev @reduxjs/toolkit
 
 # Performance testing
 npm install --save-dev @testing-library/react-hooks
@@ -61,35 +63,33 @@ npm install --save-dev playwright @playwright/test
 npm install --save-dev @testing-library/user-event
 ```
 
-### Jest Configuration (`jest.config.js`)
+### Vitest Configuration (`vitest.config.ts`)
 
-```javascript
-module.exports = {
-  testEnvironment: "jsdom",
-  setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"],
-  moduleNameMapping: {
-    "^@/(.*)$": "<rootDir>/src/$1",
-    "\\.(css|less|scss|sass)$": "identity-obj-proxy",
-  },
-  collectCoverageFrom: [
-    "src/**/*.{ts,tsx}",
-    "!src/**/*.d.ts",
-    "!src/index.tsx",
-    "!src/setupTests.ts",
-  ],
-  coverageThreshold: {
-    global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
+```typescript
+import { defineConfig } from "vitest/config"
+import react from "@vitejs/plugin-react"
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./src/setupTests.ts"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      exclude: ["node_modules/", "src/setupTests.ts", "**/*.d.ts", "**/*.config.*"],
+      thresholds: {
+        global: {
+          branches: 80,
+          functions: 80,
+          lines: 80,
+          statements: 80,
+        },
+      },
     },
   },
-  testMatch: [
-    "<rootDir>/src/**/__tests__/**/*.{ts,tsx}",
-    "<rootDir>/src/**/*.{test,spec}.{ts,tsx}",
-  ],
-}
+})
 ```
 
 ### Test Setup (`src/setupTests.ts`)
@@ -97,30 +97,49 @@ module.exports = {
 ```typescript
 import "@testing-library/jest-dom"
 import { configure } from "@testing-library/react"
-import { server } from "./mocks/server"
+import { vi } from "vitest"
 
 // Configure testing library
 configure({ testIdAttribute: "data-testid" })
 
 // Mock WebSocket globally
-global.WebSocket = require("mock-socket").WebSocket
-
-// Setup MSW server
-beforeAll(() => server.listen())
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
+Object.defineProperty(window, "WebSocket", {
+  writable: true,
+  value: vi.fn().mockImplementation(() => ({
+    close: vi.fn(),
+    send: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    readyState: WebSocket.OPEN,
+  })),
+})
 
 // Mock Highcharts
-jest.mock("highcharts/highstock", () => ({
-  chart: jest.fn(),
-  setOptions: jest.fn(),
+vi.mock("highcharts/highstock", () => ({
+  default: {
+    stockChart: vi.fn(),
+    setOptions: vi.fn(),
+  },
 }))
 
 // Mock ResizeObserver
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
+Object.defineProperty(window, "ResizeObserver", {
+  writable: true,
+  value: vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  })),
+})
+
+// Mock environment variables
+vi.mock("../config/env", () => ({
+  config: {
+    BITFINEX_WS_URL: "ws://localhost:8080",
+    MAX_TRADES: 1000,
+    MAX_CANDLES: 5000,
+    IS_PRODUCTION: false,
+  },
 }))
 ```
 
@@ -134,7 +153,8 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
 
 ```typescript
 // src/modules/trades/__tests__/slice.test.ts
-import { tradesSlice, updateTrades, addTrade } from "../slice"
+import { describe, it, expect } from "vitest"
+import { tradesSlice, tradesSnapshotReducer, tradesUpdateReducer } from "../slice"
 import type { Trade } from "../types/Trade"
 
 describe("tradesSlice", () => {
@@ -166,11 +186,26 @@ describe("tradesSlice", () => {
         { ...mockTrade, id: 1, timestamp: 1640995200000 },
       ]
 
-      const action = updateTrades({ currencyPair: "BTCUSD", trades })
+      const action = tradesSnapshotReducer({ currencyPair: "BTCUSD", trades })
       const result = tradesSlice.reducer(initialState, action)
 
       expect(result.BTCUSD[0].id).toBe(1) // Earlier timestamp first
       expect(result.BTCUSD[1].id).toBe(2)
+    })
+
+    it("should enforce memory limits", () => {
+      const manyTrades = Array.from({ length: 1200 }, (_, i) => ({
+        ...mockTrade,
+        id: i,
+        timestamp: 1640995200000 + i,
+      }))
+
+      const action = tradesSnapshotReducer({ currencyPair: "BTCUSD", trades: manyTrades })
+      const result = tradesSlice.reducer(initialState, action)
+
+      // Should be limited to MAX_TRADES (1000)
+      expect(result.BTCUSD).toHaveLength(1000)
+      expect(result.BTCUSD[0].id).toBe(200) // First 200 should be removed
     })
   })
 
@@ -1218,11 +1253,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run unit tests
-        run: npm run test:unit -- --coverage
-
-      - name: Run integration tests
-        run: npm run test:integration
+      - name: Run Vitest tests
+        run: npm run test:coverage
 
       - name: Run E2E tests
         run: npm run test:e2e
@@ -1241,16 +1273,71 @@ jobs:
 ```json
 {
   "scripts": {
-    "test": "jest",
-    "test:unit": "jest --testPathPattern=__tests__",
-    "test:integration": "jest --testPathPattern=integration",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "test:watch": "vitest --watch",
+    "test:run": "vitest run",
     "test:e2e": "playwright test",
-    "test:performance": "playwright test tests/performance",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:ci": "jest --ci --coverage --watchAll=false"
+    "test:performance": "playwright test tests/performance"
   }
 }
+```
+
+### Handler Testing Strategy
+
+```typescript
+// src/core/transport/handlers/__tests__/tradesHandler.test.ts
+import { describe, it, expect, vi } from "vitest"
+import { handleTradesData } from "../tradesHandler"
+import { tradesSnapshotReducer, tradesUpdateReducer } from "../../../modules/trades/slice"
+
+describe("tradesHandler", () => {
+  const mockDispatch = vi.fn()
+  const mockSubscription = {
+    request: { symbol: "tBTCUSD" },
+    channel: "trades",
+  }
+
+  beforeEach(() => {
+    mockDispatch.mockClear()
+  })
+
+  it("should handle snapshot data", () => {
+    const snapshotData = [
+      12345, // channelId
+      [
+        [1, 1640995200000, 0.5, 45000],
+        [2, 1640995300000, 0.3, 45100],
+      ],
+    ]
+
+    handleTradesData(snapshotData, mockSubscription, mockDispatch)
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      tradesSnapshotReducer({
+        currencyPair: "BTCUSD",
+        trades: [
+          { id: 1, timestamp: 1640995200000, amount: 0.5, price: 45000 },
+          { id: 2, timestamp: 1640995300000, amount: 0.3, price: 45100 },
+        ],
+      })
+    )
+  })
+
+  it("should handle single trade update", () => {
+    const updateData = [12345, [3, 1640995400000, 0.8, 44900]]
+
+    handleTradesData(updateData, mockSubscription, mockDispatch)
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      tradesUpdateReducer({
+        currencyPair: "BTCUSD",
+        trade: { id: 3, timestamp: 1640995400000, amount: 0.8, price: 44900 },
+      })
+    )
+  })
+})
 ```
 
 ---

@@ -13,7 +13,7 @@ A comprehensive guide to building a real-time cryptocurrency trading dashboard f
 
 ## 📋 Prerequisites
 
-- Node.js 18+
+- Node.js 24+
 - Basic React/TypeScript knowledge
 - Understanding of Redux concepts
 
@@ -42,27 +42,42 @@ npm install --save-dev @types/lodash @types/luxon @types/numeral
 
 # Data grid
 npm install ag-grid-community ag-grid-react
+
+# Testing framework
+npm install --save-dev vitest @vitest/ui @vitest/coverage-v8 jsdom
+npm install --save-dev @testing-library/react @testing-library/jest-dom
 ```
 
 ### 1.3 Setup Project Structure
 
 ```
 src/
+├── config/              # Environment configuration
+│   └── env.ts
 ├── core/
-│   ├── components/
-│   └── transport/
+│   ├── components/      # Reusable UI components
+│   │   ├── AnimatedCube/
+│   │   ├── Diagnostics/
+│   │   ├── LineChart/
+│   │   ├── Loading/
+│   │   ├── TrendIndicator/
+│   │   ├── UpdateHighlight/
+│   │   └── Widget/
+│   ├── hooks/           # Custom React hooks
+│   └── transport/       # WebSocket management
+│       ├── handlers/    # Message handlers
+│       └── types/
 ├── modules/
-│   ├── app/
-│   ├── redux/
-│   ├── book/
-│   ├── candles/
-│   ├── common/
-│   ├── ping/
-│   ├── reference-data/
-│   ├── selection/
-│   ├── tickers/
-│   └── trades/
-└── theme/
+│   ├── app/             # Application bootstrap
+│   ├── redux/           # Store configuration
+│   ├── book/            # Order book
+│   ├── candles/         # Candlestick charts
+│   ├── ping/            # Connection monitoring
+│   ├── reference-data/  # Currency pairs
+│   ├── selection/       # Selected pair state
+│   ├── tickers/         # Price tickers
+│   └── trades/          # Trade history
+└── theme/               # Styling system
 ```
 
 ## 🎨 Step 2: Theme & Styling
@@ -110,32 +125,83 @@ body {
 
 ## 🏗️ Step 3: Redux Store Setup
 
-### 3.1 Create Store (`src/modules/redux/store.ts`)
+### 3.1 Environment Configuration (`src/config/env.ts`)
+
+```typescript
+export const config = {
+  BITFINEX_WS_URL: import.meta.env["VITE_BITFINEX_WS_URL"] || "wss://api-pub.bitfinex.com/ws/2",
+  IS_PRODUCTION: import.meta.env.PROD,
+  MAX_TRADES: Number(import.meta.env["VITE_MAX_TRADES"]) || 1000,
+  MAX_CANDLES: Number(import.meta.env["VITE_MAX_CANDLES"]) || 5000,
+}
+```
+
+### 3.2 Create Store (`src/modules/redux/store.ts`)
 
 ```typescript
 import { configureStore } from "@reduxjs/toolkit"
+import { appBootstrapSlice } from "../app/slice"
+import { tradesSlice } from "../trades/slice"
+import { subscriptionsSlice, changeConnectionStatus } from "../../core/transport/slice"
+import { refDataSlice } from "../reference-data/slice"
+import { tickerSlice } from "../tickers/slice"
+import { candleSlice } from "../candles/slice"
+import { selectionSlice } from "../selection/slice"
+import { bookSlice } from "../book/slice"
+import { pingSlice, startPing } from "../ping/slice"
+import { WsConnectionProxy } from "../../core/transport/WsConnectionProxy"
 import { Connection } from "../../core/transport/Connection"
-import { SocketIOConnectionProxy } from "../../core/transport/SocketIOConnectionProxy"
+import { createWsMiddleware } from "../../core/transport/wsMiddleware"
+import { ConnectionStatus } from "../../core/transport/types/ConnectionStatus"
+import { config } from "../../config/env"
 
-const connectionProxy = new WsConnectionProxy("wss://api-pub.bitfinex.com/ws/2")
+const connectionProxy = new WsConnectionProxy(config.BITFINEX_WS_URL)
 export const connection = new Connection(connectionProxy)
 
-const createStore = () => {
+function createStore() {
   const store = configureStore({
     reducer: {
-      // Add reducers here
+      app: appBootstrapSlice.reducer,
+      trades: tradesSlice.reducer,
+      subscriptions: subscriptionsSlice.reducer,
+      refData: refDataSlice.reducer,
+      ticker: tickerSlice.reducer,
+      candles: candleSlice.reducer,
+      selection: selectionSlice.reducer,
+      book: bookSlice.reducer,
+      ping: pingSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         thunk: {
           extraArgument: { connection },
         },
-      }),
+      }).concat(createWsMiddleware(connection)),
   })
+
+  // Connection event handlers
+  connection.onConnect(() => {
+    store.dispatch(changeConnectionStatus(ConnectionStatus.Connected))
+    store.dispatch(startPing())
+    console.log("Connected")
+  })
+
+  connection.onClose(() => {
+    store.dispatch(changeConnectionStatus(ConnectionStatus.Disconnected))
+    console.log("Disconnected")
+    connection.connect()
+  })
+
   return store
 }
 
-export default createStore
+export const getStore = () => {
+  if (!storeInstance) {
+    storeInstance = createStore()
+  }
+  return storeInstance
+}
+
 export type RootState = ReturnType<ReturnType<typeof createStore>["getState"]>
 export type AppDispatch = ReturnType<typeof createStore>["dispatch"]
 ```
@@ -403,19 +469,43 @@ const CandlesChart = ({ candles }: Props) => {
         title: { text: 'Candlestick Chart' },
         rangeSelector: { enabled: true },
         navigator: { enabled: true },
-        series: [{ type: "candlestick", name: "Price", data: chartData }]
+        scrollbar: { enabled: true },
+        series: [{
+          type: "candlestick",
+          name: "Price",
+          data: chartData,
+          tooltip: {
+            valueDecimals: 2
+          }
+        }],
+        chart: {
+          backgroundColor: '#1b1e2b',
+          style: {
+            fontFamily: 'IBM Plex Sans'
+          }
+        },
+        xAxis: {
+          type: 'datetime'
+        },
+        yAxis: {
+          title: {
+            text: 'Price (USD)'
+          }
+        }
       })
     }
   }, [candles])
 
   useEffect(() => {
-    import('highcharts/themes/dark-unica')
-    setReady(true)
+    // Load dark theme
+    import('highcharts/themes/dark-unica').then(() => {
+      setReady(true)
+    })
   }, [])
 
   return (
     <Container>
-      {ready && (
+      {ready && candles.length > 0 && (
         <HighchartsReact
           highcharts={Highcharts}
           options={chartOptions}
@@ -522,16 +612,68 @@ const Ticker = ({ currencyPair, lastPrice, dailyChange, dailyChangeRelative }: P
 export default Ticker
 ```
 
-## 🔄 Step 8: WebSocket Middleware
+## 🔄 Step 8: Handler-Based WebSocket Architecture
 
-### 8.1 Create Middleware (`src/core/transport/wsMiddleware.ts`)
+### 8.1 Create Message Handlers (`src/core/transport/handlers/`)
+
+#### Trades Handler (`tradesHandler.ts`)
 
 ```typescript
-import { Connection } from "./Connection"
-import { updateTrades, addTrade } from "../../modules/trades/slice"
-import { updateTicker } from "../../modules/tickers/slice"
-import { candlesSnapshot, candlesUpdate } from "../../modules/candles/slice"
+import { tradesSnapshotReducer, tradesUpdateReducer } from "../../../modules/trades/slice"
+import type { AppDispatch } from "../../../modules/redux/store"
+
+export const handleTradesData = (parsedData: any[], subscription: any, dispatch: AppDispatch) => {
+  const currencyPair = subscription.request.symbol.slice(1)
+
+  if (Array.isArray(parsedData[1])) {
+    // Snapshot data (initial load)
+    const trades = parsedData[1]
+      .map(([id, timestamp, amount, price]: any[]) => ({
+        id,
+        timestamp,
+        amount,
+        price,
+      }))
+      .sort((a: any, b: any) => a.timestamp - b.timestamp)
+
+    dispatch(tradesSnapshotReducer({ currencyPair, trades }))
+  } else {
+    // Single trade update
+    const [id, timestamp, amount, price] = parsedData[1]
+    const trade = { id, timestamp, amount, price }
+    dispatch(tradesUpdateReducer({ currencyPair, trade }))
+  }
+}
+```
+
+#### Ticker Handler (`tickerHandler.ts`)
+
+```typescript
+import { updateTicker } from "../../../modules/tickers/slice"
+import type { AppDispatch } from "../../../modules/redux/store"
+
+export const handleTickerData = (parsedData: any[], subscription: any, dispatch: AppDispatch) => {
+  const symbol = subscription.request.symbol
+  dispatch(updateTicker({ symbol, data: parsedData[1] }))
+}
+```
+
+### 8.2 WebSocket Middleware (`src/core/transport/wsMiddleware.ts`)
+
+```typescript
 import type { Middleware } from "@reduxjs/toolkit"
+import { Connection } from "./Connection"
+import { updateStaleSubscription } from "./slice"
+import { Channel } from "./types/Channels"
+import { handlePong } from "../../modules/ping/slice"
+import {
+  handleSubscriptionAck,
+  handleUnSubscriptionAck,
+  handleTradesData,
+  handleTickerData,
+  handleCandlesData,
+  handleBookData,
+} from "./handlers"
 
 export const createWsMiddleware = (connection: Connection): Middleware => {
   return (store) => (next) => (action) => {
@@ -539,42 +681,41 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
       const parsedData = JSON.parse(data)
 
       if (parsedData.event === "subscribed") {
-        // Handle subscription acknowledgment
+        handleSubscriptionAck(parsedData, store)
         return
+      } else if (parsedData.event === "unsubscribed") {
+        handleUnSubscriptionAck(parsedData, store)
+        return
+      } else if (parsedData.event === "pong") {
+        store.dispatch(handlePong())
       }
 
       if (Array.isArray(parsedData) && parsedData[1] === "hb") {
-        // Handle heartbeat
-        return
+        return // Heartbeat
       }
 
       if (Array.isArray(parsedData)) {
         const [channelId] = parsedData
         const subscription = store.getState().subscriptions[channelId]
+        store.dispatch(updateStaleSubscription({ channelId }))
 
-        if (subscription?.channel === "trades") {
-          // Handle trades data
-          const currencyPair = subscription.request.symbol.slice(1)
-          if (Array.isArray(parsedData[1])) {
-            const trades = parsedData[1].map(([id, timestamp, amount, price]) => ({
-              id,
-              timestamp,
-              amount,
-              price,
-            }))
-            store.dispatch(updateTrades({ currencyPair, trades }))
-          }
-        } else if (subscription?.channel === "ticker") {
-          // Handle ticker data
-          store.dispatch(updateTicker({ symbol: subscription.request.symbol, data: parsedData }))
-        } else if (subscription?.channel === "candles") {
-          // Handle candles data
-          const currencyPair = subscription.request.key.split(":")[2].slice(1)
-          if (Array.isArray(parsedData[1])) {
-            store.dispatch(candlesSnapshot({ currencyPair, candles: parsedData[1] }))
-          } else {
-            store.dispatch(candlesUpdate({ currencyPair, candle: parsedData[1] }))
-          }
+        // Route to appropriate handler
+        switch (subscription?.channel) {
+          case Channel.TRADES:
+            handleTradesData(parsedData, subscription, store.dispatch)
+            break
+          case Channel.TICKER:
+            handleTickerData(parsedData, subscription, store.dispatch)
+            break
+          case Channel.CANDLES:
+            handleCandlesData(parsedData, subscription, store.dispatch)
+            break
+          case Channel.BOOK:
+            handleBookData(parsedData, subscription, store.dispatch)
+            break
+          default:
+            console.warn("Unhandled channel:", subscription?.channel)
+            break
         }
       }
     })
@@ -584,19 +725,35 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
 }
 ```
 
-## 🚀 Step 9: App Bootstrap
+## 🚀 Step 9: App Bootstrap with Staggered Subscriptions
 
 ### 9.1 Bootstrap Logic (`src/modules/app/slice.ts`)
 
 ```typescript
-import { createAsyncThunk } from "@reduxjs/toolkit"
-import {
-  tradeSubscribeToSymbol,
-  tickerSubscribeToSymbol,
-  candleSubscribeToSymbol,
-} from "../transport/slice"
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
+import { refDataLoad } from "../reference-data/slice"
+import { candlesSubscribeToSymbol, tickerSubscribeToSymbol } from "../../core/transport/slice"
 import type { Connection } from "../../core/transport/Connection"
 import type { RootState } from "../redux/store"
+import { ConnectionStatus } from "../../core/transport/types/ConnectionStatus"
+import { selectCurrencyPair } from "../selection/slice"
+
+export const DEFAULT_TIMEFRAME = "1m"
+export const SUBSCRIPTION_TIMEOUT_IN_MS = 2000
+const CHECK_CONNECTION_TIMEOUT_IN_MS = 100
+
+const waitForConnection = (getState: () => RootState): Promise<void> => {
+  return new Promise((resolve) => {
+    const checkConnection = () => {
+      if (getState().subscriptions.wsConnectionStatus === ConnectionStatus.Connected) {
+        resolve()
+      } else {
+        setTimeout(checkConnection, CHECK_CONNECTION_TIMEOUT_IN_MS)
+      }
+    }
+    checkConnection()
+  })
+}
 
 export const bootstrapApp = createAsyncThunk(
   "app/bootstrap",
@@ -604,52 +761,81 @@ export const bootstrapApp = createAsyncThunk(
     const { connection } = extra as { connection: Connection }
 
     connection.connect()
+    await waitForConnection(getState as () => RootState)
 
-    // Wait for connection
-    await new Promise((resolve) => {
-      const checkConnection = () => {
-        if (connection.isConnected()) {
-          resolve(null)
-        } else {
-          setTimeout(checkConnection, 100)
-        }
-      }
-      checkConnection()
+    // Load currency pairs from reference data
+    const currencyPairs = await dispatch(refDataLoad()).unwrap()
+
+    // Select first currency pair
+    dispatch(selectCurrencyPair({ currencyPair: currencyPairs[0] }))
+
+    // Staggered subscriptions to prevent server overload
+    currencyPairs.forEach((currencyPair: string, index: number) => {
+      setTimeout(
+        () => {
+          dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
+          dispatch(
+            candlesSubscribeToSymbol({
+              symbol: currencyPair,
+              timeframe: DEFAULT_TIMEFRAME,
+            })
+          )
+        },
+        (index + 1) * SUBSCRIPTION_TIMEOUT_IN_MS // 2-second intervals
+      )
     })
 
-    // Subscribe to data feeds
-    const currencyPairs = ["BTCUSD", "ETHUSD", "LTCUSD"]
-
-    currencyPairs.forEach((pair, index) => {
-      setTimeout(() => {
-        dispatch(tickerSubscribeToSymbol({ symbol: `t${pair}` }))
-        dispatch(candleSubscribeToSymbol({ symbol: `t${pair}`, timeframe: "1M" }))
-      }, index * 200)
-    })
-
-    setTimeout(() => {
-      dispatch(tradeSubscribeToSymbol({ symbol: `t${currencyPairs[0]}` }))
-    }, 200)
+    return currencyPairs[0]
   }
 )
+
+export const appBootstrapSlice = createSlice({
+  name: "app/bootstrap",
+  initialState: {},
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(bootstrapApp.fulfilled, (_state, _action) => {
+      console.log(`Bootstrap App successfully`)
+    })
+  },
+})
 ```
 
 ## 🎯 Step 10: Final Assembly
 
-### 10.1 Main App Component (`src/App.tsx`)
+### 10.1 Testing Setup (`vitest.config.ts`)
+
+```typescript
+import { defineConfig } from "vitest/config"
+import react from "@vitejs/plugin-react"
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: "jsdom",
+    globals: true,
+  },
+})
+```
+
+### 10.2 Main App Component (`src/App.tsx`)
 
 ```typescript
 import { useEffect } from 'react'
 import { Provider } from 'react-redux'
 import { useAppDispatch } from './modules/redux/hooks'
 import { bootstrapApp } from './modules/app/slice'
-import createStore from './modules/redux/store'
-import { Container, Header, TickersPanel, TradesPanel, CandlesPanel } from './App.styled'
-import TickersContainer from './modules/tickers/components/Tickers.container'
+import { getStore } from './modules/redux/store'
+import { Container, Header } from './App.styled'
+import TickersContainer from './modules/tickers/components/Tickers/Tickers.container'
 import TradesContainer from './modules/trades/components/Trades.container'
 import CandlesContainer from './modules/candles/components/CandlesChart.container'
+import BookContainer from './modules/book/components/Book/Book.container'
+import DepthChartContainer from './modules/book/components/DepthChart/DepthChart.container'
+import DiagnosticsContainer from './core/components/Diagnostics/Diagnostics.container'
+import LatencyContainer from './modules/ping/components/Latency/Latency.container'
 
-const store = createStore()
+const store = getStore()
 
 const AppContent = () => {
   const dispatch = useAppDispatch()
@@ -662,16 +848,15 @@ const AppContent = () => {
     <Container>
       <Header>
         <h1>🚀 CryptoApp</h1>
+        <DiagnosticsContainer />
+        <LatencyContainer />
       </Header>
-      <TickersPanel>
-        <TickersContainer />
-      </TickersPanel>
-      <TradesPanel>
-        <TradesContainer currencyPair="BTCUSD" />
-      </TradesPanel>
-      <CandlesPanel>
-        <CandlesContainer currencyPair="BTCUSD" />
-      </CandlesPanel>
+
+      <TickersContainer />
+      <TradesContainer />
+      <CandlesContainer />
+      <BookContainer />
+      <DepthChartContainer />
     </Container>
   )
 }
@@ -687,23 +872,61 @@ export default App
 
 ## 🎉 Congratulations!
 
-You've built a complete real-time cryptocurrency trading dashboard!
+You've built a production-ready real-time cryptocurrency trading dashboard!
 
 ### What You've Learned:
 
-- ✅ WebSocket connections with auto-reconnection
-- ✅ Redux Toolkit with async thunks
-- ✅ Real-time data visualization
-- ✅ Styled Components with themes
-- ✅ TypeScript best practices
-- ✅ Modern React patterns
+- ✅ **Handler-Based Architecture**: Modular WebSocket message processing
+- ✅ **Redux Toolkit + Thunk**: Modern Redux with async subscription management
+- ✅ **Staggered Subscriptions**: API-friendly subscription timing
+- ✅ **Memory Management**: Configurable limits preventing memory leaks
+- ✅ **Environment Configuration**: Flexible deployment settings
+- ✅ **TypeScript Strict Mode**: Enhanced type safety
+- ✅ **Vitest Testing**: Modern testing framework
+- ✅ **Real-time Data Visualization**: Professional charts and components
+- ✅ **Production Architecture**: Scalable, maintainable codebase
+
+### Current Features:
+
+- ✅ **Real-time Price Tickers**: Live market data with color coding
+- ✅ **Interactive Candlestick Charts**: Professional trading charts
+- ✅ **Live Trade Feed**: Real-time trade history
+- ✅ **Order Book**: Bid/ask spreads with depth visualization
+- ✅ **Connection Monitoring**: Diagnostics and latency tracking
+- ✅ **Responsive Design**: Works on all screen sizes
+- ✅ **Dark Theme**: Professional trading interface
+
+### Testing Your App:
+
+```bash
+# Run tests
+npm run test
+
+# Run with UI
+npm run test:ui
+
+# Generate coverage
+npm run test:coverage
+
+# Start development server
+npm run dev
+```
 
 ### Next Steps:
 
-- Add more chart types
-- Implement order book
-- Add portfolio tracking
-- Create mobile responsive design
-- Add unit tests
+- Add error boundaries for crash protection
+- Implement portfolio tracking
+- Add technical indicators (RSI, MACD)
+- Create mobile Progressive Web App
+- Add price alerts with notifications
+- Implement paper trading simulation
 
 Happy coding! 🚀
+
+### Architecture Benefits:
+
+- **Scalable**: Handler-based architecture supports easy feature additions
+- **Testable**: Comprehensive Vitest testing strategy
+- **Maintainable**: Clear separation of concerns
+- **Production-Ready**: Memory management and error handling
+- **Type-Safe**: Enhanced TypeScript configuration prevents runtime errors

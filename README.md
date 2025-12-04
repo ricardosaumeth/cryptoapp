@@ -7,6 +7,7 @@ A real-time cryptocurrency trading dashboard built with React 19, TypeScript, an
 ## ✨ Core Features
 
 ### 📊 **Real-Time Trading Interface**
+
 - **Bitfinex API Integration**: Direct WebSocket API v2 connection for live market data
 - **Redux Thunk Async Operations**: Professional async subscription management
 - **Interactive Candlestick Charts**: Highcharts with zoom, navigation, and technical analysis
@@ -15,6 +16,7 @@ A real-time cryptocurrency trading dashboard built with React 19, TypeScript, an
 - **Market Overview**: Comprehensive ticker grid with price changes and mini charts
 
 ### 🛡️ **Production-Ready Architecture**
+
 - **Handler-Based Processing**: Modular WebSocket message handlers for maintainability
 - **Memory Management**: Configurable limits preventing memory leaks
 - **Connection Monitoring**: Real-time latency tracking and diagnostics
@@ -23,6 +25,7 @@ A real-time cryptocurrency trading dashboard built with React 19, TypeScript, an
 - **Type Safety**: Enhanced TypeScript strict mode configuration
 
 ### 🎨 **Modern UI/UX**
+
 - **Responsive Design**: Adaptive grid layout for all screen sizes
 - **Dark Theme**: Professional trading interface with smooth animations
 - **Component Library**: Reusable UI components with consistent styling
@@ -32,6 +35,7 @@ A real-time cryptocurrency trading dashboard built with React 19, TypeScript, an
 ## 🛠️ Tech Stack
 
 ### **Core Technologies**
+
 - **Frontend**: React 19, TypeScript 5.9, Vite 7.2
 - **State Management**: Redux Toolkit 2.0 with Redux Thunk
 - **API Integration**: Bitfinex WebSocket API v2
@@ -40,12 +44,14 @@ A real-time cryptocurrency trading dashboard built with React 19, TypeScript, an
 - **Data Grid**: AG Grid Community 34.3
 
 ### **Development & Testing**
+
 - **Testing**: Vitest 2.1 with React Testing Library and comprehensive handler tests
 - **Type Safety**: Enhanced TypeScript strict mode with noUncheckedIndexedAccess
 - **Code Quality**: ESLint 9.39.1, Prettier 3.6.2 (available via npm scripts, not enforced)
 - **Build Tool**: Vite 7.2 with optimized production builds
 
 ### **Utilities & Libraries**
+
 - **Data Processing**: Lodash 4.17, Luxon 3.7, Numeral 2.0
 - **Custom Hooks**: useGridResize, useLatest, usePrevious, useThrottle
 - **Monitoring**: Built-in connection diagnostics and latency tracking
@@ -53,6 +59,7 @@ A real-time cryptocurrency trading dashboard built with React 19, TypeScript, an
 ## 🚀 Quick Start
 
 ### **1. Installation**
+
 ```bash
 # Clone repository
 git clone <repository-url>
@@ -63,6 +70,7 @@ npm install
 ```
 
 ### **2. Environment Setup**
+
 ```bash
 # Create environment file
 cp .env.example .env
@@ -74,6 +82,7 @@ cp .env.example .env
 ```
 
 ### **3. Development**
+
 ```bash
 # Start development server
 npm run dev
@@ -86,6 +95,7 @@ npm run test
 ```
 
 ### **4. Production Build**
+
 ```bash
 # Build optimized version
 npm run build
@@ -201,6 +211,7 @@ src/
 ## 🎨 Feature Deep Dive
 
 ### 🔌 **Bitfinex API Integration**
+
 - **WebSocket API v2**: Direct connection to `wss://api-pub.bitfinex.com/ws/2`
 - **Handler-Based Processing**: Modular handlers for trades, tickers, candles, and book data
 - **Auto-Reconnection**: Exponential backoff with connection recovery
@@ -209,6 +220,7 @@ src/
 - **Rate Limiting**: 2-second intervals between subscriptions to respect API limits
 
 ### 📈 **Advanced Charting**
+
 - **Professional Candlestick Charts**: Highcharts with OHLC data visualization
 - **Interactive Navigation**: Zoom, pan, and range selection
 - **Market Depth Charts**: Order book visualization with bid/ask curves
@@ -217,6 +229,7 @@ src/
 - **Dark Theme Integration**: Consistent styling across all chart types
 
 ### 📊 **Trading Interface**
+
 - **Live Order Book**: Real-time bid/ask spreads with price aggregation
 - **Trade Feed**: Chronological trade history with buy/sell indicators
 - **Market Overview**: Multi-currency ticker grid with performance metrics
@@ -224,6 +237,7 @@ src/
 - **Data Validation**: Runtime type checking for all financial data
 
 ### ⚡ **Performance & Reliability**
+
 - **Memory Management**: Environment-configurable limits for trades (1000) and candles (5000)
 - **Handler Architecture**: Modular message processing for maintainability
 - **Connection Monitoring**: Real-time latency tracking with ping/pong
@@ -232,6 +246,7 @@ src/
 - **Connection Diagnostics**: WebSocket health monitoring with visual feedback
 
 ### 🎯 **Developer Experience**
+
 - **Comprehensive Testing**: Vitest with handler unit tests and 80%+ coverage
 - **Type Safety**: Enhanced TypeScript strict mode with advanced compiler options
 - **Environment Configuration**: Flexible deployment via environment variables
@@ -261,19 +276,13 @@ VITE_LOG_LEVEL=info
 
 ```typescript
 // Modular message handlers
-export const handleTradesData = (
-  parsedData: any[],
-  subscription: any,
-  dispatch: AppDispatch
-) => {
+export const handleTradesData = (parsedData: any[], subscription: any, dispatch: AppDispatch) => {
   const currencyPair = subscription.request.symbol.slice(1)
-  
+
   if (Array.isArray(parsedData[1])) {
     // Snapshot data with memory management
-    const trades = parsedData[1]
-      .map(transformTrade)
-      .sort((a, b) => a.timestamp - b.timestamp)
-    
+    const trades = parsedData[1].map(transformTrade).sort((a, b) => a.timestamp - b.timestamp)
+
     dispatch(tradesSnapshotReducer({ currencyPair, trades }))
   } else {
     // Single trade update
@@ -292,8 +301,8 @@ const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      thunk: { extraArgument: { connection } }
-    }).concat(createWsMiddleware(connection))
+      thunk: { extraArgument: { connection } },
+    }).concat(createWsMiddleware(connection)),
 })
 ```
 
@@ -302,14 +311,14 @@ const store = configureStore({
 ```typescript
 // src/theme/style.ts
 const Palette = {
-  BackgroundColor: '#1f2936',
-  Positive: '#00AD08',      // Green for gains
-  Negative: '#FF264D',      // Red for losses
-  Bid: '#00AD08',          // Buy orders
-  Ask: '#FF264D',          // Sell orders
-  Orange: '#FFA41B',       // Accent color
-  White: '#FFF',
-  Border: '#424242'
+  BackgroundColor: "#1f2936",
+  Positive: "#00AD08", // Green for gains
+  Negative: "#FF264D", // Red for losses
+  Bid: "#00AD08", // Buy orders
+  Ask: "#FF264D", // Sell orders
+  Orange: "#FFA41B", // Accent color
+  White: "#FFF",
+  Border: "#424242",
 }
 
 // Font system with Fira Sans
@@ -320,20 +329,24 @@ const Palette = {
 ## 📦 Available Scripts
 
 ### Development
+
 - `npm run dev` - Start development server with hot reload
 - `npm run preview` - Preview production build locally
 
 ### Testing
+
 - `npm run test` - Run unit tests with Vitest
 - `npm run test:ui` - Run tests with interactive UI
 - `npm run test:coverage` - Generate test coverage report
 
 ### Build & Deploy
+
 - `npm run build` - Production build (TypeScript + Vite optimization)
 - `npm run lint` - Run ESLint with TypeScript support
 - `npm run format` - Format code with Prettier
 
 ### Quality Assurance
+
 ```bash
 # Run full quality check
 npm run lint && npm run test && npm run build
@@ -342,6 +355,7 @@ npm run lint && npm run test && npm run build
 ## 🌟 Component Architecture
 
 ### **Core Components**
+
 - **CandlesChart**: Professional candlestick charts with Highcharts integration
 - **Market**: Real-time market data with performance metrics
 - **Tickers**: Responsive grid with mini charts and trend indicators
@@ -350,6 +364,7 @@ npm run lint && npm run test && npm run build
 - **DepthChart**: Market depth curves with interactive price levels
 
 ### **Infrastructure Components**
+
 - **Diagnostics**: WebSocket connection monitoring and health checks
 - **Latency**: Real-time ping monitoring with performance alerts
 - **AnimatedContent**: Smooth transitions and loading states
@@ -357,6 +372,7 @@ npm run lint && npm run test && npm run build
 - **Widget**: Consistent container components with titles and styling
 
 ### **Custom Hooks**
+
 - **useGridResize**: Responsive grid layout handling
 - **useThrottle**: Performance optimization for high-frequency updates
 - **usePrevious**: State comparison for change detection
@@ -364,11 +380,13 @@ npm run lint && npm run test && npm run build
 ## 🚀 Performance Features
 
 ### **Memory Management**
+
 - **Configurable Limits**: Environment variables control data retention (MAX_TRADES=1000, MAX_CANDLES=5000)
 - **Automatic Cleanup**: Reducers prevent unbounded array growth
 - **Staggered Subscriptions**: 2-second intervals prevent API overload
 
 ### **Architecture Benefits**
+
 - **Handler-Based Processing**: Modular WebSocket message handling for maintainability
 - **Connection Monitoring**: Built-in latency tracking via Diagnostics and Latency components
 - **Type Safety**: Enhanced TypeScript strict mode prevents runtime errors
@@ -377,12 +395,14 @@ npm run lint && npm run test && npm run build
 ## 🧪 Testing Strategy for the Students to Implement
 
 ### **Test Coverage**
+
 - **Unit Tests**: 80%+ coverage for critical business logic
 - **Integration Tests**: WebSocket message handling and Redux flows
 - **Component Tests**: UI behavior and user interactions
 - **Performance Tests**: Memory usage and render time validation
 
 ### **Test Files**
+
 ```
 ├── slice.test.ts        # Redux state management
 ├── selectors.test.ts    # Data selection logic
@@ -395,11 +415,13 @@ npm run lint && npm run test && npm run build
 ## 🏗️ Development Setup
 
 ### **Prerequisites**
+
 - Node.js 24+ (LTS recommended)
 - npm 11+ or yarn 3+
 - Git for version control
 
 ### **Quick Start**
+
 ```bash
 # Clone and setup
 git clone <repository-url>
@@ -415,6 +437,7 @@ npm run dev
 ```
 
 ### **Development Workflow**
+
 ```bash
 # Run tests during development
 npm run test:watch
@@ -431,6 +454,7 @@ npm run preview
 ## 📊 Connection Monitoring
 
 ### **Built-in Diagnostics**
+
 - **WebSocket Health**: Connection status tracking via `ConnectionStatus` enum
 - **UI Latency**: Real-time UI thread responsiveness monitoring (every 2 seconds)
 - **Network Latency**: WebSocket round-trip time via ping/pong mechanism
@@ -438,6 +462,7 @@ npm run preview
 - **Basic Logging**: Console warnings for unhandled channels and debugging
 
 ### **Actual Implementation**
+
 ```typescript
 // UI Latency Monitoring (Diagnostics component)
 const [delay, setDelay] = useState<number | undefined>()
@@ -460,6 +485,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## 🤝 Contributing
 
 ### **Development Guidelines**
+
 1. **Fork** the repository
 2. **Create** feature branch (`git checkout -b feature/amazing-feature`)
 3. **Write tests** for new functionality
@@ -468,6 +494,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 6. **Push** and create Pull Request
 
 ### **Code Standards**
+
 - **TypeScript**: Strict mode with enhanced type checking
 - **Testing**: Minimum 80% coverage for new features
 - **Performance**: No regressions in bundle size or render times
@@ -477,12 +504,12 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **Built with ❤️ for the crypto trading community**
 
-*For learning purposes only • No responsibility accepted for use of this software*
+_For learning purposes only • No responsibility accepted for use of this software_
 
 ## Disclaimer
 
 This software is provided strictly for **learning and educational purposes**.  
-It is distributed **“as is”**, without warranties of any kind, express or implied, including but not limited to fitness for a particular purpose or non‑infringement.  
+It is distributed **“as is”**, without warranties of any kind, express or implied, including but not limited to fitness for a particular purpose or non‑infringement.
 
 The authors and contributors **do not accept any responsibility or liability** for any use, misuse, or outcomes resulting from this software.  
 By using this code, you acknowledge that you assume **full responsibility** for any consequences.
