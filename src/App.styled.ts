@@ -103,6 +103,7 @@ export const Header = styled.div`
 export const TickersPanel = styled.div`
   grid-area: tickers;
   overflow: hidden;
+  font-family: FiraSans-Medium;
 `
 
 export const MarketPanel = styled.div`
