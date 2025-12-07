@@ -95,6 +95,7 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
 
   const rowClassRules = {
     "selected-row": (params: any) => params.data.currencyPair === selectedCurrencyPair,
+    "stale-row": (params: any) => params.data.isStale,
   }
 
   return (

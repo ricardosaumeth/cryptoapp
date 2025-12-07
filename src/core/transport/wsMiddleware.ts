@@ -13,7 +13,8 @@ import {
 } from "./handlers"
 
 export const createWsMiddleware = (connection: Connection): Middleware => {
-  return (store) => (next) => (action) => {
+  return (store) => {
+    // Register handler only once when middleware is created
     connection.onReceive((data) => {
       const parsedData = JSON.parse(data)
       //console.log("parsedData", parsedData)
@@ -26,6 +27,7 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
         return
       } else if (parsedData.event === "pong") {
         store.dispatch(handlePong())
+        return
       }
 
       if (Array.isArray(parsedData) && parsedData[1] === "hb") {
@@ -35,9 +37,14 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
       if (Array.isArray(parsedData)) {
         const [channelId] = parsedData
         const subscription = store.getState().subscriptions[channelId]
+        
+        if (!subscription) {
+          return
+        }
+        
         store.dispatch(updateStaleSubscription({ channelId }))
 
-        switch (subscription?.channel) {
+        switch (subscription.channel) {
           case Channel.TRADES:
             handleTradesData(parsedData, subscription, store.dispatch)
             break
@@ -55,12 +62,12 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
             break
 
           default:
-            console.warn("Unhandled channel:", subscription?.channel)
+            console.warn("Unhandled channel:", subscription.channel)
             break
         }
       }
     })
 
-    return next(action)
+    return (next) => (action) => next(action)
   }
 }

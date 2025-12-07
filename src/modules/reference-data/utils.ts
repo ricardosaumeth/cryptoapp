@@ -19,8 +19,11 @@ export function formatCurrencyPair(currencyPair: string): string {
 
 export const formatPrice = (price: number | string | undefined) => numeral(price).format("0,0.00")
 
-export const formatAmount = (amount: number | string | undefined) =>
-  amount ? amount.toString() : ""
+export const formatAmount = (amount: number | string | undefined) => {
+  if (!amount) return ""
+  const num = typeof amount === "string" ? parseFloat(amount) : amount
+  return numeral(num).format("0,0.00000000")
+}
 
 export const formatVolume = (volume: number) => numeral(volume).format("0.00 a")
 

@@ -36,13 +36,13 @@ export const bootstrapApp = createAsyncThunk(
     dispatch(selectCurrencyPair({ currencyPair: currencyPairs[0] }))
 
     // Subscribe to ticker and candles for all currency pairs with delays
-    currencyPairs.forEach((currencyPair: string, index: number) => {
+    currencyPairs.forEach((currencyPair: string) => {
       setTimeout(
         () => {
           dispatch(tickerSubscribeToSymbol({ symbol: currencyPair }))
           dispatch(candlesSubscribeToSymbol({ symbol: currencyPair, timeframe: DEFAULT_TIMEFRAME }))
         },
-        (index + 1) * SUBSCRIPTION_TIMEOUT_IN_MS
+        SUBSCRIPTION_TIMEOUT_IN_MS
       )
     })
 

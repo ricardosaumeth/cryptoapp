@@ -1,20 +1,39 @@
-import { useState, memo } from "react"
+import { Component } from "react"
 import UpdateHighlight from "../../../../core/components/UpdateHighlight/UpdateHighlight"
 
 interface Props {
   valueFormatted: string
 }
 
-const PriceRenderer = memo((props: Props) => {
-  const [valueFormatted, setValueFormatted] = useState(props.valueFormatted)
+interface State {
+  valueFormatted: string
+}
 
-  // AG Grid calls this method to refresh the cell
-  ;(PriceRenderer as any).refresh = (params: Props) => {
-    setValueFormatted(params.valueFormatted)
+//AG Grid's refresh method needs to be a class method,
+// not a function component hook. The class component pattern allows
+// AG Grid to call the refresh method directly on the component
+// instance.
+class PriceRenderer extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props)
+
+    this.state = {
+      valueFormatted: props.valueFormatted,
+    }
+  }
+
+  refresh(params: Props) {
+    this.setState({
+      valueFormatted: params.valueFormatted,
+    })
+
     return true
   }
 
-  return <UpdateHighlight value={valueFormatted} />
-})
+  render() {
+    const { valueFormatted } = this.state
+    return <UpdateHighlight value={valueFormatted} />
+  }
+}
 
 export default PriceRenderer

@@ -1,4 +1,4 @@
-import { useMemo, memo, useState } from "react"
+import { useMemo, memo, useState, useCallback } from "react"
 import { AgGridReact } from "ag-grid-react"
 import type { ColDef, GridApi } from "ag-grid-community"
 import type { Trade } from "../types/Trade"
@@ -57,7 +57,7 @@ const Trades = memo(({ trades, isStale }: Props) => {
 
   useGridResize(gridApi)
 
-  const getRowId = useMemo(() => (params: any) => `${params.data.id}`, [])
+  const getRowId = useCallback((params: any) => `${params.data.id}`, [])
 
   return (
     <Container className="ag-theme-quartz-dark">
