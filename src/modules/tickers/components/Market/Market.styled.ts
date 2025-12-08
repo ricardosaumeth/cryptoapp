@@ -14,8 +14,7 @@ export const Container = styled.div`
     background-color: ${Palette.BackgroundColorOnHover};
   }
 
-.stale-row {
+  .stale-row {
     opacity: 0.6;
   }
 `
-

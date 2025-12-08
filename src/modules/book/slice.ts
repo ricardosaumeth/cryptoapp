@@ -7,6 +7,7 @@ export interface BookState {
   [currencyPair: string]: SymbolState
 }
 
+const MAX_BOOK_ORDERS = 100
 const initialState: BookState = {}
 
 export const bookSlice = createSlice({
@@ -42,6 +43,9 @@ export const bookSlice = createSlice({
       } else {
         // add
         orders.push({ id, price, amount })
+        if (orders.length > MAX_BOOK_ORDERS) {
+          orders.splice(0, orders.length - MAX_BOOK_ORDERS)
+        }
       }
     },
   },

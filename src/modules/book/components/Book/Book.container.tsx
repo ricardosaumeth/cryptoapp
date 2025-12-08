@@ -1,6 +1,4 @@
 import { useSelector } from "react-redux"
-import { useMemo } from "react"
-import { createSelector } from "@reduxjs/toolkit"
 import { getBook } from "../../selectors"
 import { getSelectedCurrencyPair } from "../../../selection/selectors"
 import { type RootState } from "../../../redux/store"
@@ -11,15 +9,9 @@ import Book from "./Book"
 const BookContainer = () => {
   const selectedCurrencyPair = useSelector(getSelectedCurrencyPair)
 
-  const selectOrders = useMemo(
-    () =>
-      createSelector([(state: RootState) => state, () => selectedCurrencyPair], (state, pair) =>
-        pair ? getBook(state)(pair) : []
-      ),
-    [selectedCurrencyPair]
+  const orders = useSelector((state: RootState) =>
+    selectedCurrencyPair ? getBook(state, selectedCurrencyPair) : []
   )
-
-  const orders = useSelector(selectOrders)
   const subscriptionId = useSelector((state: RootState) => getSubscriptionId(state, Channel.BOOK))
   const isStale = useSelector((state: RootState) =>
     subscriptionId ? getIsSubscriptionStale(state, subscriptionId) : false

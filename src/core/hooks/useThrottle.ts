@@ -20,8 +20,8 @@ export const useThrottle = <T>(value: T, ms = 1000) => {
   const setThrottledValueThrottled = useThrottleFn(setThrottledValue, ms)
 
   useEffect(() => {
-    setThrottledValueThrottled(value)
+    value && setThrottledValueThrottled(value)
   }, [value, setThrottledValueThrottled])
-  
+
   return throttledValue
 }

@@ -1,7 +1,6 @@
-import { useState } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { AgGridReact } from "ag-grid-react"
 import type { ColDef, GridApi } from "ag-grid-community"
-import { useThrottle } from "../../../../core/hooks/useThrottle"
 import { priceFormatter, amountFormatter } from "../../../ag-grid/formatter"
 import { Container } from "./Book.styled"
 import Loading from "../../../../core/components/Loading"
@@ -18,53 +17,56 @@ export interface Props {
 
 const Book = ({ orders, isStale }: Props) => {
   const [gridApi, setGridApi] = useState<GridApi | undefined>()
-
-  const throttledOrders = useThrottle<{ bid: Order; ask: Order }[]>(orders, 100)
-  const columnDefs: ColDef[] = [
-    {
-      headerName: "Bid Amount",
-      field: "bid.amount",
-      width: 145,
-      valueFormatter: amountFormatter,
-      cellRenderer: bidAmountRenderer,
-    },
-    {
-      headerName: "Bid Price",
-      field: "bid.price",
-      width: 125,
-      cellStyle: () => ({
-        color: Palette.Bid,
-      }),
-      type: "numericColumn",
-      valueFormatter: priceFormatter,
-    },
-    {
-      headerName: "Ask Price",
-      field: "ask.price",
-      width: 125,
-      cellStyle: () => ({
-        color: Palette.Ask,
-      }),
-      valueFormatter: priceFormatter,
-    },
-    {
-      headerName: "Ask Amount",
-      field: "ask.amount",
-      width: 145,
-      valueFormatter: (params) => amountFormatter({ value: Math.abs(params.value) }),
-      cellRenderer: askAmountRenderer,
-    },
-  ]
+  const columnDefs: ColDef[] = useMemo(
+    () => [
+      {
+        headerName: "Bid Amount",
+        field: "bid.amount",
+        width: 145,
+        valueFormatter: amountFormatter,
+        cellRenderer: bidAmountRenderer,
+      },
+      {
+        headerName: "Bid Price",
+        field: "bid.price",
+        width: 125,
+        cellStyle: () => ({
+          color: Palette.Bid,
+        }),
+        type: "numericColumn",
+        valueFormatter: priceFormatter,
+      },
+      {
+        headerName: "Ask Price",
+        field: "ask.price",
+        width: 125,
+        cellStyle: () => ({
+          color: Palette.Ask,
+        }),
+        valueFormatter: priceFormatter,
+      },
+      {
+        headerName: "Ask Amount",
+        field: "ask.amount",
+        width: 145,
+        valueFormatter: (params) => amountFormatter({ value: Math.abs(params.value) }),
+        cellRenderer: askAmountRenderer,
+      },
+    ],
+    []
+  )
 
   useGridResize(gridApi)
+
+  const getRowId = useCallback(({ data }: any) => [data.bid?.id, data.ask?.id].join("#"), [])
 
   return (
     <Container className="ag-theme-quartz-dark">
       {isStale && <Stale />}
       <AgGridReact
         columnDefs={columnDefs}
-        rowData={throttledOrders}
-        getRowId={({ data }) => [data.bid?.id, data.ask?.id].join("#")}
+        rowData={orders}
+        getRowId={getRowId}
         suppressHorizontalScroll={true}
         gridOptions={{ localeText: { noRowsToShow: "Loading..." } }}
         onGridReady={(event) => {
