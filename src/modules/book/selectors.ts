@@ -69,21 +69,23 @@ export const getDepth = createSelector(
     const rawBook = book[symbol]
     if (!rawBook?.length) return { bids: [], asks: [] }
 
-    const bids = rawBook.filter((o) => o.amount > 0)
-    const asks = rawBook.filter((o) => o.amount < 0)
+    const bids = rawBook.filter((o) => o.amount > 0).sort((a, b) => a.price - b.price)
+    const asks = rawBook.filter((o) => o.amount < 0).sort((a, b) => a.price - b.price)
 
-    const bidPrices = [...new Set(bids.map((o) => o.price))].sort((a, b) => a - b)
-    const askPrices = [...new Set(asks.map((o) => o.price))].sort((a, b) => a - b)
+    // Single-pass cumulative depth calculation
+    const bidDepth: { price: number; depth: number }[] = []
+    let bidSum = 0
+    for (const bid of bids) {
+      bidSum += Math.abs(bid.amount)
+      bidDepth.push({ price: bid.price, depth: bidSum })
+    }
 
-    const bidDepth = bidPrices.map((price) => ({
-      price,
-      depth: bids.filter((o) => o.price >= price).reduce((sum, o) => sum + Math.abs(o.amount), 0),
-    }))
-
-    const askDepth = askPrices.map((price) => ({
-      price,
-      depth: asks.filter((o) => o.price <= price).reduce((sum, o) => sum + Math.abs(o.amount), 0),
-    }))
+    const askDepth: { price: number; depth: number }[] = []
+    let askSum = 0
+    for (const ask of asks) {
+      askSum += Math.abs(ask.amount)
+      askDepth.push({ price: ask.price, depth: askSum })
+    }
 
     return { bids: bidDepth, asks: askDepth }
   }

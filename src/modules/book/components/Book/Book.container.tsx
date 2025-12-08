@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import { useSelector } from "react-redux"
 import { getBook } from "../../selectors"
 import { getSelectedCurrencyPair } from "../../../selection/selectors"
@@ -8,9 +9,10 @@ import Book from "./Book"
 
 const BookContainer = () => {
   const selectedCurrencyPair = useSelector(getSelectedCurrencyPair)
+  const emptyOrders = useMemo(() => [], [])
 
   const orders = useSelector((state: RootState) =>
-    selectedCurrencyPair ? getBook(state, selectedCurrencyPair) : []
+    selectedCurrencyPair ? getBook(state, selectedCurrencyPair) : emptyOrders
   )
   const subscriptionId = useSelector((state: RootState) => getSubscriptionId(state, Channel.BOOK))
   const isStale = useSelector((state: RootState) =>
