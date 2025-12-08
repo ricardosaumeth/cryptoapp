@@ -38,13 +38,13 @@ export class WsConnectionProxy implements ConnectionProxy {
     }
 
     this.socket.onclose = () => {
+      this.onCloseFn && this.onCloseFn()
+      
       if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
         this.reconnectAttempts++
         setTimeout(() => this.connect(), this.reconnectDelay * this.reconnectAttempts)
       }
     }
-
-    this.socket.onclose = () => this.onCloseFn && this.onCloseFn()
   }
 
   stop(): void {
