@@ -1,4 +1,5 @@
 import { useEffect } from "react"
+import { flushSync } from "react-dom"
 import { Provider, useDispatch, useSelector } from "react-redux"
 import { getStore, type AppDispatch } from "./modules/redux/store"
 import Trades from "./modules/trades/components"
@@ -39,6 +40,24 @@ function AppContent() {
 
   useEffect(() => {
     dispatch(bootstrapApp())
+  }, [dispatch])
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        flushSync(() => {
+          dispatch({ type: "@@VISIBILITY_CHANGE" })
+        })
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            dispatch({ type: "@@FORCE_RENDER" })
+          })
+        })
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange)
   }, [dispatch])
 
   useEffect(() => {
