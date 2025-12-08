@@ -5,7 +5,6 @@ export interface Props {
 }
 
 const Latency = ({ latency }: Props) => {
-  console.log("latency", latency)
   return (
     <Container>
       <span>Round trip: </span>

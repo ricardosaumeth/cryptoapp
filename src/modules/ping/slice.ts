@@ -52,6 +52,14 @@ export const startPing = createAsyncThunk("ping/startPing", async (_, { dispatch
   return initialTimestamp
 })
 
+export const stopPing = createAsyncThunk("ping/stopPing", async () => {
+  if (pingInterval) {
+    clearInterval(pingInterval)
+    pingInterval = null
+  }
+  return null
+})
+
 export const pingSlice = createSlice({
   name: "ping",
   initialState: {

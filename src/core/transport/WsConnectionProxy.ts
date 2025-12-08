@@ -39,10 +39,16 @@ export class WsConnectionProxy implements ConnectionProxy {
 
     this.socket.onclose = () => {
       this.onCloseFn && this.onCloseFn()
-      
+
       if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
         this.reconnectAttempts++
-        setTimeout(() => this.connect(), this.reconnectDelay * this.reconnectAttempts)
+        const delay = this.reconnectDelay * this.reconnectAttempts
+        console.log(`Scheduling reconnect in ${delay}ms...`)
+
+        setTimeout(() => {
+          this.connect()
+          console.log("Reconnect attempt executed.")
+        }, delay)
       }
     }
   }

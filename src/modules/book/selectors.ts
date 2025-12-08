@@ -2,7 +2,7 @@ import { createSelector } from "@reduxjs/toolkit"
 import { type RootState } from "../redux/store"
 import type { Order } from "./types/Order"
 
-const MAX_LEVELS = 5
+const MAX_LEVELS = 25
 
 const bookSelector = (state: RootState) => state.book
 

@@ -5,9 +5,9 @@ import { subscriptionsSlice, changeConnectionStatus } from "../../core/transport
 import { refDataSlice } from "../reference-data/slice"
 import { tickerSlice } from "../tickers/slice"
 import { candleSlice } from "../candles/slice"
-import { selectionSlice } from "../selection/slice"
+import { selectCurrencyPair, selectionSlice } from "../selection/slice"
 import { bookSlice } from "../book/slice"
-import { pingSlice, startPing } from "../ping/slice"
+import { pingSlice, startPing, stopPing } from "../ping/slice"
 import { WsConnectionProxy } from "../../core/transport/WsConnectionProxy"
 import { Connection } from "../../core/transport/Connection"
 import { createWsMiddleware } from "../../core/transport/wsMiddleware"
@@ -37,6 +37,8 @@ function createStore() {
         thunk: {
           extraArgument: { connection },
         },
+        serializableCheck: false,
+        immutableCheck: false,
       }).concat(createWsMiddleware(connection)),
   })
 
@@ -44,12 +46,17 @@ function createStore() {
     store.dispatch(changeConnectionStatus(ConnectionStatus.Connected))
     store.dispatch(startPing())
     console.log("Connected")
+
+    const { currencyPair } = store.getState().selection
+    if (currencyPair) {
+      store.dispatch(selectCurrencyPair({ currencyPair }))
+    }
   })
 
   connection.onClose(() => {
     store.dispatch(changeConnectionStatus(ConnectionStatus.Disconnected))
-    console.log("Disconnected")
-    connection.connect()
+    store.dispatch(stopPing())
+    console.log("Disconnected - will auto-reconnect")
   })
 
   return store
