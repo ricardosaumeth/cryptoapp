@@ -1,8 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { Trade } from "./types/Trade"
-import { config } from "../../config/env"
 
-export const MAX_TRADES = config.MAX_TRADES
+export const MAX_TRADES = import.meta.env["VITE_MAX_TRADES"]
 
 interface TradesState {
   [currencyPair: string]: Trade[]

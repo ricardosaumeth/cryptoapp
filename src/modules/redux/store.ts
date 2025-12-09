@@ -12,10 +12,11 @@ import { WsConnectionProxy } from "../../core/transport/WsConnectionProxy"
 import { Connection } from "../../core/transport/Connection"
 import { createWsMiddleware } from "../../core/transport/wsMiddleware"
 import { ConnectionStatus } from "../../core/transport/types/ConnectionStatus"
-import { config } from "../../config/env"
 import { startStaleMonitor } from "../../core/transport/staleMonitor"
 
-const connectionProxy = new WsConnectionProxy(config.BITFINEX_WS_URL)
+const connectionProxy = new WsConnectionProxy(
+  import.meta.env["VITE_BITFINEX_WS_URL"] || "wss://api-pub.bitfinex.com/ws/2"
+)
 export const connection = new Connection(connectionProxy)
 
 let storeInstance: ReturnType<typeof createStore> | null = null
