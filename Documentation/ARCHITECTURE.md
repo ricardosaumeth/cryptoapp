@@ -313,9 +313,11 @@ Bitfinex Format → Normalized Candle → Highcharts Format → Chart Render
 ```
 transport/
 ├── Connection.ts              # High-level connection API
-├── SocketIOConnectionProxy.ts # WebSocket implementation
-├── wsMiddleware.ts           # Redux integration
+├── WsConnectionProxy.ts       # WebSocket implementation
+├── wsMiddleware.ts           # Redux integration with handlers
+├── staleMonitor.ts           # Heartbeat-based stale detection
 ├── slice.ts                  # Subscription management
+├── selectors.ts              # Subscription selectors
 └── types/
     ├── ConnectionProxy.ts    # Interface definitions
     └── ConnectionStatus.ts   # Status enumeration
@@ -340,34 +342,75 @@ Disconnected ──connect()──→ Connecting ──success──→ Connecte
 **Message Processing Pipeline**:
 
 ```typescript
-// Middleware processes all WebSocket messages
+// Middleware processes all WebSocket messages with handler-based routing
 const wsMiddleware: Middleware = (store) => (next) => (action) => {
   connection.onReceive((data) => {
     const parsed = JSON.parse(data)
 
-    // Route messages based on channel type
+    // Route messages based on type
     if (parsed.event === "subscribed") {
-      store.dispatch(subscribeToChannelAck(parsed))
+      handleSubscriptionAck(parsed, store)
+    } else if (parsed.event === "unsubscribed") {
+      handleUnSubscriptionAck(parsed, store)
+    } else if (parsed.event === "pong") {
+      store.dispatch(handlePong())
+    } else if (Array.isArray(parsed) && parsed[1] === "hb") {
+      // Heartbeat handling - reset stale flag
+      const [channelId] = parsed
+      const subscription = store.getState().subscriptions[channelId]
+      if (subscription?.isStale) {
+        store.dispatch(updateStaleSubscription({ channelId }))
+      }
     } else if (Array.isArray(parsed)) {
-      const [channelId, payload] = parsed
+      const [channelId] = parsed
       const subscription = store.getState().subscriptions[channelId]
 
-      // Dispatch to appropriate module
+      // Route to modular handlers
       switch (subscription?.channel) {
-        case "trades":
-          store.dispatch(updateTrades({ currencyPair, trades: payload }))
+        case Channel.TRADES:
+          handleTradesData(parsed, subscription, store.dispatch)
           break
-        case "ticker":
-          store.dispatch(updateTicker({ symbol, data: payload }))
+        case Channel.TICKER:
+          handleTickerData(parsed, subscription, store.dispatch)
           break
-        case "candles":
-          store.dispatch(candlesUpdate({ currencyPair, candle: payload }))
+        case Channel.CANDLES:
+          handleCandlesData(parsed, subscription, store.dispatch)
+          break
+        case Channel.BOOK:
+          handleBookData(parsed, subscription, store.dispatch)
           break
       }
     }
   })
 
   return next(action)
+}
+```
+
+**Stale Detection Architecture**:
+
+```typescript
+// Heartbeat-based monitoring (20s timeout, 5s check interval)
+const STALE_TIMEOUT_MS = 20000
+const STALE_CHECK_INTERVAL_MS = 5000
+
+export const startStaleMonitor = (getState: () => RootState, dispatch: AppDispatch) => {
+  const intervalId = setInterval(() => {
+    const state = getState()
+    const now = Date.now()
+
+    Object.keys(state.subscriptions).forEach((key) => {
+      const channelId = Number(key)
+      const subscription = state.subscriptions[channelId]
+      const { lastUpdate, isStale } = subscription
+
+      if (lastUpdate && !isStale && now - lastUpdate > STALE_TIMEOUT_MS) {
+        dispatch(markSubscriptionStale({ channelId }))
+      }
+    })
+  }, STALE_CHECK_INTERVAL_MS)
+
+  return () => clearInterval(intervalId)
 }
 ```
 
@@ -562,6 +605,36 @@ addTrade: (state, action) => {
   if (trades.length > MAX_TRADES_PER_SYMBOL) {
     trades.splice(0, trades.length - MAX_TRADES_PER_SYMBOL)
   }
+}
+```
+
+### Order Book Batching
+
+```typescript
+// Per-currency-pair batching to prevent AG Grid performance issues
+const BATCH_DELAY_MS = 50
+const updateQueues = new Map<string, any[]>()
+const batchTimeouts = new Map<string, NodeJS.Timeout>()
+
+const flushUpdates = (currencyPair: string, dispatch: AppDispatch) => {
+  const queue = updateQueues.get(currencyPair)
+  if (queue && queue.length > 0) {
+    queue.forEach((order) => {
+      dispatch(bookUpdateReducer({ currencyPair, order }))
+    })
+    updateQueues.set(currencyPair, [])
+  }
+  batchTimeouts.delete(currencyPair)
+}
+
+// Queue high-frequency updates
+const queue = updateQueues.get(currencyPair) || []
+queue.push(order)
+updateQueues.set(currencyPair, queue)
+
+if (!batchTimeouts.has(currencyPair)) {
+  const timeout = setTimeout(() => flushUpdates(currencyPair, dispatch), BATCH_DELAY_MS)
+  batchTimeouts.set(currencyPair, timeout)
 }
 ```
 

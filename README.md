@@ -141,6 +141,7 @@ src/
 │   │   ├── Connection.ts
 │   │   ├── WsConnectionProxy.ts
 │   │   ├── wsMiddleware.ts
+│   │   ├── staleMonitor.ts
 │   │   ├── slice.ts
 │   │   └── selectors.ts
 │   ├── utils.ts        # Core utility functions
@@ -240,10 +241,12 @@ src/
 
 - **Memory Management**: Environment-configurable limits for trades (1000) and candles (5000)
 - **Handler Architecture**: Modular message processing for maintainability
-- **Connection Monitoring**: Real-time latency tracking with ping/pong
-- **Stale Detection**: Automatic detection of inactive subscriptions
+- **Order Book Batching**: 50ms batching for high-frequency updates to prevent AG Grid performance issues
+- **Connection Monitoring**: Real-time latency tracking with ping/pong mechanism
+- **Stale Detection**: Heartbeat-based monitoring (20s timeout) with visual indicators
 - **Memoized Selectors**: Optimized data access preventing unnecessary re-renders
-- **Connection Diagnostics**: WebSocket health monitoring with visual feedback
+- **Connection Diagnostics**: WebSocket health monitoring with auto-reconnection (5 attempts, exponential backoff)
+- **Null Safety**: Comprehensive null/NaN checks in AG Grid formatters
 
 ### 🎯 **Developer Experience**
 
@@ -458,24 +461,78 @@ npm run preview
 - **WebSocket Health**: Connection status tracking via `ConnectionStatus` enum
 - **UI Latency**: Real-time UI thread responsiveness monitoring (every 2 seconds)
 - **Network Latency**: WebSocket round-trip time via ping/pong mechanism
-- **Stale Detection**: Automatic detection of inactive subscription channels
-- **Basic Logging**: Console warnings for unhandled channels and debugging
+- **Stale Detection**: Heartbeat-based monitoring detecting inactive subscriptions after 20 seconds
+- **Visual Indicators**: Stale overlays on Book, DepthChart, Trades, Candles, and Market components
+- **Auto-Reconnection**: Exponential backoff with up to 5 reconnection attempts
 
-### **Actual Implementation**
+### **Stale Detection Implementation**
 
 ```typescript
-// UI Latency Monitoring (Diagnostics component)
-const [delay, setDelay] = useState<number | undefined>()
-// Measures UI thread responsiveness every 2 seconds
+// Stale Monitor - checks every 5 seconds
+const STALE_TIMEOUT_MS = 20000 // 20 seconds without heartbeat = stale
+const STALE_CHECK_INTERVAL_MS = 5000 // Check every 5 seconds
 
+export const startStaleMonitor = (getState: () => RootState, dispatch: AppDispatch) => {
+  const intervalId = setInterval(() => {
+    const state = getState()
+    const now = Date.now()
+
+    Object.keys(state.subscriptions).forEach((key) => {
+      const channelId = Number(key)
+      if (isNaN(channelId)) return
+
+      const subscription = state.subscriptions[channelId]
+      if (!subscription) return
+
+      const { lastUpdate, isStale } = subscription
+
+      if (lastUpdate && !isStale && now - lastUpdate > STALE_TIMEOUT_MS) {
+        dispatch(markSubscriptionStale({ channelId }))
+      }
+    })
+  }, STALE_CHECK_INTERVAL_MS)
+
+  return () => clearInterval(intervalId)
+}
+
+// Heartbeat handling - resets stale flag
+if (Array.isArray(parsedData) && parsedData[1] === "hb") {
+  const [channelId] = parsedData
+  const subscription = store.getState().subscriptions[channelId]
+  if (subscription?.isStale) {
+    store.dispatch(updateStaleSubscription({ channelId }))
+  }
+  return
+}
+
+// UI Components with stale indicators
+const Book = ({ orders, isStale }: Props) => {
+  return (
+    <Container>
+      {isStale && <Stale />}
+      <AgGridReact rowData={orders} />
+    </Container>
+  )
+}
+```
+
+### **Connection Monitoring Features**
+
+```typescript
 // Network Latency (Latency component)
 const Latency = ({ latency }: Props) => {
   return <span>{latency || "---"}ms</span>
 }
 
-// Connection Status & Stale Detection
-store.dispatch(updateStaleSubscription({ channelId }))
-console.warn("Unhandled channel:", subscription?.channel)
+// Auto-Reconnection with exponential backoff
+this.socket.onclose = () => {
+  this.onCloseFn && this.onCloseFn()
+
+  if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
+    this.reconnectAttempts++
+    setTimeout(() => this.connect(), this.reconnectDelay * this.reconnectAttempts)
+  }
+}
 ```
 
 ## 📄 License

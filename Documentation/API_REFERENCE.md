@@ -226,6 +226,8 @@ interface SubscriptionState {
   [channelId: number]: {
     channel: string
     request: SubscriptionRequest
+    isStale: boolean
+    lastUpdate?: number
   }
   wsConnectionStatus: ConnectionStatus
 }
@@ -246,7 +248,7 @@ enum ConnectionStatus {
 
 ```typescript
 // Update connection status
-wsConnectionStatusChanged(payload: ConnectionStatus)
+changeConnectionStatus(payload: ConnectionStatus)
 
 // Handle subscription acknowledgment
 subscribeToChannelAck(payload: {
@@ -254,6 +256,43 @@ subscribeToChannelAck(payload: {
   channel: string
   request: SubscriptionRequest
 })
+
+// Update stale subscription (reset on heartbeat)
+updateStaleSubscription(payload: { channelId: number })
+
+// Mark subscription as stale (no heartbeat for 20s)
+markSubscriptionStale(payload: { channelId: number })
+```
+
+#### Stale Detection
+
+```typescript
+// Stale monitor configuration
+const STALE_TIMEOUT_MS = 20000 // 20 seconds without heartbeat
+const STALE_CHECK_INTERVAL_MS = 5000 // Check every 5 seconds
+
+// Start monitoring for stale subscriptions
+startStaleMonitor(getState: () => RootState, dispatch: AppDispatch): () => void
+
+// Heartbeat handling in middleware
+if (Array.isArray(parsedData) && parsedData[1] === "hb") {
+  const [channelId] = parsedData
+  const subscription = store.getState().subscriptions[channelId]
+  if (subscription?.isStale) {
+    store.dispatch(updateStaleSubscription({ channelId }))
+  }
+  return
+}
+```
+
+#### Selectors
+
+```typescript
+// Get subscription ID by channel and symbol
+getSubscriptionId(state: RootState, channel: Channel, symbol?: string): number | undefined
+
+// Check if subscription is stale
+getIsSubscriptionStale(state: RootState, subscriptionId: number): boolean
 ```
 
 #### Async Thunks
@@ -644,6 +683,27 @@ formatLargeNumber(value: number): string
 
 // Calculate percentage change
 calculatePercentageChange(oldValue: number, newValue: number): number
+
+// AG Grid formatters with null/NaN safety
+priceFormatter(params: { value: number }): string {
+  if (!params || params.value == null || isNaN(params.value)) return "-"
+  return formatPrice(params.value)
+}
+
+amountFormatter(params: { value: number }): string {
+  if (!params || params.value == null || isNaN(params.value)) return "-"
+  return formatAmount(params.value)
+}
+
+volumeFormatter(params: { value: number }): string {
+  if (!params || params.value == null || isNaN(params.value)) return "-"
+  return formatVolume(params.value)
+}
+
+timeFormatter(params: { value: number }): string {
+  if (!params || params.value == null || isNaN(params.value)) return "-"
+  return formatTime(params.value)
+}
 ```
 
 ### Data Processing
@@ -938,6 +998,36 @@ const MAX_CANDLES = config.MAX_CANDLES // 5000 by default
 // Automatic cleanup in reducers
 if (state[currencyPair].length > MAX_TRADES) {
   state[currencyPair].splice(0, state[currencyPair].length - MAX_TRADES)
+}
+```
+
+### Order Book Batching
+
+```typescript
+// Batch high-frequency order book updates (50ms delay)
+const BATCH_DELAY_MS = 50
+const updateQueues = new Map<string, any[]>()
+const batchTimeouts = new Map<string, NodeJS.Timeout>()
+
+const flushUpdates = (currencyPair: string, dispatch: AppDispatch) => {
+  const queue = updateQueues.get(currencyPair)
+  if (queue && queue.length > 0) {
+    queue.forEach((order) => {
+      dispatch(bookUpdateReducer({ currencyPair, order }))
+    })
+    updateQueues.set(currencyPair, [])
+  }
+  batchTimeouts.delete(currencyPair)
+}
+
+// Queue updates instead of immediate dispatch
+const queue = updateQueues.get(currencyPair) || []
+queue.push(order)
+updateQueues.set(currencyPair, queue)
+
+if (!batchTimeouts.has(currencyPair)) {
+  const timeout = setTimeout(() => flushUpdates(currencyPair, dispatch), BATCH_DELAY_MS)
+  batchTimeouts.set(currencyPair, timeout)
 }
 ```
 

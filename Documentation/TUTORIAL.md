@@ -725,7 +725,142 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
 }
 ```
 
-## 🚀 Step 9: App Bootstrap with Staggered Subscriptions
+## 🔍 Step 9: Stale Detection & Connection Monitoring
+
+### 9.1 Stale Monitor (`src/core/transport/staleMonitor.ts`)
+
+```typescript
+import type { AppDispatch, RootState } from "../../modules/redux/store"
+import { markSubscriptionStale } from "./slice"
+
+const STALE_TIMEOUT_MS = 20000 // 20 seconds without heartbeat = stale
+const STALE_CHECK_INTERVAL_MS = 5000 // Check every 5 seconds
+
+export const startStaleMonitor = (getState: () => RootState, dispatch: AppDispatch) => {
+  const intervalId = setInterval(() => {
+    const state = getState()
+    const now = Date.now()
+
+    Object.keys(state.subscriptions).forEach((key) => {
+      const channelId = Number(key)
+      if (isNaN(channelId)) return
+
+      const subscription = state.subscriptions[channelId]
+      if (!subscription) return
+
+      const { lastUpdate, isStale } = subscription
+
+      if (lastUpdate && !isStale && now - lastUpdate > STALE_TIMEOUT_MS) {
+        dispatch(markSubscriptionStale({ channelId }))
+      }
+    })
+  }, STALE_CHECK_INTERVAL_MS)
+
+  return () => clearInterval(intervalId)
+}
+```
+
+### 9.2 Update Subscription State (`src/core/transport/slice.ts`)
+
+```typescript
+export interface SubscriptionState {
+  [channelId: number]: {
+    channel: string
+    request: requestSubscribeToChannelAck
+    isStale: boolean
+    lastUpdate?: number
+  }
+  wsConnectionStatus: ConnectionStatus
+}
+
+// Add new actions
+reducers: {
+  updateStaleSubscription: (
+    state,
+    action: PayloadAction<{ channelId: number }>
+  ) => {
+    const { channelId } = action.payload
+    if (state[channelId]) {
+      state[channelId]!.isStale = false
+      state[channelId]!.lastUpdate = Date.now()
+    }
+  },
+  markSubscriptionStale: (
+    state,
+    action: PayloadAction<{ channelId: number }>
+  ) => {
+    const { channelId } = action.payload
+    if (state[channelId]) {
+      state[channelId]!.isStale = true
+    }
+  },
+}
+```
+
+### 9.3 Update Middleware for Heartbeat Handling
+
+```typescript
+// In wsMiddleware.ts - handle heartbeat messages
+if (Array.isArray(parsedData) && parsedData[1] === "hb") {
+  const [channelId] = parsedData
+  const subscription = store.getState().subscriptions[channelId]
+  if (subscription?.isStale) {
+    store.dispatch(updateStaleSubscription({ channelId }))
+  }
+  return
+}
+```
+
+### 9.4 Start Monitor in Store
+
+```typescript
+// In store.ts
+import { startStaleMonitor } from "../../core/transport/staleMonitor"
+
+function createStore() {
+  const store = configureStore({
+    /* ... */
+  })
+
+  // Start stale monitor
+  startStaleMonitor(store.getState, store.dispatch)
+
+  return store
+}
+```
+
+### 9.5 Stale UI Component (`src/core/components/Stale/Stale.tsx`)
+
+```typescript
+import Loading from "../Loading"
+import { Container } from "./Stale.styled"
+
+const Stale = () => {
+  return (
+    <Container>
+      <Loading title={"Stale..."} />
+    </Container>
+  )
+}
+
+export default Stale
+```
+
+### 9.6 Add Stale Indicator to Components
+
+```typescript
+// Example: Book component
+const Book = ({ orders, isStale }: Props) => {
+  return (
+    <Container>
+      {isStale && <Stale />}
+      <AgGridReact rowData={orders} />
+    </Container>
+  )
+}
+```
+
+## 🚀 Step 10: App Bootstrap with Staggered Subscriptions
 
 ### 9.1 Bootstrap Logic (`src/modules/app/slice.ts`)
 
@@ -801,7 +936,7 @@ export const appBootstrapSlice = createSlice({
 })
 ```
 
-## 🎯 Step 10: Final Assembly
+## 🎯 Step 11: Final Assembly
 
 ### 10.1 Testing Setup (`vitest.config.ts`)
 
@@ -892,7 +1027,9 @@ You've built a production-ready real-time cryptocurrency trading dashboard!
 - ✅ **Interactive Candlestick Charts**: Professional trading charts
 - ✅ **Live Trade Feed**: Real-time trade history
 - ✅ **Order Book**: Bid/ask spreads with depth visualization
+- ✅ **Stale Detection**: Heartbeat-based monitoring (20s timeout)
 - ✅ **Connection Monitoring**: Diagnostics and latency tracking
+- ✅ **Order Book Batching**: 50ms batching for AG Grid performance
 - ✅ **Responsive Design**: Works on all screen sizes
 - ✅ **Dark Theme**: Professional trading interface
 
@@ -926,7 +1063,7 @@ Happy coding! 🚀
 ### Architecture Benefits:
 
 - **Scalable**: Handler-based architecture supports easy feature additions
-- **Testable**: Comprehensive Vitest testing strategy
-- **Maintainable**: Clear separation of concerns
-- **Production-Ready**: Memory management and error handling
+- **Testable**: Comprehensive Vitest testing strategy with stale monitor tests
+- **Maintainable**: Clear separation of concerns with modular handlers
 - **Type-Safe**: Enhanced TypeScript configuration prevents runtime errors
+- **Reliable**: Heartbeat-based stale detection ensures data freshness

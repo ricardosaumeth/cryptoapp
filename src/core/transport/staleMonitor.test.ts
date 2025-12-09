@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { startStaleMonitor } from "./staleMonitor"
-import type { RootState } from "../../modules/redux/store"
 
 vi.mock("./slice", () => ({
   markSubscriptionStale: vi.fn((payload) => ({ type: "subscriptions/markStale", payload })),

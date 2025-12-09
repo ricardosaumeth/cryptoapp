@@ -1340,6 +1340,98 @@ describe("tradesHandler", () => {
 })
 ```
 
----
+### Stale Monitor Testing
 
-_This testing guide ensures your CryptoApp maintains the highest quality standards. For implementation examples, see the test files in each module. For CI/CD setup, see [Deployment Guide](DEPLOYMENT.md)._
+```typescript
+// src/core/transport/__tests__/staleMonitor.test.ts
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { startStaleMonitor } from "../staleMonitor"
+import type { RootState } from "../../../modules/redux/store"
+
+describe("staleMonitor", () => {
+  let mockGetState: any
+  let mockDispatch: any
+  let cleanup: () => void
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    mockDispatch = vi.fn()
+  })
+
+  afterEach(() => {
+    if (cleanup) cleanup()
+    vi.useRealTimers()
+  })
+
+  it("should mark subscription as stale after 20 seconds without heartbeat", () => {
+    const now = Date.now()
+    mockGetState = vi.fn(() => ({
+      subscriptions: {
+        12345: {
+          channel: "trades",
+          isStale: false,
+          lastUpdate: now - 21000, // 21 seconds ago
+        },
+      },
+    })) as () => RootState
+
+    cleanup = startStaleMonitor(mockGetState, mockDispatch)
+
+    vi.advanceTimersByTime(5000)
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "subscriptions/markStale",
+      payload: { channelId: 12345 },
+    })
+  })
+
+  it("should not mark subscription as stale if updated recently", () => {
+    const now = Date.now()
+    mockGetState = vi.fn(() => ({
+      subscriptions: {
+        12345: {
+          channel: "trades",
+          isStale: false,
+          lastUpdate: now - 5000, // 5 seconds ago
+        },
+      },
+    })) as () => RootState
+
+    cleanup = startStaleMonitor(mockGetState, mockDispatch)
+
+    vi.advanceTimersByTime(5000)
+
+    expect(mockDispatch).not.toHaveBeenCalled()
+  })
+
+  it("should handle multiple subscriptions independently", () => {
+    const now = Date.now()
+    mockGetState = vi.fn(() => ({
+      subscriptions: {
+        12345: {
+          channel: "trades",
+          isStale: false,
+          lastUpdate: now - 25000, // stale
+        },
+        12346: {
+          channel: "ticker",
+          isStale: false,
+          lastUpdate: now - 5000, // fresh
+        },
+      },
+    })) as () => RootState
+
+    cleanup = startStaleMonitor(mockGetState, mockDispatch)
+
+    vi.advanceTimersByTime(5000)
+
+    expect(mockDispatch).toHaveBeenCalledTimes(1)
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "subscriptions/markStale",
+      payload: { channelId: 12345 },
+    })
+  })
+})
+```
+
+---
