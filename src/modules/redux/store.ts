@@ -13,6 +13,7 @@ import { Connection } from "../../core/transport/Connection"
 import { createWsMiddleware } from "../../core/transport/wsMiddleware"
 import { ConnectionStatus } from "../../core/transport/types/ConnectionStatus"
 import { config } from "../../config/env"
+import { startStaleMonitor } from "../../core/transport/staleMonitor"
 
 const connectionProxy = new WsConnectionProxy(config.BITFINEX_WS_URL)
 export const connection = new Connection(connectionProxy)
@@ -58,6 +59,8 @@ function createStore() {
     store.dispatch(stopPing())
     console.log("Disconnected - will auto-reconnect")
   })
+
+  startStaleMonitor(store.getState, store.dispatch)
 
   return store
 }

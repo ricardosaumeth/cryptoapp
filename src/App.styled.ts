@@ -60,7 +60,7 @@ export const Content = styled.div`
 `
 
 export const Header = styled.div`
-  background-color: #4682b4;
+  background-color: ${Palette.SteelBlue};
   grid-area: header;
   color: ${Palette.White};
   position: relative;

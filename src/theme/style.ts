@@ -13,6 +13,7 @@ const Palette = {
   Border: "#424242",
   LightGray: "rgba(245, 245, 245, 0.64)",
   DarkGray: "#63666D",
+  SteelBlue: "#4682b4",
 }
 
 export default Palette

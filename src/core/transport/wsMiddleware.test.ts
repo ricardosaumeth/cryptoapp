@@ -97,7 +97,25 @@ describe("wsMiddleware", () => {
     expect(mockStore.dispatch).toHaveBeenCalledWith({ type: "ping/pong" })
   })
 
-  it("should ignore heartbeat messages", () => {
+  it("should handle heartbeat messages and reset stale if needed", () => {
+    mockStore.getState = vi.fn(() => ({
+      subscriptions: {
+        12345: { channel: Channel.TRADES, isStale: true },
+      },
+    }))
+
+    middleware({ type: "test" })
+
+    const heartbeatData = JSON.stringify([12345, "hb"])
+    onReceiveCallback(heartbeatData)
+
+    expect(mockStore.dispatch).toHaveBeenCalledWith({
+      type: "subscriptions/updateStale",
+      payload: { channelId: 12345 },
+    })
+  })
+
+  it("should ignore heartbeat when not stale", () => {
     middleware({ type: "test" })
 
     const heartbeatData = JSON.stringify([12345, "hb"])
@@ -112,10 +130,6 @@ describe("wsMiddleware", () => {
     const tradesData = JSON.stringify([12345, [[1, 1640995200000, 0.5, 45000]]])
     onReceiveCallback(tradesData)
 
-    expect(mockStore.dispatch).toHaveBeenCalledWith({
-      type: "subscriptions/updateStale",
-      payload: { channelId: 12345 },
-    })
     expect(handlers.handleTradesData).toHaveBeenCalledWith(
       [12345, [[1, 1640995200000, 0.5, 45000]]],
       { channel: Channel.TRADES },

@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from "vitest"
 import { priceFormatter, amountFormatter, volumeFormatter, timeFormatter } from "./formatter"
 
-// Mock the utility functions
 vi.mock("../reference-data/utils", () => ({
   formatPrice: vi.fn((value) => `$${value}`),
   formatAmount: vi.fn((value) => `${value} BTC`),

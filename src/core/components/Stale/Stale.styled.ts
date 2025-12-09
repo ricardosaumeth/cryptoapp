@@ -1,4 +1,5 @@
 import styled from "styled-components"
+import Palette from "../../../theme/style"
 
 export const Container = styled.div`
   position: absolute;
@@ -6,7 +7,7 @@ export const Container = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: rgba(34, 34, 34, 0.7);
+  background-color: ${Palette.BackgroundColorOnHover};
   pointer-events: none;
   z-index: 1;
   display: flex;

@@ -9,12 +9,9 @@ export const Container = styled.div`
     font-size: 12px;
   }
 
-  .selected-row {
+  .selected-row,
+  .stale-row {
     font-weight: 700;
     background-color: ${Palette.BackgroundColorOnHover};
-  }
-
-  .stale-row {
-    opacity: 0.6;
   }
 `

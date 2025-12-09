@@ -65,6 +65,7 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
       headerName: "",
       field: "prices",
       cellRenderer: "priceChartRenderer",
+      valueFormatter: () => "",
       width: 66,
       cellStyle: () => ({
         paddingLeft: 0,

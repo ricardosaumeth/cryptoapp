@@ -39,7 +39,7 @@ describe("subscriptionsSlice", () => {
       expect(result[12345]).toEqual({
         channel: "trades",
         request: { channel: "trades", symbol: "tBTCUSD" },
-        isStale: true,
+        isStale: false,
       })
     })
 
@@ -65,7 +65,7 @@ describe("subscriptionsSlice", () => {
         12345: {
           channel: "trades",
           request: { channel: "trades", symbol: "tBTCUSD" },
-          isStale: true,
+          isStale: false,
         },
       }
 

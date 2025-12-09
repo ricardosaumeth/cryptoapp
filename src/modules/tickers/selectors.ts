@@ -8,6 +8,7 @@ import { candlesSelector } from "../candles/selectors"
 import { getValueAt } from "../../core/utils"
 import { getLookupKey } from "../candles/utils"
 import { DEFAULT_TIMEFRAME } from "../app/slice"
+import { Channel } from "../../core/transport/types/Channels"
 
 const tickerSelector = (state: RootState) => state.ticker
 
@@ -58,12 +59,25 @@ export const getVisibleCurrencyPairTickers = createSelector(
 export const getTickersWithPrices = createSelector(
   getTickers,
   candlesSelector,
-  (tickers, candles) => {
-    return tickers.map((ticker) => ({
-      ...ticker,
-      prices: (candles[getLookupKey(ticker.currencyPair, DEFAULT_TIMEFRAME)] || []).map(
-        (ticker) => ticker.close
-      ),
-    }))
+  (state: RootState) => state.subscriptions,
+  (tickers, candles, subscriptions) => {
+    return tickers.map((ticker) => {
+      const channelId = Object.keys(subscriptions)
+        .map(Number)
+        .find((id) => {
+          const sub = subscriptions[id]
+          return (
+            sub?.channel === Channel.TICKER && sub?.request?.symbol === `t${ticker.currencyPair}`
+          )
+        })
+
+      return {
+        ...ticker,
+        prices: (candles[getLookupKey(ticker.currencyPair, DEFAULT_TIMEFRAME)] || []).map(
+          (candle) => candle.close
+        ),
+        isStale: channelId ? subscriptions[channelId]?.isStale : false,
+      }
+    })
   }
 )
