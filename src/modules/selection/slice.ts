@@ -47,11 +47,11 @@ export const selectCurrencyPair = createAsyncThunk(
       // The original code returned immediately while setTimeout was still pending,
       // creating a race condition. The new version properly waits for the timeout
       // to complete before resolving.
-      return new Promise<string>((resolve) => {
+      return new Promise<void>((resolve) => {
         setTimeout(() => {
           dispatch(tradeSubscribeToSymbol({ symbol: currencyPair }))
           dispatch(bookSubscribeToSymbol({ symbol: currencyPair, prec: "R0" }))
-          resolve(currencyPair)
+          resolve()
         }, SUBSCRIPTION_TIMEOUT_IN_MS)
       })
     } catch (error) {
