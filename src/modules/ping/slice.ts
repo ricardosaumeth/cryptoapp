@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import { connection } from "../redux/store"
+import type { Connection } from "src/core/transport/Connection"
 
 interface PingState {
   latency: number | null
@@ -25,7 +25,9 @@ let currentCid = 0
 // - Consistent scheduling: setInterval ensures that pings are sent every
 // PING_INTERVAL_IN_MS milliseconds, without you having to manually trigger them.
 
-export const startPing = createAsyncThunk("ping/startPing", async (_, { dispatch }) => {
+export const startPing = createAsyncThunk("ping/startPing", async (_, { dispatch, extra }) => {
+  const { connection } = extra as { connection: Connection }
+
   if (pingInterval) return null
 
   const initialTimestamp = Date.now()

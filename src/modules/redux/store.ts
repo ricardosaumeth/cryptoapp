@@ -17,7 +17,7 @@ import { startStaleMonitor } from "../../core/transport/staleMonitor"
 const connectionProxy = new WsConnectionProxy(
   import.meta.env["VITE_BITFINEX_WS_URL"] || "wss://api-pub.bitfinex.com/ws/2"
 )
-export const connection = new Connection(connectionProxy)
+const connection = new Connection(connectionProxy)
 
 let storeInstance: ReturnType<typeof createStore> | null = null
 
