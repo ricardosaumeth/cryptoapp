@@ -17,7 +17,6 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
     // Register handler only once when middleware is created
     connection.onReceive((data) => {
       const parsedData = JSON.parse(data)
-      //console.log("parsedData", parsedData)
 
       if (parsedData.event === "subscribed") {
         handleSubscriptionAck(parsedData, store)
@@ -30,20 +29,17 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
         return
       }
 
-      if (Array.isArray(parsedData) && parsedData[1] === "hb") {
-        const [channelId] = parsedData
-        const subscription = store.getState().subscriptions[channelId]
-        if (subscription?.isStale) {
-          store.dispatch(updateStaleSubscription({ channelId }))
-        }
-        return
-      }
-
       if (Array.isArray(parsedData)) {
         const [channelId] = parsedData
         const subscription = store.getState().subscriptions[channelId]
 
         if (!subscription) {
+          return
+        }
+
+        store.dispatch(updateStaleSubscription({ channelId }))
+
+        if (parsedData[1] === "hb") {
           return
         }
 
