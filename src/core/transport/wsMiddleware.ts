@@ -33,15 +33,11 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
         const [channelId] = parsedData
         const subscription = store.getState().subscriptions[channelId]
 
-        if (!subscription) {
+        if (!subscription || parsedData[1] === "hb") {
           return
         }
 
         store.dispatch(updateStaleSubscription({ channelId }))
-
-        if (parsedData[1] === "hb") {
-          return
-        }
 
         switch (subscription.channel) {
           case Channel.TRADES:

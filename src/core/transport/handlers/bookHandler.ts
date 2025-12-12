@@ -1,4 +1,4 @@
-import { bookSnapshotReducer, bookUpdateReducer } from '../../../modules/book/slice'
+import { bookSnapshotReducer, bookUpdateReducer } from "../../../modules/book/slice"
 
 export const handleBookData = (parsedData: any[], subscription: any, dispatch: any) => {
   const currencyPair = subscription.request.symbol.slice(1)
@@ -12,4 +12,3 @@ export const handleBookData = (parsedData: any[], subscription: any, dispatch: a
     dispatch(bookUpdateReducer({ currencyPair, order }))
   }
 }
-

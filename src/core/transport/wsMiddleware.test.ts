@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { createWsMiddleware } from "./wsMiddleware"
 import { Channel } from "./types/Channels"
 
-// Mock all dependencies
 vi.mock("./slice", () => ({
   updateStaleSubscription: vi.fn((payload) => ({ type: "subscriptions/updateStale", payload })),
 }))
@@ -97,31 +96,25 @@ describe("wsMiddleware", () => {
     expect(mockStore.dispatch).toHaveBeenCalledWith({ type: "ping/pong" })
   })
 
-  it("should handle heartbeat messages and reset stale if needed", () => {
-    mockStore.getState = vi.fn(() => ({
-      subscriptions: {
-        12345: { channel: Channel.TRADES, isStale: true },
-      },
-    }))
-
-    middleware({ type: "test" })
-
-    const heartbeatData = JSON.stringify([12345, "hb"])
-    onReceiveCallback(heartbeatData)
-
-    expect(mockStore.dispatch).toHaveBeenCalledWith({
-      type: "subscriptions/updateStale",
-      payload: { channelId: 12345 },
-    })
-  })
-
-  it("should ignore heartbeat when not stale", () => {
+  it("should ignore heartbeat messages", () => {
     middleware({ type: "test" })
 
     const heartbeatData = JSON.stringify([12345, "hb"])
     onReceiveCallback(heartbeatData)
 
     expect(mockStore.dispatch).not.toHaveBeenCalled()
+  })
+
+  it("should update stale subscription for data messages", () => {
+    middleware({ type: "test" })
+
+    const tradesData = JSON.stringify([12345, [[1, 1640995200000, 0.5, 45000]]])
+    onReceiveCallback(tradesData)
+
+    expect(mockStore.dispatch).toHaveBeenCalledWith({
+      type: "subscriptions/updateStale",
+      payload: { channelId: 12345 },
+    })
   })
 
   it("should handle trades data", () => {
