@@ -9,7 +9,6 @@ import Palette from "../../../../theme/style"
 import { bidAmountRenderer, askAmountRenderer } from "./renderers"
 import Stale from "../../../../core/components/Stale"
 import { useGridResize } from "../../../../core/hooks/useGridResize"
-import { useThrottle } from "../../../../core/hooks/useThrottle"
 
 export interface Props {
   orders: { bid: Order; ask: Order }[]
@@ -17,7 +16,6 @@ export interface Props {
 }
 
 const Book = ({ orders, isStale }: Props) => {
-  const throttledOrders = useThrottle<{ bid: Order; ask: Order }[]>(orders, 100)
   const [gridApi, setGridApi] = useState<GridApi | undefined>()
   const columnDefs: ColDef[] = useMemo(
     () => [
@@ -60,14 +58,14 @@ const Book = ({ orders, isStale }: Props) => {
 
   useGridResize(gridApi)
 
-  const getRowId = useCallback(({ data }: any) => [data.bid?.id, data.ask?.id].join("#"), [])
+  const getRowId = useCallback(({ data }: any) => data.id, [])
 
   return (
     <Container className="ag-theme-quartz-dark">
       {isStale && <Stale />}
       <AgGridReact
         columnDefs={columnDefs}
-        rowData={throttledOrders}
+        rowData={orders}
         getRowId={getRowId}
         suppressHorizontalScroll={true}
         gridOptions={{ localeText: { noRowsToShow: "Loading..." } }}

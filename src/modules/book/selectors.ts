@@ -43,20 +43,27 @@ export const getBook = createSelector(
     const maxAskDepth = limitedAsks.reduce((sum, o) => sum + Math.abs(o.amount), 0)
 
     const maxDepth = maxBidDepth + maxAskDepth
-    const levels = Math.max(limitedBids.length, limitedAsks.length)
-    const result = new Array(levels)
 
+    // Always return exactly MAX_LEVELS rows for stability
+    const result = new Array(MAX_LEVELS)
     let bidDepth = 0
     let askDepth = 0
 
-    for (let i = 0; i < levels; i++) {
-      const bid = limitedBids[i]
-      const ask = limitedAsks[i]
+    for (let i = 0; i < MAX_LEVELS; i++) {
+      const bid = limitedBids[i] || null
+      const ask = limitedAsks[i] || null
 
       if (bid) bidDepth += bid.amount
       if (ask) askDepth += Math.abs(ask.amount)
 
-      result[i] = { bid, ask, bidDepth, askDepth, maxDepth }
+      result[i] = {
+        id: i, // Stable row ID
+        bid,
+        ask,
+        bidDepth,
+        askDepth,
+        maxDepth,
+      }
     }
 
     return result

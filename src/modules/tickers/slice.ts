@@ -7,10 +7,6 @@ export interface TickerState {
 
 const initialState: TickerState = {}
 
-export interface SubscribeToSymbolPayload {
-  symbol: string
-}
-
 export interface TickerUpdatePayload {
   symbol: string
   data: any[]

@@ -57,7 +57,7 @@ const Trades = memo(({ trades, isStale }: Props) => {
 
   useGridResize(gridApi)
 
-  const getRowId = useCallback((params: any) => `${params.data.id}`, [])
+  const getRowId = useCallback((params: any) => params.data.id, [])
 
   return (
     <Container className="ag-theme-quartz-dark">
