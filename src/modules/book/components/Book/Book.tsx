@@ -58,7 +58,7 @@ const Book = ({ orders, isStale }: Props) => {
 
   useGridResize(gridApi)
 
-  const getRowId = useCallback(({ data }: any) => data.id, [])
+  const getRowId = useCallback(({ data }: any) => `${data.id}`, [])
 
   return (
     <Container className="ag-theme-quartz-dark">
