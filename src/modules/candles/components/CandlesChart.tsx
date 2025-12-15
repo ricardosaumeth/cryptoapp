@@ -108,7 +108,7 @@ const CandlesChart = ({ candles, currencyPair, isStale }: Props) => {
   }, [candles, currencyPair])
 
   return (
-    <Container>
+    <Container className="candles-chart">
       {isStale && <Stale />}
       {isLoading && <Loading />}
       <HighchartsReact
