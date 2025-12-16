@@ -33,7 +33,11 @@ export const bootstrapApp = createAsyncThunk(
 
     const currencyPairs = await dispatch(refDataLoad()).unwrap()
 
-    dispatch(selectCurrencyPair({ currencyPair: currencyPairs[0] }))
+    const state = getState() as RootState
+    const previousPair = state.selection.currencyPair
+    const currencyPair = previousPair || currencyPairs[0]
+
+    dispatch(selectCurrencyPair({ currencyPair }))
 
     // Subscribe to ticker and candles for all currency pairs with delays
     currencyPairs.forEach((currencyPair: string) => {
@@ -47,14 +51,24 @@ export const bootstrapApp = createAsyncThunk(
   }
 )
 
+export const shutdownApp = createAsyncThunk("app/shutdown", async (_, { extra }) => {
+  const { connection } = extra as { connection: Connection }
+  connection.disconnect()
+  return true
+})
+
 export const appBootstrapSlice = createSlice({
   name: "app/bootstrap",
   initialState: {},
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(bootstrapApp.fulfilled, (_state, _action) => {
-      console.log(`Bootstrap App successfully`)
-    })
+    builder
+      .addCase(bootstrapApp.fulfilled, (_state, _action) => {
+        console.log(`Bootstrap App successfully`)
+      })
+      .addCase(shutdownApp.fulfilled, (_state, _action) => {
+        console.log(`Disconnecting App...`)
+      })
   },
 })
 

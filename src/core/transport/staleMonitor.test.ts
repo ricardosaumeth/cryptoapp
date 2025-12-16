@@ -20,7 +20,7 @@ describe("staleMonitor", () => {
     vi.useRealTimers()
   })
 
-  it("should mark subscription as stale after 20 seconds without update", () => {
+  it("should mark subscription as stale after 90 seconds without update", () => {
     const now = Date.now()
     mockGetState = vi.fn(
       () =>
@@ -29,7 +29,7 @@ describe("staleMonitor", () => {
             12345: {
               channel: "trades",
               isStale: false,
-              lastUpdate: now - 21000, // 21 seconds ago
+              lastUpdate: now - 91000, // 91 seconds ago
             },
           },
         }) as any
@@ -37,7 +37,7 @@ describe("staleMonitor", () => {
 
     cleanup = startStaleMonitor(mockGetState, mockDispatch)
 
-    vi.advanceTimersByTime(5000)
+    vi.advanceTimersByTime(30000)
 
     expect(mockDispatch).toHaveBeenCalledWith({
       type: "subscriptions/markStale",
@@ -62,7 +62,7 @@ describe("staleMonitor", () => {
 
     cleanup = startStaleMonitor(mockGetState, mockDispatch)
 
-    vi.advanceTimersByTime(5000)
+    vi.advanceTimersByTime(30000)
 
     expect(mockDispatch).not.toHaveBeenCalled()
   })
@@ -84,7 +84,7 @@ describe("staleMonitor", () => {
 
     cleanup = startStaleMonitor(mockGetState, mockDispatch)
 
-    vi.advanceTimersByTime(5000)
+    vi.advanceTimersByTime(30000)
 
     expect(mockDispatch).not.toHaveBeenCalled()
   })
@@ -104,7 +104,7 @@ describe("staleMonitor", () => {
 
     cleanup = startStaleMonitor(mockGetState, mockDispatch)
 
-    vi.advanceTimersByTime(5000)
+    vi.advanceTimersByTime(30000)
 
     expect(mockDispatch).not.toHaveBeenCalled()
   })
@@ -118,7 +118,7 @@ describe("staleMonitor", () => {
             12345: {
               channel: "trades",
               isStale: false,
-              lastUpdate: now - 25000, // stale
+              lastUpdate: now - 95000, // stale
             },
             12346: {
               channel: "ticker",
@@ -128,7 +128,7 @@ describe("staleMonitor", () => {
             12347: {
               channel: "book",
               isStale: false,
-              lastUpdate: now - 30000, // stale
+              lastUpdate: now - 100000, // stale
             },
           },
         }) as any
@@ -136,7 +136,7 @@ describe("staleMonitor", () => {
 
     cleanup = startStaleMonitor(mockGetState, mockDispatch)
 
-    vi.advanceTimersByTime(5000)
+    vi.advanceTimersByTime(30000)
 
     expect(mockDispatch).toHaveBeenCalledTimes(2)
     expect(mockDispatch).toHaveBeenCalledWith({
@@ -155,7 +155,7 @@ describe("staleMonitor", () => {
     cleanup = startStaleMonitor(mockGetState, mockDispatch)
     cleanup()
 
-    vi.advanceTimersByTime(10000)
+    vi.advanceTimersByTime(60000)
 
     expect(mockDispatch).not.toHaveBeenCalled()
   })

@@ -17,7 +17,7 @@ export interface Props {
 }
 
 const Book = ({ orders, isStale }: Props) => {
-  const throttledOrders = useThrottle<{ bid: Order; ask: Order }[]>(orders, 300)
+  const throttledOrders = useThrottle<{ bid: Order; ask: Order }[]>(orders, 100)
   const [gridApi, setGridApi] = useState<GridApi | undefined>()
   const columnDefs: ColDef[] = useMemo(
     () => [
