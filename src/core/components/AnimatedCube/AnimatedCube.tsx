@@ -21,7 +21,7 @@ const AnimatedCube = ({ trigger, children }: Props) => {
     const updateDimensions = () => {
       if (containerRef && containerRef.current) {
         const { width } = containerRef.current.getBoundingClientRect()
-        console.log(`Update cube width to ${width}`)
+        //console.log(`Update cube width to ${width}`)
 
         setWidth(width)
       } else {

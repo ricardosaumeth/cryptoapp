@@ -98,7 +98,7 @@ const CandlesChart = ({ candles, currencyPair, isStale }: Props) => {
             upColor: Palette.Bid,
           },
           column: {
-            color: Palette.LightGray,
+            color: Palette.SteelBlue,
             borderRadius: 0,
             borderWidth: 0,
           },

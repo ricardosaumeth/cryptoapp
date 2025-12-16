@@ -1,4 +1,4 @@
-import { createSelector } from "reselect"
+import { createSelector } from "@reduxjs/toolkit"
 import type { RootState } from "../redux/store"
 import { getLookupKey } from "./utils"
 import type { Candle } from "./types/Candle"
