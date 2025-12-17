@@ -67,7 +67,7 @@ export const appBootstrapSlice = createSlice({
         console.log(`Bootstrap App successfully`)
       })
       .addCase(shutdownApp.fulfilled, (_state, _action) => {
-        console.log(`Disconnecting App...`)
+        console.log(`Websocket disconnected...`)
       })
   },
 })
