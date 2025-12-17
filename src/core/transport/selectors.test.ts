@@ -28,22 +28,26 @@ describe("transport selectors", () => {
 
   describe("getSubscriptionId", () => {
     it("should return subscription ID for existing channel", () => {
-      const result = getSubscriptionId(mockState as RootState, Channel.TRADES)
+      const selector = getSubscriptionId(Channel.TRADES, { symbol: "tBTCUSD" })
+      const result = selector(mockState as RootState)
       expect(result).toBe(12345)
     })
 
     it("should return subscription ID for ticker channel", () => {
-      const result = getSubscriptionId(mockState as RootState, Channel.TICKER)
+      const selector = getSubscriptionId(Channel.TICKER, { symbol: "tETHUSD" })
+      const result = selector(mockState as RootState)
       expect(result).toBe(12346)
     })
 
     it("should return subscription ID for candles channel", () => {
-      const result = getSubscriptionId(mockState as RootState, Channel.CANDLES)
+      const selector = getSubscriptionId(Channel.CANDLES, { key: "trade:1m:tBTCUSD" })
+      const result = selector(mockState as RootState)
       expect(result).toBe(12347)
     })
 
     it("should return undefined for non-existent channel", () => {
-      const result = getSubscriptionId(mockState as RootState, Channel.BOOK)
+      const selector = getSubscriptionId(Channel.BOOK, { symbol: "tBTCUSD", prec: "R0" })
+      const result = selector(mockState as RootState)
       expect(result).toBeUndefined()
     })
 
@@ -51,7 +55,8 @@ describe("transport selectors", () => {
       const emptyState = {
         subscriptions: { wsConnectionStatus: ConnectionStatus.Disconnected },
       }
-      const result = getSubscriptionId(emptyState as RootState, Channel.TRADES)
+      const selector = getSubscriptionId(Channel.TRADES, { symbol: "tBTCUSD" })
+      const result = selector(emptyState as RootState)
       expect(result).toBeUndefined()
     })
   })

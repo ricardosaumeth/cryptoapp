@@ -44,7 +44,17 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
           return
         }
 
+        // Clear stale for current channel
         store.dispatch(updateStaleSubscription({ channelId }))
+
+        // Clear stale for ALL subscriptions since WebSocket is active
+        const allSubscriptions = store.getState().subscriptions
+        Object.keys(allSubscriptions).forEach((key) => {
+          const channelId = Number(key)
+          if (!isNaN(channelId) && allSubscriptions[channelId]?.isStale) {
+            store.dispatch(updateStaleSubscription({ channelId }))
+          }
+        })
 
         switch (subscription.channel) {
           case Channel.TRADES:

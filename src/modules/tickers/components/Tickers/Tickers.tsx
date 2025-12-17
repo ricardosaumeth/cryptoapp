@@ -6,9 +6,10 @@ import Ticker from "../Ticker"
 export interface Props {
   currencyPairs: string[]
   selectedCurrencyPairIndex?: number
+  isStale?: boolean
 }
 
-const Tickers = ({ currencyPairs, selectedCurrencyPairIndex }: Props) => {
+const Tickers = ({ currencyPairs, selectedCurrencyPairIndex, isStale }: Props) => {
   const [direction, setDirection] = useState<ScrollDirection>("left")
   const previousSelectedCurrencyPairIndex = usePrevious(selectedCurrencyPairIndex)
 
@@ -29,7 +30,7 @@ const Tickers = ({ currencyPairs, selectedCurrencyPairIndex }: Props) => {
           $direction={direction}
           key={currencyPair}
         >
-          <Ticker currencyPair={currencyPair} />
+          <Ticker currencyPair={currencyPair} isStale={isStale} />
         </TickerWrapper>
       ))}
     </Container>

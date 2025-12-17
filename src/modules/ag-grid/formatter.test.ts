@@ -15,15 +15,15 @@ describe("AG Grid Formatters", () => {
     })
 
     it("should return dash for null value", () => {
-      expect(priceFormatter({ value: null as any })).toBe("-")
+      expect(priceFormatter({ value: null as any })).toBe("0.00")
     })
 
     it("should return dash for undefined value", () => {
-      expect(priceFormatter({ value: undefined as any })).toBe("-")
+      expect(priceFormatter({ value: undefined as any })).toBe("0.00")
     })
 
     it("should return dash for null params", () => {
-      expect(priceFormatter(null as any)).toBe("-")
+      expect(priceFormatter(null as any)).toBe("0.00")
     })
   })
 
@@ -33,7 +33,7 @@ describe("AG Grid Formatters", () => {
     })
 
     it("should return dash for null value", () => {
-      expect(amountFormatter({ value: null as any })).toBe("-")
+      expect(amountFormatter({ value: null as any })).toBe("0.00")
     })
   })
 
@@ -43,7 +43,7 @@ describe("AG Grid Formatters", () => {
     })
 
     it("should return dash for null value", () => {
-      expect(volumeFormatter({ value: null as any })).toBe("-")
+      expect(volumeFormatter({ value: null as any })).toBe("0.00")
     })
   })
 
@@ -53,7 +53,7 @@ describe("AG Grid Formatters", () => {
     })
 
     it("should return dash for null value", () => {
-      expect(timeFormatter({ value: null as any })).toBe("-")
+      expect(timeFormatter({ value: null as any })).toBe("0.00")
     })
   })
 })

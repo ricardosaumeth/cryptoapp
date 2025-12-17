@@ -21,8 +21,12 @@ const CandlesChartContainer = () => {
   )
 
   const candles = useSelector(selectCandles)
-  const subscriptionId = useSelector((state: RootState) =>
-    getSubscriptionId(state, Channel.CANDLES)
+  const subscriptionId = useSelector(
+    selectedCurrencyPair
+      ? getSubscriptionId(Channel.CANDLES, {
+          key: `trade:${DEFAULT_TIMEFRAME}:t${selectedCurrencyPair}`,
+        })
+      : () => undefined
   )
   const isStale = useSelector((state: RootState) =>
     subscriptionId ? getIsSubscriptionStale(state, subscriptionId) : false

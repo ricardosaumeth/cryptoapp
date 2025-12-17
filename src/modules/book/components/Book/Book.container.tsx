@@ -14,8 +14,10 @@ const BookContainer = () => {
   const orders = useSelector((state: RootState) =>
     selectedCurrencyPair ? getBook(state, selectedCurrencyPair) : emptyOrders
   )
-  const subscriptionId = useSelector((state: RootState) =>
-    selectedCurrencyPair ? getSubscriptionId(state, Channel.BOOK, selectedCurrencyPair) : undefined
+  const subscriptionId = useSelector(
+    selectedCurrencyPair
+      ? getSubscriptionId(Channel.BOOK, { symbol: `t${selectedCurrencyPair}`, prec: "R0" })
+      : () => undefined
   )
   const isStale = useSelector((state: RootState) =>
     subscriptionId ? getIsSubscriptionStale(state, subscriptionId) : false

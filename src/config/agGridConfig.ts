@@ -1,4 +1,3 @@
-import { ModuleRegistry } from "ag-grid-community"
 import {
   ClientSideRowModelModule,
   ValidationModule,
@@ -7,6 +6,7 @@ import {
   ColumnAutoSizeModule,
   RowApiModule,
   LocaleModule,
+  ModuleRegistry,
 } from "ag-grid-community"
 
 const AG_GRID_MODULES = [

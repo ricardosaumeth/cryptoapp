@@ -1,33 +1,31 @@
 import { createSelector } from "reselect"
 import { type RootState } from "../../modules/redux/store"
 import { Channel } from "./types/Channels"
+import type { requestSubscribeToChannelAck } from "./slice"
 
 const subscriptionsSelector = (state: RootState) => state.subscriptions
 
-export const getSubscriptionId = createSelector(
-  [
-    subscriptionsSelector,
-    (_: RootState, channel: Channel) => channel,
-    (_: RootState, _channel: Channel, symbol?: string) => symbol,
-  ],
-  (subscriptions, channel, symbol) => {
+export const getSubscriptions = subscriptionsSelector
+
+export const getSubscriptionId = (channel: Channel, request: { [key: string]: string } = {}) =>
+  createSelector(getSubscriptions, (subscriptions) => {
     const channelIds = Object.keys(subscriptions)
       .filter((key) => !isNaN(Number(key)))
       .map(Number)
 
-    return channelIds.find((id) => {
-      const sub = subscriptions[id]
-      if (sub?.channel !== channel) return false
-      if (symbol) {
-        const targetSymbol = `t${symbol}`
-        if (sub?.request?.symbol !== targetSymbol && !sub?.request?.key?.includes(targetSymbol)) {
-          return false
-        }
-      }
-      return true
+    const matchingChannels = channelIds.filter((channelId) => {
+      const sub = subscriptions[channelId]
+      return (
+        sub?.channel === channel &&
+        Object.keys(request).every(
+          (key) => request[key] === sub?.request?.[key as keyof requestSubscribeToChannelAck]
+        )
+      )
     })
-  }
-)
+
+    // Return the most recent (highest ID) subscription
+    return matchingChannels.length > 0 ? Math.max(...matchingChannels) : undefined
+  })
 
 export const getIsSubscriptionStale = createSelector(
   [subscriptionsSelector, (_: RootState, subscriptionId: number) => subscriptionId],

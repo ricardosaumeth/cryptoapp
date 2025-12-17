@@ -11,9 +11,10 @@ import { Channel } from "../../../../core/transport/types/Channels"
 
 export interface ContainerProps {
   currencyPair: string
+  isStale?: boolean
 }
 
-const TickerContainer = ({ currencyPair }: ContainerProps) => {
+const TickerContainer = ({ currencyPair, isStale: parentIsStale }: ContainerProps) => {
   const dispatch = useDispatch<AppDispatch>()
 
   const ticker = useSelector(getTicker)(currencyPair)
@@ -21,10 +22,14 @@ const TickerContainer = ({ currencyPair }: ContainerProps) => {
   const selectCurrencyPairMemo = useMemo(() => getSelectedCurrencyPair, [])
 
   const selectedCurrencyPair = useSelector(selectCurrencyPairMemo)
-  const subscriptionId = useSelector((state: RootState) => getSubscriptionId(state, Channel.TICKER))
-  const isStale = useSelector((state: RootState) =>
-    subscriptionId ? getIsSubscriptionStale(state, subscriptionId) : false
+  const subscriptionId = useSelector(
+    getSubscriptionId(Channel.TICKER, { symbol: `t${currencyPair}` })
   )
+
+  const isStale =
+    useSelector((state: RootState) =>
+      subscriptionId ? getIsSubscriptionStale(state, subscriptionId) : false
+    ) || parentIsStale
 
   return (
     <Ticker
@@ -34,7 +39,7 @@ const TickerContainer = ({ currencyPair }: ContainerProps) => {
       dailyChangeRelative={dailyChangeRelative!}
       onClick={() => dispatch(selectCurrencyPair({ currencyPair }))}
       isActive={selectedCurrencyPair === currencyPair}
-      isStale={isStale}
+      isStale={isStale || false}
     />
   )
 }
