@@ -16,7 +16,7 @@ export interface Props {
 }
 
 const Trades = memo(({ trades, isStale }: Props) => {
-  const throttledTrades = useThrottle<Trade[]>(trades, 500)
+  const throttledTrades = useThrottle<Trade[]>(trades, 100)
   const [gridApi, setGridApi] = useState<GridApi | undefined>()
   const columnDefs: ColDef[] = useMemo(
     () => [

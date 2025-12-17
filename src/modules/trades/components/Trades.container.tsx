@@ -1,22 +1,9 @@
 import { useSelector } from "react-redux"
-import { createSelector } from "@reduxjs/toolkit"
 import Trades from "./Trades"
-import { getSelectedCurrencyPair } from "../../selection/selectors"
 import type { RootState } from "../../redux/store"
-import type { Trade } from "../types/Trade"
 import { getIsSubscriptionStale, getSubscriptionId } from "../../../core/transport/selectors"
 import { Channel } from "../../../core/transport/types/Channels"
-
-const emptyTrades: Trade[] = []
-
-const getTradesForSelectedPair = createSelector(
-  [(state: RootState) => state.trades, getSelectedCurrencyPair],
-  (trades, selectedCurrencyPair) => {
-    if (!selectedCurrencyPair) return emptyTrades
-    const result = trades[selectedCurrencyPair]
-    return result !== undefined ? result : emptyTrades
-  }
-)
+import { getTradesForSelectedPair } from "../selector"
 
 const TradesContainer = () => {
   const trades = useSelector(getTradesForSelectedPair)

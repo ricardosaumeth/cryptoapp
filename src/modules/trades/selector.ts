@@ -1,9 +1,15 @@
 import { createSelector } from "@reduxjs/toolkit"
 import type { RootState } from "../redux/store"
 import type { Trade } from "./types/Trade"
+import { getSelectedCurrencyPair } from "../selection/selectors"
 
-export const getTrades = (currencyPair: string) =>
-  createSelector(
-    [(state: RootState) => state.trades],
-    (trades): Trade[] => trades[currencyPair] || []
-  )
+const emptyTrades: Trade[] = []
+
+export const getTradesForSelectedPair = createSelector(
+  [(state: RootState) => state.trades, getSelectedCurrencyPair],
+  (trades, selectedCurrencyPair) => {
+    if (!selectedCurrencyPair) return emptyTrades
+    const result = trades[selectedCurrencyPair]
+    return result !== undefined ? result : emptyTrades
+  }
+)
