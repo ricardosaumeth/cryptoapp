@@ -1,4 +1,3 @@
-import { useMemo } from "react"
 import { useSelector } from "react-redux"
 import { useDispatch } from "react-redux"
 import { type AppDispatch, type RootState } from "../../../../modules/redux/store"
@@ -19,9 +18,8 @@ const TickerContainer = ({ currencyPair, isStale: parentIsStale }: ContainerProp
 
   const ticker = useSelector(getTicker)(currencyPair)
   const { lastPrice, dailyChange, dailyChangeRelative } = ticker || {}
-  const selectCurrencyPairMemo = useMemo(() => getSelectedCurrencyPair, [])
 
-  const selectedCurrencyPair = useSelector(selectCurrencyPairMemo)
+  const selectedCurrencyPair = useSelector(getSelectedCurrencyPair)
   const subscriptionId = useSelector(
     getSubscriptionId(Channel.TICKER, { symbol: `t${currencyPair}` })
   )

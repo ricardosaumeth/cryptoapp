@@ -6,16 +6,6 @@ const MAX_LEVELS = 25
 
 const bookSelector = (state: RootState) => state.book
 
-export const getRawBook = createSelector(
-  [bookSelector, (_: RootState, symbol: string) => symbol],
-  (book, symbol) => book[symbol]
-)
-
-// [
-//     { bid: { price: 100 }, ask: { price: 101 }, depth: 0 },
-//     { bid: { price: 99 }, ask: { price: 102 }, depth: 1 },
-//     { bid: { price: 98 }, ask: undefined, depth: 2 }
-// ]
 export const getBook = createSelector(
   [bookSelector, (_: RootState, symbol: string) => symbol],
   (book, symbol) => {
@@ -57,7 +47,7 @@ export const getBook = createSelector(
       if (ask) askDepth += Math.abs(ask.amount)
 
       result[i] = {
-        id: i, // Stable row ID
+        id: i, // Stable row ID for React rendering.
         bid,
         ask,
         bidDepth,
