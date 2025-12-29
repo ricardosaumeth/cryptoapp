@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react"
+import { useDispatch } from "react-redux"
 import { AgGridReact } from "ag-grid-react"
 import type { ColDef, GridApi, IRowNode } from "ag-grid-community"
 import { priceFormatter, volumeFormatter } from "../../../ag-grid/formatter"
 import { type Ticker } from "../../types/Ticker"
+import { selectCurrencyPair } from "../../../selection/slice"
 import PriceChartRenderer from "./PriceChartRenderer"
 import { formatCurrencyPair } from "../../../reference-data/utils"
 import Loading from "../../../../core/components/Loading"
@@ -10,19 +12,15 @@ import { useGridResize } from "../../../../core/hooks/useGridResize"
 import PriceRenderer from "./PriceRenderer"
 import { Container } from "./Market.styled"
 import Palette from "../../../../theme/style"
+import type { AppDispatch } from "src/modules/redux/store"
 
-export interface StateProps {
+export interface Props {
   tickers: (Ticker & { currencyPair: string; prices: number[] })[]
   selectedCurrencyPair?: string
 }
 
-export interface DispatchProps {
-  onClick: (currencyPair: string) => void
-}
-
-export type Props = StateProps & DispatchProps
-
-const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
+const Market = ({ tickers, selectedCurrencyPair }: Props) => {
+  const dispatch = useDispatch<AppDispatch>()
   const [gridApi, setGridApi] = useState<GridApi | undefined>()
 
   const columnDefs: ColDef[] = [
@@ -111,7 +109,7 @@ const Market = ({ tickers, selectedCurrencyPair, onClick }: Props) => {
           setGridApi(event.api)
         }}
         onRowClicked={(event) => {
-          onClick(event.data.currencyPair)
+          dispatch(selectCurrencyPair({ currencyPair: event.data.currencyPair }))
         }}
         noRowsOverlayComponent={"customLoadingOverlay"}
         components={{
