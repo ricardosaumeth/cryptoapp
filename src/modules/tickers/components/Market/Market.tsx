@@ -77,9 +77,7 @@ const Market = ({ tickers, selectedCurrencyPair }: Props) => {
       const nodesToRefresh: IRowNode[] = []
       gridApi.forEachNode(function (node) {
         const shouldSelect = node.data.currencyPair === selectedCurrencyPair
-        if (node.isSelected()) {
-          nodesToRefresh.push(node)
-        } else if (shouldSelect) {
+        if (node.isSelected() || shouldSelect) {
           nodesToRefresh.push(node)
         }
         node.setSelected(shouldSelect)
