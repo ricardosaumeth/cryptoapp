@@ -95,7 +95,7 @@ function AppContent() {
             </AnimatedContent>
           </Widget>
         </DepthPanel>
-        <Footer>{import.meta.env.DEV && <PerformanceDashboard />}</Footer>
+        <Footer><PerformanceDashboard /></Footer>
       </Content>
     </Container>
   )
