@@ -24,10 +24,9 @@ import { getSelectedCurrencyPair } from "./modules/selection/selectors"
 import { getTicker } from "./modules/tickers/selectors"
 import { GithubLink } from "./GithubLink"
 import Widget from "./core/components/Widget"
-import Diagnostics from "./core/components/Diagnostics"
-import Latency from "./modules/ping/components/Latency"
 import AnimatedContent from "./modules/common/AnimatedContent"
 import { parseCurrencyPair } from "./modules/reference-data/utils"
+import PerformanceDashboard from "./modules/PerformanceDashboard"
 
 const store = getStore()
 
@@ -96,10 +95,7 @@ function AppContent() {
             </AnimatedContent>
           </Widget>
         </DepthPanel>
-        <Footer>
-          <Latency />
-          <Diagnostics />
-        </Footer>
+        <Footer>{import.meta.env.DEV && <PerformanceDashboard />}</Footer>
       </Content>
     </Container>
   )

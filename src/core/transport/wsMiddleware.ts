@@ -2,7 +2,6 @@ import type { Middleware } from "@reduxjs/toolkit"
 import { Connection } from "./Connection"
 import { updateStaleSubscription } from "./slice"
 import { Channel } from "./types/Channels"
-import { handlePong } from "../../modules/ping/slice"
 import {
   handleSubscriptionAck,
   handleUnSubscriptionAck,
@@ -23,9 +22,6 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
         return
       } else if (parsedData.event === "unsubscribed") {
         handleUnSubscriptionAck(parsedData, store)
-        return
-      } else if (parsedData.event === "pong") {
-        store.dispatch(handlePong())
         return
       }
 

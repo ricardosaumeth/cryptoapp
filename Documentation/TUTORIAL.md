@@ -52,8 +52,6 @@ npm install --save-dev @testing-library/react @testing-library/jest-dom
 
 ```
 src/
-├── config/              # Environment configuration
-│   └── env.ts
 ├── core/
 │   ├── components/      # Reusable UI components
 │   │   ├── AnimatedCube/
@@ -72,7 +70,6 @@ src/
 │   ├── redux/           # Store configuration
 │   ├── book/            # Order book
 │   ├── candles/         # Candlestick charts
-│   ├── ping/            # Connection monitoring
 │   ├── reference-data/  # Currency pairs
 │   ├── selection/       # Selected pair state
 │   ├── tickers/         # Price tickers
@@ -125,15 +122,12 @@ body {
 
 ## 🏗️ Step 3: Redux Store Setup
 
-### 3.1 Environment Configuration (`src/config/env.ts`)
+### 3.1 Environment Configuration (`.env`)
 
 ```typescript
-export const config = {
-  BITFINEX_WS_URL: import.meta.env["VITE_BITFINEX_WS_URL"] || "wss://api-pub.bitfinex.com/ws/2",
-  IS_PRODUCTION: import.meta.env.PROD,
-  MAX_TRADES: Number(import.meta.env["VITE_MAX_TRADES"]) || 1000,
-  MAX_CANDLES: Number(import.meta.env["VITE_MAX_CANDLES"]) || 5000,
-}
+VITE_BITFINEX_WS_URL=wss://api-pub.bitfinex.com/ws/2
+VITE_MAX_TRADES=1000
+VITE_MAX_CANDLES=5000
 ```
 
 ### 3.2 Create Store (`src/modules/redux/store.ts`)
@@ -148,7 +142,6 @@ import { tickerSlice } from "../tickers/slice"
 import { candleSlice } from "../candles/slice"
 import { selectionSlice } from "../selection/slice"
 import { bookSlice } from "../book/slice"
-import { pingSlice, startPing } from "../ping/slice"
 import { WsConnectionProxy } from "../../core/transport/WsConnectionProxy"
 import { Connection } from "../../core/transport/Connection"
 import { createWsMiddleware } from "../../core/transport/wsMiddleware"
@@ -169,7 +162,6 @@ function createStore() {
       candles: candleSlice.reducer,
       selection: selectionSlice.reducer,
       book: bookSlice.reducer,
-      ping: pingSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
@@ -182,7 +174,6 @@ function createStore() {
   // Connection event handlers
   connection.onConnect(() => {
     store.dispatch(changeConnectionStatus(ConnectionStatus.Connected))
-    store.dispatch(startPing())
     console.log("Connected")
   })
 
@@ -665,7 +656,6 @@ import type { Middleware } from "@reduxjs/toolkit"
 import { Connection } from "./Connection"
 import { updateStaleSubscription } from "./slice"
 import { Channel } from "./types/Channels"
-import { handlePong } from "../../modules/ping/slice"
 import {
   handleSubscriptionAck,
   handleUnSubscriptionAck,
@@ -968,7 +958,6 @@ import CandlesContainer from './modules/candles/components/CandlesChart.containe
 import BookContainer from './modules/book/components/Book/Book.container'
 import DepthChartContainer from './modules/book/components/DepthChart/DepthChart.container'
 import DiagnosticsContainer from './core/components/Diagnostics/Diagnostics.container'
-import LatencyContainer from './modules/ping/components/Latency/Latency.container'
 
 const store = getStore()
 
@@ -983,8 +972,6 @@ const AppContent = () => {
     <Container>
       <Header>
         <h1>🚀 CryptoApp</h1>
-        <DiagnosticsContainer />
-        <LatencyContainer />
       </Header>
 
       <TickersContainer />

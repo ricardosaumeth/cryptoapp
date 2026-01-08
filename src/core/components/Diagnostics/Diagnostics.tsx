@@ -1,43 +1,54 @@
 import { useState, useEffect } from "react"
 import { Container } from "./Diagnostics.styled"
 
-// ⚡ What this component does
-// It’s a diagnostic tool that measures how responsive the browser’s event loop is.
-// - Every 2 seconds, it schedules a timeout.
-// - The difference between when it was scheduled and when it actually runs tells you how much the UI thread was blocked.
-// - If your app is busy (e.g. heavy rendering, blocking JS), the delay will spike.
-// So it’s essentially a UI latency monitor for your dashboard.
-
-const DIAGNOSTICS_INTERVAL_MS = 2000
+// ✅ Fixed UI Responsiveness Monitor
+// Measures actual UI thread blocking by tracking requestAnimationFrame delays
+// More accurate than setTimeout which gets throttled by browser
 
 const Diagnostics = () => {
-  const [delay, setDelay] = useState<number | undefined>()
+  const [uiLatency, setUiLatency] = useState<number | undefined>()
 
   useEffect(() => {
-    let timeoutId: number | undefined = undefined
+    let lastFrameTime = performance.now()
+    let frameCount = 0
+    let totalLatency = 0
 
-    const intervalId = setInterval(() => {
-      const time = Date.now()
-      if (timeoutId) {
-        clearTimeout(timeoutId)
+    const measureUIResponsiveness = () => {
+      const currentTime = performance.now()
+      const frameDelta = currentTime - lastFrameTime
+      
+      // Expected frame time at 60fps is ~16.67ms
+      // Anything significantly higher indicates UI blocking
+      if (frameDelta > 20) { // Allow some variance
+        frameCount++
+        totalLatency += frameDelta
+        
+        // Update average every 10 frames
+        if (frameCount >= 10) {
+          setUiLatency(totalLatency / frameCount)
+          frameCount = 0
+          totalLatency = 0
+        }
       }
-      timeoutId = window.setTimeout(() => {
-        setDelay(Date.now() - time)
-      })
-    }, DIAGNOSTICS_INTERVAL_MS)
-
-    return () => {
-      clearInterval(intervalId)
-      if (timeoutId) {
-        clearTimeout(timeoutId)
-      }
+      
+      lastFrameTime = currentTime
+      requestAnimationFrame(measureUIResponsiveness)
     }
+
+    measureUIResponsiveness()
   }, [])
 
   return (
     <Container>
-      <span>UI Latency: </span>
-      <span>{delay || "---"}ms</span>
+      <span>UI Thread: </span>
+      <span style={{ color: uiLatency && uiLatency > 50 ? '#ff6b6b' : '#4CAF50' }}>
+        {uiLatency ? `${uiLatency.toFixed(1)}ms` : "Responsive"}
+      </span>
+      {uiLatency && uiLatency > 100 && (
+        <span style={{ color: '#ff6b6b', fontSize: '10px', marginLeft: '4px' }}>
+          ⚠️ Blocking
+        </span>
+      )}
     </Container>
   )
 }

@@ -1,16 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { createWsMiddleware } from "./wsMiddleware"
 import { Channel } from "./types/Channels"
+import * as handlers from "./handlers"
 
 vi.mock("./slice", () => ({
   updateStaleSubscription: vi.fn((payload) => ({ type: "subscriptions/updateStale", payload })),
 }))
-
-vi.mock("../../modules/ping/slice", () => ({
-  handlePong: vi.fn(() => ({ type: "ping/pong" })),
-}))
-
-import * as handlers from "./handlers"
 
 vi.mock("./handlers", () => ({
   handleSubscriptionAck: vi.fn(),
@@ -85,15 +80,6 @@ describe("wsMiddleware", () => {
       { event: "unsubscribed", chanId: 12345 },
       mockStore
     )
-  })
-
-  it("should handle pong event", () => {
-    middleware({ type: "test" })
-
-    const pongData = JSON.stringify({ event: "pong" })
-    onReceiveCallback(pongData)
-
-    expect(mockStore.dispatch).toHaveBeenCalledWith({ type: "ping/pong" })
   })
 
   it("should ignore heartbeat messages", () => {

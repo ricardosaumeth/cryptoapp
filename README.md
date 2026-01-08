@@ -53,8 +53,8 @@ A real-time cryptocurrency trading dashboard built with React 19, TypeScript, an
 ### **Utilities & Libraries**
 
 - **Data Processing**: Lodash 4.17, Luxon 3.7, Numeral 2.0
-- **Custom Hooks**: useGridResize, useLatest, usePrevious, useThrottle
-- **Monitoring**: Built-in connection diagnostics and latency tracking
+- **Custom Hooks**: useGridResize, useLatest, usePrevious, useThrottle, usePerformanceMonitor
+- **Performance Monitoring**: Real-time FPS, memory usage, and data processing latency tracking
 
 ## 🚀 Quick Start
 
@@ -108,8 +108,7 @@ npm run preview
 
 ```
 src/
-├── config/             # Environment configuration
-│   └── env.ts          # Centralized config management
+management
 ├── core/               # Core utilities and components
 │   ├── components/     # Reusable UI components
 │   │   ├── AnimatedCube/ # 3D loading animations
@@ -124,7 +123,8 @@ src/
 │   │   ├── useGridResize.ts
 │   │   ├── useLatest.ts
 │   │   ├── usePrevious.ts
-│   │   └── useThrottle.ts
+│   │   ├── useThrottle.ts
+│   │   └── usePerformanceMonitor.ts # Performance monitoring hook
 │   ├── transport/      # WebSocket infrastructure
 │   │   ├── handlers/   # Message processing handlers
 │   │   │   ├── bookHandler.ts
@@ -146,6 +146,8 @@ src/
 │   │   └── selectors.ts
 │   ├── utils.ts        # Core utility functions
 │   └── utils.test.ts   # Core utilities tests
+├── services/           # Service layer
+│   └── performanceTracker.ts # Performance metrics service
 ├── modules/            # Feature modules (Domain-driven design)
 │   ├── ag-grid/        # Data grid formatters
 │   │   ├── formatter.ts
@@ -167,11 +169,8 @@ src/
 │   │   └── utils.ts
 │   ├── common/        # Shared components
 │   │   └── AnimatedContent/
-│   ├── ping/          # Latency monitoring
-│   │   ├── components/
-│   │   │   └── Latency/
-│   │   ├── selectors.ts
-│   │   └── slice.ts
+│   ├── PerformanceDashboard/ # Performance monitoring dashboard
+│   │   └── PerformanceDashboard.tsx
 │   ├── redux/         # Store configuration
 │   │   └── store.ts
 │   ├── reference-data/ # Currency pair management
@@ -242,11 +241,10 @@ src/
 - **Memory Management**: Environment-configurable limits for trades (1000) and candles (5000)
 - **Handler Architecture**: Modular message processing for maintainability
 - **Order Book Batching**: 50ms batching for high-frequency updates to prevent AG Grid performance issues
-- **Connection Monitoring**: Real-time latency tracking with ping/pong mechanism
+- **Connection Monitoring**: Real-time latency tracking and diagnostics
 - **Stale Detection**: Heartbeat-based monitoring (20s timeout) with visual indicators
 - **Memoized Selectors**: Optimized data access preventing unnecessary re-renders
 - **Connection Diagnostics**: WebSocket health monitoring with auto-reconnection (5 attempts, exponential backoff)
-- **Null Safety**: Comprehensive null/NaN checks in AG Grid formatters
 
 ### 🎯 **Developer Experience**
 
@@ -369,7 +367,8 @@ npm run lint && npm run test && npm run build
 ### **Infrastructure Components**
 
 - **Diagnostics**: WebSocket connection monitoring and health checks
-- **Latency**: Real-time ping monitoring with performance alerts
+- **Latency**: Real-time latency monitoring with performance alerts
+- **PerformanceDashboard**: Real-time performance metrics display
 - **AnimatedContent**: Smooth transitions and loading states
 - **UpdateHighlight**: Value change animations for price updates
 - **Widget**: Consistent container components with titles and styling
@@ -379,6 +378,7 @@ npm run lint && npm run test && npm run build
 - **useGridResize**: Responsive grid layout handling
 - **useThrottle**: Performance optimization for high-frequency updates
 - **usePrevious**: State comparison for change detection
+- **usePerformanceMonitor**: Real-time performance metrics tracking
 
 ## 🚀 Performance Features
 
@@ -392,6 +392,7 @@ npm run lint && npm run test && npm run build
 
 - **Handler-Based Processing**: Modular WebSocket message handling for maintainability
 - **Connection Monitoring**: Built-in latency tracking via Diagnostics and Latency components
+- **Performance Monitoring**: Real-time metrics via PerformanceDashboard and usePerformanceMonitor hook
 - **Type Safety**: Enhanced TypeScript strict mode prevents runtime errors
 - **Testing Coverage**: Comprehensive Vitest test suite with handler unit tests
 
@@ -460,7 +461,7 @@ npm run preview
 
 - **WebSocket Health**: Connection status tracking via `ConnectionStatus` enum
 - **UI Latency**: Real-time UI thread responsiveness monitoring (every 2 seconds)
-- **Network Latency**: WebSocket round-trip time via ping/pong mechanism
+- **Network Latency**: WebSocket round-trip time via latency monitoring
 - **Stale Detection**: Heartbeat-based monitoring detecting inactive subscriptions after 20 seconds
 - **Visual Indicators**: Stale overlays on Book, DepthChart, Trades, Candles, and Market components
 - **Auto-Reconnection**: Exponential backoff with up to 5 reconnection attempts
@@ -517,23 +518,6 @@ const Book = ({ orders, isStale }: Props) => {
 ```
 
 ### **Connection Monitoring Features**
-
-```typescript
-// Network Latency (Latency component)
-const Latency = ({ latency }: Props) => {
-  return <span>{latency || "---"}ms</span>
-}
-
-// Auto-Reconnection with exponential backoff
-this.socket.onclose = () => {
-  this.onCloseFn && this.onCloseFn()
-
-  if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
-    this.reconnectAttempts++
-    setTimeout(() => this.connect(), this.reconnectDelay * this.reconnectAttempts)
-  }
-}
-```
 
 ## 📄 License
 

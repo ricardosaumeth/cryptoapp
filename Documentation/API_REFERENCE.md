@@ -29,7 +29,6 @@ interface RootState {
   refData: RefDataState
   selection: SelectionState
   book: BookState
-  ping: PingState
 }
 ```
 
@@ -47,7 +46,6 @@ const store = configureStore({
     candles: candleSlice.reducer,
     selection: selectionSlice.reducer,
     book: bookSlice.reducer,
-    ping: pingSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

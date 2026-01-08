@@ -78,7 +78,6 @@ CryptoApp follows a **modular, event-driven architecture** designed for real-tim
 core/
 ├── components/           # Reusable UI components
 │   ├── AnimatedCube/     # 3D loading animations
-│   ├── Diagnostics/      # Connection monitoring
 │   ├── LineChart/        # Mini price charts
 │   ├── Loading/          # Loading states
 │   ├── Stale/            # Stale data indicators
@@ -147,7 +146,6 @@ function createStore() {
       candles: candleSlice.reducer,
       selection: selectionSlice.reducer,
       book: bookSlice.reducer,
-      ping: pingSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
@@ -160,7 +158,6 @@ function createStore() {
   // Connection event handlers
   connection.onConnect(() => {
     store.dispatch(changeConnectionStatus(ConnectionStatus.Connected))
-    store.dispatch(startPing())
   })
 
   connection.onClose(() => {
@@ -352,8 +349,6 @@ const wsMiddleware: Middleware = (store) => (next) => (action) => {
       handleSubscriptionAck(parsed, store)
     } else if (parsed.event === "unsubscribed") {
       handleUnSubscriptionAck(parsed, store)
-    } else if (parsed.event === "pong") {
-      store.dispatch(handlePong())
     } else if (Array.isArray(parsed) && parsed[1] === "hb") {
       // Heartbeat handling - reset stale flag
       const [channelId] = parsed

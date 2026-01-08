@@ -707,7 +707,6 @@ describe("Redux Integration", () => {
         refData: refDataSlice.reducer,
         selection: selectionSlice.reducer,
         book: bookSlice.reducer,
-        ping: pingSlice.reducer,
       },
       middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
