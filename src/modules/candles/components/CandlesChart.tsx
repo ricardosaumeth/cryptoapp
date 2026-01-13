@@ -6,8 +6,10 @@ import { type Candle } from "../types/Candle"
 import { formatCurrencyPair } from "../../reference-data/utils"
 import Stale from "../../../core/components/Stale"
 import Loading from "../../../core/components/Loading"
+import { useRenderTracker } from "../../../core/hooks/useRenderTracker"
 import Palette from "../../../theme/style"
 import "../../../theme/Highchart"
+import { Channel } from "../../../core/transport/types/Channels"
 
 export interface Props {
   candles: Candle[]
@@ -16,6 +18,7 @@ export interface Props {
 }
 
 const CandlesChart = ({ candles, currencyPair, isStale }: Props) => {
+  useRenderTracker(Channel.TRADES)
   const [isLoading, setIsLoading] = useState(true)
   const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
     time: {

@@ -9,6 +9,7 @@ import PriceChartRenderer from "./PriceChartRenderer"
 import { formatCurrencyPair } from "../../../reference-data/utils"
 import Loading from "../../../../core/components/Loading"
 import { useGridResize } from "../../../../core/hooks/useGridResize"
+import { useRenderTracker } from "../../../../core/hooks/useRenderTracker"
 import PriceRenderer from "./PriceRenderer"
 import { Container } from "./Market.styled"
 import Palette from "../../../../theme/style"
@@ -20,6 +21,7 @@ export interface Props {
 }
 
 const Market = ({ tickers, selectedCurrencyPair }: Props) => {
+  useRenderTracker("Market")
   const dispatch = useDispatch<AppDispatch>()
   const [gridApi, setGridApi] = useState<GridApi | undefined>()
 

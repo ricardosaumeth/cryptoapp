@@ -2,6 +2,7 @@ import type { Middleware } from "@reduxjs/toolkit"
 import { Connection } from "./Connection"
 import { updateStaleSubscription } from "./slice"
 import { Channel } from "./types/Channels"
+import { performanceMetrics } from "../../services/performanceMetrics"
 import {
   handleSubscriptionAck,
   handleUnSubscriptionAck,
@@ -42,6 +43,9 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
 
         // Clear stale for current channel
         store.dispatch(updateStaleSubscription({ channelId }))
+
+        // Track performance metrics
+        performanceMetrics.trackUpdate(subscription.channel)
 
         // Clear stale for ALL subscriptions since WebSocket is active
         const allSubscriptions = store.getState().subscriptions

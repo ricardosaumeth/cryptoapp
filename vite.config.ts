@@ -1,8 +1,21 @@
 import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: "/cryptoapp/",
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split vendor libraries
+          vendor: ["react", "react-dom"],
+          redux: ["@reduxjs/toolkit", "react-redux"],
+          charts: ["highcharts", "highcharts-react-official"],
+          grid: ["ag-grid-community", "ag-grid-react"],
+          utils: ["lodash", "luxon", "numeral"],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
 })

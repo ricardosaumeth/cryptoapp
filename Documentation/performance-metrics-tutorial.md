@@ -36,7 +36,7 @@ function updateTrades(trades) {
 // With metrics - you know exactly what's happening
 function updateTrades(trades) {
   // performance.now() is a high‑precision timer provided by the browser.
-// It returns the current timestamp in milliseconds, with microsecond precision.
+  // It returns the current timestamp in milliseconds, with microsecond precision.
 
   const start = performance.now()
   trades.forEach((trade) => processComplexCalculation(trade))
@@ -532,7 +532,7 @@ const goodComponent = () => {
 
 ## 🏦 CryptoApp Specific Metrics
 
-### 1. Network Latency (Monitoring) 
+### 1. Network Latency (Monitoring)
 
 **What CryptoApp Currently Measures:**
 

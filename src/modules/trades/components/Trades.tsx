@@ -5,10 +5,12 @@ import type { Trade } from "../types/Trade"
 import { Container } from "./Trades.styled"
 import Palette from "../../../theme/style"
 import { useThrottle } from "../../../core/hooks/useThrottle"
+import { useRenderTracker } from "../../../core/hooks/useRenderTracker"
 import Stale from "../../../core/components/Stale"
 import { useGridResize } from "../../../core/hooks/useGridResize"
 import Loading from "../../../core/components/Loading"
 import { amountFormatter, priceFormatter, timeFormatter } from "../../ag-grid/formatter"
+import { Channel } from "../../../core/transport/types/Channels"
 
 export interface Props {
   trades: Trade[]
@@ -16,6 +18,7 @@ export interface Props {
 }
 
 const Trades = memo(({ trades, isStale }: Props) => {
+  useRenderTracker(Channel.CANDLES)
   const throttledTrades = useThrottle<Trade[]>(trades, 100)
   const [gridApi, setGridApi] = useState<GridApi | undefined>()
   const columnDefs: ColDef[] = useMemo(

@@ -4,6 +4,7 @@ import HighchartsReact from "highcharts-react-official"
 import { useThrottle } from "../../../../core/hooks/useThrottle"
 import Stale from "../../../../core/components/Stale"
 import Loading from "../../../../core/components/Loading"
+import { useRenderTracker } from "../../../../core/hooks/useRenderTracker"
 import { Container } from "./DepthChart.styled"
 import Palette from "../../../../theme/style"
 import "../../../../theme/Highchart"
@@ -19,6 +20,7 @@ export interface Props {
 }
 
 const DepthChart = ({ depth, isStale }: Props) => {
+  useRenderTracker("Depth")
   const throttledDepth = useThrottle<Depth>(depth, 500)
   const [isLoading, setIsLoading] = useState(true)
   const [chartOptions, setChartOptions] = useState<Highcharts.Options>({

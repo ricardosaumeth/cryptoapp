@@ -95,7 +95,9 @@ function AppContent() {
             </AnimatedContent>
           </Widget>
         </DepthPanel>
-        <Footer><PerformanceDashboard /></Footer>
+        <Footer>
+          <PerformanceDashboard />
+        </Footer>
       </Content>
     </Container>
   )
