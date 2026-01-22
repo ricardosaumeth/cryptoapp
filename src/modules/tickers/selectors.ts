@@ -8,7 +8,7 @@ import { candlesSelector } from "../candles/selectors"
 import { getValueAt } from "../../core/utils"
 import { getLookupKey } from "../candles/utils"
 import { DEFAULT_TIMEFRAME } from "../app/slice"
-import { Channel } from "../../core/transport/types/Channels"
+import { ChannelTypeEnum } from "../../types/avro-types"
 
 const tickerSelector = (state: RootState) => state.ticker
 
@@ -67,7 +67,8 @@ export const getTickersWithPrices = createSelector(
         .find((id) => {
           const sub = subscriptions[id]
           return (
-            sub?.channel === Channel.TICKER && sub?.request?.symbol === `t${ticker.currencyPair}`
+            sub?.channel === ChannelTypeEnum.TICKER &&
+            sub?.request?.symbol === `t${ticker.currencyPair}`
           )
         })
 

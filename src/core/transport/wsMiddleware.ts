@@ -1,7 +1,7 @@
 import type { Middleware } from "@reduxjs/toolkit"
 import { Connection } from "./Connection"
 import { updateStaleSubscription } from "./slice"
-import { Channel } from "./types/Channels"
+import { ChannelTypeEnum } from "../../types/avro-types"
 import { performanceMetrics } from "../../services/performanceMetrics"
 import {
   handleSubscriptionAck,
@@ -17,7 +17,7 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
     // Register handler only once when middleware is created
     connection.onReceive((data) => {
       const parsedData = JSON.parse(data)
-
+      console.log(parsedData)
       if (parsedData.event === "subscribed") {
         handleSubscriptionAck(parsedData, store)
         return
@@ -57,19 +57,19 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
         })
 
         switch (subscription.channel) {
-          case Channel.TRADES:
+          case ChannelTypeEnum.TRADES:
             handleTradesData(parsedData, subscription, store.dispatch)
             break
 
-          case Channel.TICKER:
+          case ChannelTypeEnum.TICKER:
             handleTickerData(parsedData, subscription, store.dispatch)
             break
 
-          case Channel.CANDLES:
+          case ChannelTypeEnum.CANDLES:
             handleCandlesData(parsedData, subscription, store.dispatch)
             break
 
-          case Channel.BOOK:
+          case ChannelTypeEnum.BOOK:
             handleBookData(parsedData, subscription, store.dispatch)
             break
 

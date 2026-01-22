@@ -1,8 +1,8 @@
-import type { ChannelTypes } from "./Channels"
+import { ChannelTypeEnum } from "../../../types/avro-types"
 
 export type SubscribeMsg = {
   event: string
-  channel: ChannelTypes
+  channel: ChannelTypeEnum
   symbol?: string
   prec?: string
   key?: string

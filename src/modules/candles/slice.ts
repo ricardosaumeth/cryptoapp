@@ -1,6 +1,26 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { Candle, CandleTuple } from "./types/Candle"
 
+/**
+ * MEMORY-BOUNDED ARRAY CONFIGURATION FOR CANDLES
+ *
+ * Candles are time-series data that accumulate continuously.
+ * 1-minute candles: 1,440 per day, 10,080 per week, 43,200 per month
+ *
+ * Without limits:
+ * - 30 days = 43,200 candles per pair
+ * - 10 pairs = 432,000 candles
+ * - Highcharts becomes unresponsive
+ * - Memory usage grows unbounded
+ *
+ * MAX_CANDLES = 5000 provides:
+ * - 1-minute candles: ~3.5 days of history
+ * - 5-minute candles: ~17 days of history
+ * - 15-minute candles: ~52 days of history
+ * - Sufficient for technical analysis (moving averages, Bollinger Bands)
+ * - Smooth Highcharts rendering
+ * - Stable memory footprint
+ */
 const MAX_CANDLES = import.meta.env["VITE_MAX_CANDLES"]
 
 type SymbolState = Candle[]
@@ -64,7 +84,22 @@ export const candleSlice = createSlice({
         state[lookupKey] = []
       }
 
-      // Keep only recent candles to prevent memory issues
+      /**
+       * 🔥 CRITICAL: MEMORY-BOUNDED ARRAY FOR TIME-SERIES DATA
+       *
+       * Candles accumulate over time and will grow indefinitely without bounds.
+       *
+       * Why slice(-MAX_CANDLES) instead of splice()?
+       * - Creates new array with only the last N candles
+       * - Simpler than calculating splice offset
+       * - Redux Toolkit's Immer handles this efficiently
+       *
+       * Impact:
+       * - Without: 43,200 candles after 30 days (4.3MB per pair)
+       * - With: 5,000 candles always (500KB per pair)
+       *
+       * This keeps Highcharts responsive and memory usage predictable.
+       */
       if (state[lookupKey]!.length > MAX_CANDLES) {
         state[lookupKey] = state[lookupKey]!.slice(-MAX_CANDLES)
       }

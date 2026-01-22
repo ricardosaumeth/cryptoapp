@@ -1,6 +1,6 @@
 import { performanceTracker } from "../../../services/performanceTracker"
 import { bookSnapshotReducer, bookUpdateReducer } from "../../../modules/book/slice"
-import { Channel } from "../types/Channels"
+import { ChannelTypeEnum } from "../../../types/avro-types"
 
 export const handleBookData = (parsedData: any[], subscription: any, dispatch: any) => {
   const startTime = performance.now()
@@ -17,5 +17,5 @@ export const handleBookData = (parsedData: any[], subscription: any, dispatch: a
   }
 
   const processingTime = performance.now() - startTime
-  performanceTracker.updateLatency(Channel.BOOK, processingTime)
+  performanceTracker.updateLatency(ChannelTypeEnum.BOOK, processingTime)
 }

@@ -7,6 +7,22 @@ export interface BookState {
   [currencyPair: string]: SymbolState
 }
 
+/**
+ * MEMORY-BOUNDED ARRAY CONFIGURATION FOR ORDER BOOK
+ *
+ * Order books are SNAPSHOTS of current market state, not historical data.
+ * Unlike trades/candles, we don't need deep history—just current depth.
+ *
+ * Why 100 orders?
+ * - Order books show top bids and asks
+ * - Top 50 bids + top 50 asks = complete market depth
+ * - Depth charts only visualize top levels
+ * - More than 100 is visual noise
+ * - Keeps AG Grid responsive for real-time updates
+ *
+ * Note: Order books update 10-60 times per second.
+ * Without bounds, even snapshots can accumulate if not properly managed.
+ */
 const MAX_BOOK_ORDERS = 100
 const initialState: BookState = {}
 
@@ -43,6 +59,24 @@ export const bookSlice = createSlice({
       } else {
         // add
         orders.push({ id, price, amount })
+
+        /**
+         * 🔥 CRITICAL: MEMORY-BOUNDED ARRAY FOR ORDER BOOK
+         *
+         * Order books are current market snapshots, not historical records.
+         * We only need the top N orders for:
+         * - Depth chart visualization
+         * - Bid/ask spread analysis
+         * - Market depth display
+         *
+         * Why bound order books?
+         * - Updates arrive 10-60 times per second
+         * - Without bounds, arrays can still grow from edge cases
+         * - AG Grid performance degrades with large datasets
+         * - 100 orders is more than enough for visualization
+         *
+         * Real-world: Most exchanges only show top 20-50 levels anyway.
+         */
         if (orders.length > MAX_BOOK_ORDERS) {
           orders.splice(0, orders.length - MAX_BOOK_ORDERS)
         }

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { getSubscriptionId, getIsSubscriptionStale } from "./selectors"
-import { Channel } from "./types/Channels"
+import { ChannelTypeEnum } from "../../types/avro-types"
 import { ConnectionStatus } from "./types/ConnectionStatus"
 import type { RootState } from "../../modules/redux/store"
 
@@ -8,17 +8,17 @@ describe("transport selectors", () => {
   const mockState: Partial<RootState> = {
     subscriptions: {
       12345: {
-        channel: Channel.TRADES,
+        channel: ChannelTypeEnum.TRADES,
         request: { channel: "trades", symbol: "tBTCUSD" },
         isStale: true,
       },
       12346: {
-        channel: Channel.TICKER,
+        channel: ChannelTypeEnum.TICKER,
         request: { channel: "ticker", symbol: "tETHUSD" },
         isStale: false,
       },
       12347: {
-        channel: Channel.CANDLES,
+        channel: ChannelTypeEnum.CANDLES,
         request: { channel: "candles", key: "trade:1m:tBTCUSD" },
         isStale: true,
       },
@@ -28,25 +28,25 @@ describe("transport selectors", () => {
 
   describe("getSubscriptionId", () => {
     it("should return subscription ID for existing channel", () => {
-      const selector = getSubscriptionId(Channel.TRADES, { symbol: "tBTCUSD" })
+      const selector = getSubscriptionId(ChannelTypeEnum.TRADES, { symbol: "tBTCUSD" })
       const result = selector(mockState as RootState)
       expect(result).toBe(12345)
     })
 
     it("should return subscription ID for ticker channel", () => {
-      const selector = getSubscriptionId(Channel.TICKER, { symbol: "tETHUSD" })
+      const selector = getSubscriptionId(ChannelTypeEnum.TICKER, { symbol: "tETHUSD" })
       const result = selector(mockState as RootState)
       expect(result).toBe(12346)
     })
 
     it("should return subscription ID for candles channel", () => {
-      const selector = getSubscriptionId(Channel.CANDLES, { key: "trade:1m:tBTCUSD" })
+      const selector = getSubscriptionId(ChannelTypeEnum.CANDLES, { key: "trade:1m:tBTCUSD" })
       const result = selector(mockState as RootState)
       expect(result).toBe(12347)
     })
 
     it("should return undefined for non-existent channel", () => {
-      const selector = getSubscriptionId(Channel.BOOK, { symbol: "tBTCUSD", prec: "R0" })
+      const selector = getSubscriptionId(ChannelTypeEnum.BOOK, { symbol: "tBTCUSD", prec: "R0" })
       const result = selector(mockState as RootState)
       expect(result).toBeUndefined()
     })
@@ -55,7 +55,7 @@ describe("transport selectors", () => {
       const emptyState = {
         subscriptions: { wsConnectionStatus: ConnectionStatus.Disconnected },
       }
-      const selector = getSubscriptionId(Channel.TRADES, { symbol: "tBTCUSD" })
+      const selector = getSubscriptionId(ChannelTypeEnum.TRADES, { symbol: "tBTCUSD" })
       const result = selector(emptyState as RootState)
       expect(result).toBeUndefined()
     })

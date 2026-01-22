@@ -2,7 +2,7 @@ import { useSelector } from "react-redux"
 import Trades from "./Trades"
 import type { RootState } from "../../redux/store"
 import { getIsSubscriptionStale, getSubscriptionId } from "../../../core/transport/selectors"
-import { Channel } from "../../../core/transport/types/Channels"
+import { ChannelTypeEnum } from "../../../types/avro-types"
 import { getTradesForSelectedPair } from "../selector"
 import { getSelectedCurrencyPair } from "../../selection/selectors"
 
@@ -11,7 +11,7 @@ const TradesContainer = () => {
   const selectedCurrencyPair = useSelector(getSelectedCurrencyPair)
   const subscriptionId = useSelector(
     selectedCurrencyPair
-      ? getSubscriptionId(Channel.TRADES, { symbol: `t${selectedCurrencyPair}` })
+      ? getSubscriptionId(ChannelTypeEnum.TRADES, { symbol: `t${selectedCurrencyPair}` })
       : () => undefined
   )
   const isStale = useSelector((state: RootState) =>

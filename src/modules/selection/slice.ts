@@ -6,7 +6,7 @@ import {
 } from "../../core/transport/slice"
 import { SUBSCRIPTION_TIMEOUT_IN_MS } from "../app/slice"
 import type { RootState } from "../redux/store"
-import { Channel } from "../../core/transport/types/Channels"
+import { ChannelTypeEnum } from "../../types/avro-types"
 
 interface CurrencyPairState {
   currencyPair: string
@@ -27,7 +27,7 @@ export const selectCurrencyPair = createAsyncThunk(
         const unsubPromises = Object.entries(state.subscriptions)
           .filter(([chanId]) => {
             const sub = state.subscriptions[Number(chanId)]
-            return sub?.channel === Channel.TRADES || sub?.channel === Channel.BOOK
+            return sub?.channel === ChannelTypeEnum.TRADES || sub?.channel === ChannelTypeEnum.BOOK
           })
           .map(async ([chanId]) => {
             try {

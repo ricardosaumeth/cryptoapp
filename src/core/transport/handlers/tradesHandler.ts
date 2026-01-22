@@ -1,7 +1,7 @@
 import { tradesSnapshotReducer, tradesUpdateReducer } from "../../../modules/trades/slice"
 import type { RawTrade, Trade } from "../../../modules/trades/types/Trade"
 import { performanceTracker } from "../../../services/performanceTracker"
-import { Channel } from "../types/Channels"
+import { ChannelTypeEnum } from "../../../types/avro-types"
 
 export const handleTradesData = (parsedData: any[], subscription: any, dispatch: any) => {
   const startTime = performance.now()
@@ -27,7 +27,7 @@ export const handleTradesData = (parsedData: any[], subscription: any, dispatch:
   }
 
   const processingTime = performance.now() - startTime
-  performanceTracker.updateLatency(Channel.TRADES, processingTime)
+  performanceTracker.updateLatency(ChannelTypeEnum.TRADES, processingTime)
 
   console.log(`Trades processing: ${processingTime.toFixed(2)}ms`)
 }

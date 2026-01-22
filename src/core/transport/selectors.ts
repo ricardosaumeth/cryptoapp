@@ -1,13 +1,16 @@
 import { createSelector } from "reselect"
 import { type RootState } from "../../modules/redux/store"
-import { Channel } from "./types/Channels"
+import { ChannelTypeEnum } from "../../types/avro-types"
 import type { requestSubscribeToChannelAck } from "./slice"
 
 const subscriptionsSelector = (state: RootState) => state.subscriptions
 
 export const getSubscriptions = subscriptionsSelector
 
-export const getSubscriptionId = (channel: Channel, request: { [key: string]: string } = {}) =>
+export const getSubscriptionId = (
+  channel: ChannelTypeEnum,
+  request: { [key: string]: string } = {}
+) =>
   createSelector(getSubscriptions, (subscriptions) => {
     const channelIds = Object.keys(subscriptions)
       .filter((key) => !isNaN(Number(key)))

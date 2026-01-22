@@ -6,7 +6,7 @@ import { selectCurrencyPair } from "../../../selection/slice"
 import { getSelectedCurrencyPair } from "../../../selection/selectors"
 import Ticker from "./Ticker"
 import { getIsSubscriptionStale, getSubscriptionId } from "../../../../core/transport/selectors"
-import { Channel } from "../../../../core/transport/types/Channels"
+import { ChannelTypeEnum } from "../../../../types/avro-types"
 
 export interface ContainerProps {
   currencyPair: string
@@ -21,7 +21,7 @@ const TickerContainer = ({ currencyPair, isStale: parentIsStale }: ContainerProp
 
   const selectedCurrencyPair = useSelector(getSelectedCurrencyPair)
   const subscriptionId = useSelector(
-    getSubscriptionId(Channel.TICKER, { symbol: `t${currencyPair}` })
+    getSubscriptionId(ChannelTypeEnum.TICKER, { symbol: `t${currencyPair}` })
   )
 
   const isStale =

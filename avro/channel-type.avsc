@@ -1,0 +1,6 @@
+{
+  "type": "enum",
+  "name": "ChannelType",
+  "namespace": "com.crypto.api.types",
+  "symbols": ["TRADES", "TICKER", "BOOK", "CANDLES"]
+}

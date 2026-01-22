@@ -13,6 +13,7 @@ import {
   updateStaleSubscription,
 } from "./slice"
 import { ConnectionStatus } from "./types/ConnectionStatus"
+import { ChannelTypeEnum } from "../../types/avro-types"
 
 describe("subscriptionsSlice", () => {
   const initialState = {
@@ -30,14 +31,14 @@ describe("subscriptionsSlice", () => {
     it("should handle subscription acknowledgment", () => {
       const action = subscribeToChannelAck({
         channelId: 12345,
-        channel: "trades",
+        channel: ChannelTypeEnum.TRADES,
         request: { channel: "trades", symbol: "tBTCUSD" },
       })
 
       const result = subscriptionsSlice.reducer(initialState, action)
 
       expect(result[12345]).toEqual({
-        channel: "trades",
+        channel: ChannelTypeEnum.TRADES,
         request: { channel: "trades", symbol: "tBTCUSD" },
         isStale: false,
       })
@@ -47,7 +48,7 @@ describe("subscriptionsSlice", () => {
       const stateWithSubscription = {
         ...initialState,
         12345: {
-          channel: "trades",
+          channel: ChannelTypeEnum.TRADES,
           request: { channel: "trades", symbol: "tBTCUSD" },
           isStale: false,
         },
@@ -63,7 +64,7 @@ describe("subscriptionsSlice", () => {
       const stateWithStaleSubscription = {
         ...initialState,
         12345: {
-          channel: "trades",
+          channel: ChannelTypeEnum.TRADES,
           request: { channel: "trades", symbol: "tBTCUSD" },
           isStale: false,
         },

@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "SubscribeRequest",
+  "namespace": "com.crypto.api.websocket",
+  "fields": [
+    { "name": "event", "type": "string", "default": "subscribe" },
+    {
+      "name": "channel",
+      "type": {
+        "type": "enum",
+        "name": "ChannelType",
+        "symbols": ["TRADES", "TICKER", "BOOK", "CANDLES"]
+      }
+    },
+    { "name": "symbol", "type": ["null", "string"], "default": null },
+    { "name": "key", "type": ["null", "string"], "default": null },
+    { "name": "prec", "type": ["null", "string"], "default": null }
+  ]
+}

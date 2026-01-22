@@ -7,7 +7,7 @@ import type { Candle } from "../types/Candle"
 import type { RootState } from "../../redux/store"
 import { DEFAULT_TIMEFRAME } from "../../app/slice"
 import { getIsSubscriptionStale, getSubscriptionId } from "../../../core/transport/selectors"
-import { Channel } from "../../../core/transport/types/Channels"
+import { ChannelTypeEnum } from "../../../types/avro-types"
 
 const CandlesChartContainer = () => {
   const selectedCurrencyPair = useSelector(getSelectedCurrencyPair)
@@ -23,7 +23,7 @@ const CandlesChartContainer = () => {
   const candles = useSelector(selectCandles)
   const subscriptionId = useSelector(
     selectedCurrencyPair
-      ? getSubscriptionId(Channel.CANDLES, {
+      ? getSubscriptionId(ChannelTypeEnum.CANDLES, {
           key: `trade:${DEFAULT_TIMEFRAME}:t${selectedCurrencyPair}`,
         })
       : () => undefined

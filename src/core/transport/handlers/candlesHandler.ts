@@ -1,7 +1,7 @@
 import { candlesSnapshotReducer, candlesUpdateReducer } from "../../../modules/candles/slice"
 import { getLookupKey } from "../../../modules/candles/utils"
 import { performanceTracker } from "../../../services/performanceTracker"
-import { Channel } from "../types/Channels"
+import { ChannelTypeEnum } from "../../../types/avro-types"
 
 export const handleCandlesData = (parsedData: any[], subscription: any, dispatch: any) => {
   const startTime = performance.now()
@@ -22,5 +22,5 @@ export const handleCandlesData = (parsedData: any[], subscription: any, dispatch
   }
 
   const processingTime = performance.now() - startTime
-  performanceTracker.updateLatency(Channel.CANDLES, processingTime)
+  performanceTracker.updateLatency(ChannelTypeEnum.CANDLES, processingTime)
 }

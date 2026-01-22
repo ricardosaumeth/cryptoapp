@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "generate:avro": "node ./avro/scripts/generate-avro-types.cjs"
   },
   "dependencies": {
     "highcharts": "^12.4.0",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@ovotech/avro-ts": "^6.2.0",
     "@reduxjs/toolkit": "^2.0.1",
     "@types/lodash": "^4.17.21",
     "@types/luxon": "^3.7.1",

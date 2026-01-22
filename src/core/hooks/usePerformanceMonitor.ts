@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { performanceTracker } from "../../services/performanceTracker"
-import { Channel } from "../transport/types/Channels"
+import { ChannelTypeEnum } from "../../types/avro-types"
 
 enum ConnectionHealth {
   GOOD = "good",
@@ -38,7 +38,7 @@ export const usePerformanceMonitor = (): PerformanceMetrics => {
 
   useEffect(() => {
     // Subscribe to latency updates from WebSocket handlers
-    performanceTracker.subscribe(Channel.TRADES, (latency) => {
+    performanceTracker.subscribe(ChannelTypeEnum.TRADES, (latency) => {
       setMetrics((prev) => {
         const newMetrics = {
           ...prev,
@@ -48,7 +48,7 @@ export const usePerformanceMonitor = (): PerformanceMetrics => {
       })
     })
 
-    performanceTracker.subscribe(Channel.TICKER, (latency) => {
+    performanceTracker.subscribe(ChannelTypeEnum.TICKER, (latency) => {
       setMetrics((prev) => {
         const newMetrics = {
           ...prev,
@@ -58,7 +58,7 @@ export const usePerformanceMonitor = (): PerformanceMetrics => {
       })
     })
 
-    performanceTracker.subscribe(Channel.BOOK, (latency) => {
+    performanceTracker.subscribe(ChannelTypeEnum.BOOK, (latency) => {
       setMetrics((prev) => {
         const newMetrics = {
           ...prev,
@@ -68,7 +68,7 @@ export const usePerformanceMonitor = (): PerformanceMetrics => {
       })
     })
 
-    performanceTracker.subscribe(Channel.CANDLES, (latency) => {
+    performanceTracker.subscribe(ChannelTypeEnum.CANDLES, (latency) => {
       setMetrics((prev) => {
         const newMetrics = {
           ...prev,
@@ -137,10 +137,10 @@ export const usePerformanceMonitor = (): PerformanceMetrics => {
     // Cleanup subscriptions on unmount
     return () => {
       clearInterval(memoryInterval)
-      performanceTracker.unsubscribe(Channel.TRADES)
-      performanceTracker.unsubscribe(Channel.TICKER)
-      performanceTracker.unsubscribe(Channel.BOOK)
-      performanceTracker.unsubscribe(Channel.CANDLES)
+      performanceTracker.unsubscribe(ChannelTypeEnum.TRADES)
+      performanceTracker.unsubscribe(ChannelTypeEnum.TICKER)
+      performanceTracker.unsubscribe(ChannelTypeEnum.BOOK)
+      performanceTracker.unsubscribe(ChannelTypeEnum.CANDLES)
     }
   }, [])
 

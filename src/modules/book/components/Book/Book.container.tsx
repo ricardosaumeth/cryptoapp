@@ -4,7 +4,7 @@ import { getBook } from "../../selectors"
 import { getSelectedCurrencyPair } from "../../../selection/selectors"
 import { type RootState } from "../../../redux/store"
 import { getIsSubscriptionStale, getSubscriptionId } from "../../../../core/transport/selectors"
-import { Channel } from "../../../../core/transport/types/Channels"
+import { ChannelTypeEnum } from "../../../../types/avro-types"
 import Book from "./Book"
 
 const BookContainer = () => {
@@ -16,7 +16,7 @@ const BookContainer = () => {
   )
   const subscriptionId = useSelector(
     selectedCurrencyPair
-      ? getSubscriptionId(Channel.BOOK, { symbol: `t${selectedCurrencyPair}`, prec: "R0" })
+      ? getSubscriptionId(ChannelTypeEnum.BOOK, { symbol: `t${selectedCurrencyPair}`, prec: "R0" })
       : () => undefined
   )
   const isStale = useSelector((state: RootState) =>

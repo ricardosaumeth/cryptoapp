@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { createWsMiddleware } from "./wsMiddleware"
-import { Channel } from "./types/Channels"
+import { ChannelTypeEnum } from "../../types/avro-types"
 import * as handlers from "./handlers"
 
 vi.mock("./slice", () => ({
@@ -36,10 +36,10 @@ describe("wsMiddleware", () => {
       dispatch: vi.fn(),
       getState: vi.fn(() => ({
         subscriptions: {
-          12345: { channel: Channel.TRADES },
-          12346: { channel: Channel.TICKER },
-          12347: { channel: Channel.CANDLES },
-          12348: { channel: Channel.BOOK },
+          12345: { channel: ChannelTypeEnum.TRADES },
+          12346: { channel: ChannelTypeEnum.TICKER },
+          12347: { channel: ChannelTypeEnum.CANDLES },
+          12348: { channel: ChannelTypeEnum.BOOK },
         },
       })),
     }
@@ -111,7 +111,7 @@ describe("wsMiddleware", () => {
 
     expect(handlers.handleTradesData).toHaveBeenCalledWith(
       [12345, [[1, 1640995200000, 0.5, 45000]]],
-      { channel: Channel.TRADES },
+      { channel: ChannelTypeEnum.TRADES },
       mockStore.dispatch
     )
   })
@@ -124,7 +124,7 @@ describe("wsMiddleware", () => {
 
     expect(handlers.handleTickerData).toHaveBeenCalledWith(
       [12346, [7364.9, 7365, 7364.8]],
-      { channel: Channel.TICKER },
+      { channel: ChannelTypeEnum.TICKER },
       mockStore.dispatch
     )
   })
@@ -137,7 +137,7 @@ describe("wsMiddleware", () => {
 
     expect(handlers.handleCandlesData).toHaveBeenCalledWith(
       [12347, [1640995200000, 45000, 45100, 45200, 44900, 1.5]],
-      { channel: Channel.CANDLES },
+      { channel: ChannelTypeEnum.CANDLES },
       mockStore.dispatch
     )
   })
@@ -150,7 +150,7 @@ describe("wsMiddleware", () => {
 
     expect(handlers.handleBookData).toHaveBeenCalledWith(
       [12348, [[45000, 2, 1.5]]],
-      { channel: Channel.BOOK },
+      { channel: ChannelTypeEnum.BOOK },
       mockStore.dispatch
     )
   })

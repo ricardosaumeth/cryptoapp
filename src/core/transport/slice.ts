@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import { ConnectionStatus } from "./types/ConnectionStatus"
 import type { Connection } from "./Connection"
-import { type ChannelTypes, Channel } from "./types/Channels"
 import { SubscriptionActionType, type SubscriptionActionTypes } from "./types/ActionTypes"
 import type { SubscribeMsg } from "./types/SubscribeMsg"
+import { ChannelTypeEnum } from "../../types/avro-types"
 
 export type requestSubscribeToChannelAck = {
   channel: string
@@ -33,7 +33,7 @@ interface SubscribePayload {
   prec?: string
 }
 
-const createSubscribeThunk = (channel: ChannelTypes, actionType: SubscriptionActionTypes) =>
+const createSubscribeThunk = (channel: ChannelTypeEnum, actionType: SubscriptionActionTypes) =>
   createAsyncThunk(actionType, async ({ symbol, timeframe, prec }: SubscribePayload, { extra }) => {
     const { connection } = extra as { connection: Connection }
 
@@ -43,17 +43,17 @@ const createSubscribeThunk = (channel: ChannelTypes, actionType: SubscriptionAct
     }
 
     switch (channel) {
-      case Channel.CANDLES:
+      case ChannelTypeEnum.CANDLES:
         msg.key = `trade:${timeframe}:t${symbol}`
         break
 
-      case Channel.BOOK:
+      case ChannelTypeEnum.BOOK:
         msg.prec = prec
         msg.symbol = `t${symbol}`
         break
 
-      case Channel.TRADES:
-      case Channel.TICKER:
+      case ChannelTypeEnum.TRADES:
+      case ChannelTypeEnum.TICKER:
         msg.symbol = `t${symbol}`
         break
 
@@ -81,22 +81,22 @@ export const unsubscribeFromTradesAndBook = createAsyncThunk(
 )
 
 export const tradeSubscribeToSymbol = createSubscribeThunk(
-  Channel.TRADES,
+  ChannelTypeEnum.TRADES,
   SubscriptionActionType.SUBSCRIBE_TO_TRADES
 )
 
 export const tickerSubscribeToSymbol = createSubscribeThunk(
-  Channel.TICKER,
+  ChannelTypeEnum.TICKER,
   SubscriptionActionType.SUBSCRIBE_TO_TICKER
 )
 
 export const candlesSubscribeToSymbol = createSubscribeThunk(
-  Channel.CANDLES,
+  ChannelTypeEnum.CANDLES,
   SubscriptionActionType.SUBSCRIBE_TO_CANDLES
 )
 
 export const bookSubscribeToSymbol = createSubscribeThunk(
-  Channel.BOOK,
+  ChannelTypeEnum.BOOK,
   SubscriptionActionType.SUBSCRIBE_TO_BOOK
 )
 
@@ -111,7 +111,7 @@ export const subscriptionsSlice = createSlice({
       state,
       action: PayloadAction<{
         channelId: number
-        channel: ChannelTypes
+        channel: ChannelTypeEnum
         request: requestSubscribeToChannelAck
       }>
     ) => {

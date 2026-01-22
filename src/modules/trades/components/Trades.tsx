@@ -10,7 +10,7 @@ import Stale from "../../../core/components/Stale"
 import { useGridResize } from "../../../core/hooks/useGridResize"
 import Loading from "../../../core/components/Loading"
 import { amountFormatter, priceFormatter, timeFormatter } from "../../ag-grid/formatter"
-import { Channel } from "../../../core/transport/types/Channels"
+import { ChannelTypeEnum } from "../../../types/avro-types"
 
 export interface Props {
   trades: Trade[]
@@ -18,7 +18,7 @@ export interface Props {
 }
 
 const Trades = memo(({ trades, isStale }: Props) => {
-  useRenderTracker(Channel.CANDLES)
+  useRenderTracker(ChannelTypeEnum.CANDLES)
   const throttledTrades = useThrottle<Trade[]>(trades, 100)
   const [gridApi, setGridApi] = useState<GridApi | undefined>()
   const columnDefs: ColDef[] = useMemo(

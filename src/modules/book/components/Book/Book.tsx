@@ -11,7 +11,7 @@ import Stale from "../../../../core/components/Stale"
 import { useGridResize } from "../../../../core/hooks/useGridResize"
 import { useThrottle } from "../../../../core/hooks/useThrottle"
 import { useRenderTracker } from "../../../../core/hooks/useRenderTracker"
-import { Channel } from "../../../../core/transport/types/Channels"
+import { ChannelTypeEnum } from "../../../../types/avro-types"
 
 export interface Props {
   orders: { bid: Order; ask: Order }[]
@@ -19,7 +19,7 @@ export interface Props {
 }
 
 const Book = ({ orders, isStale }: Props) => {
-  useRenderTracker(Channel.BOOK)
+  useRenderTracker(ChannelTypeEnum.BOOK)
   const throttledOrders = useThrottle<{ bid: Order; ask: Order }[]>(orders, 100)
   const [gridApi, setGridApi] = useState<GridApi | undefined>()
   const columnDefs: ColDef[] = useMemo(

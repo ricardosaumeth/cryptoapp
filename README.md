@@ -106,6 +106,17 @@ npm run preview
 
 ## 📁 Project Architecture
 
+## 📚 Documentation
+
+- **[AI-Accelerated Development](./docs/AI_ACCELERATED_DEVELOPMENT.md)** - How senior engineers use AI to build real-time UIs faster
+- **[Memory-Bounded Arrays Deep Dive](./docs/MEMORY_BOUNDED_ARRAYS.md)** - Critical concept for real-time systems
+- **[slice() vs splice() Explained](./docs/SLICE_VS_SPLICE.md)** - Memory management techniques
+- **[Architecture Overview](#-project-architecture)** - Project structure and organization
+- **[API Integration](#-bitfinex-api-integration)** - WebSocket implementation details
+- **[Performance Features](#-performance-features)** - Optimization strategies
+
+## 📁 Project Structure
+
 ```
 src/
 management

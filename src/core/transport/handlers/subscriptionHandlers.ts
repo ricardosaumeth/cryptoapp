@@ -3,7 +3,7 @@ import {
   unSubscribeToChannelAck,
   type requestSubscribeToChannelAck,
 } from "../slice"
-import { Channel } from "../types/Channels"
+import { ChannelTypeEnum } from "../../../types/avro-types"
 
 export const handleSubscriptionAck = (parsedData: any, store: any) => {
   const { chanId: channelId, channel, event, symbol, key, prec } = parsedData
@@ -14,18 +14,18 @@ export const handleSubscriptionAck = (parsedData: any, store: any) => {
   }
 
   switch (channel) {
-    case Channel.CANDLES:
+    case ChannelTypeEnum.CANDLES:
       request.key = key
       break
 
-    case Channel.BOOK:
+    case ChannelTypeEnum.BOOK:
       request.prec = prec
       request.symbol = symbol
       delete request.event
       break
 
-    case Channel.TRADES:
-    case Channel.TICKER:
+    case ChannelTypeEnum.TRADES:
+    case ChannelTypeEnum.TICKER:
       request.symbol = symbol
       break
 
