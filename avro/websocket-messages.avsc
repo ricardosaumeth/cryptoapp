@@ -1,95 +1,64 @@
-{
-  "type": "enum",
-  "name": "ChannelType",
-  "namespace": "com.crypto.api.types",
-  "symbols": ["TRADES", "TICKER", "BOOK", "CANDLES"]
-}
-
-{
-  "type": "record",
-  "name": "SubscribeRequest",
-  "namespace": "com.crypto.api.websocket",
-  "fields": [
-    {"name": "event", "type": "string", "default": "subscribe"},
-    {"name": "channel", "type": "com.crypto.api.types.ChannelType"},
-    {"name": "symbol", "type": ["null", "string"], "default": null},
-    {"name": "key", "type": ["null", "string"], "default": null},
-    {"name": "prec", "type": ["null", "string"], "default": null}
-  ]
-}
-
-{
-  "type": "record",
-  "name": "SubscribeResponse",
-  "namespace": "com.crypto.api.websocket",
-  "fields": [
-    {"name": "event", "type": "string", "default": "subscribed"},
-    {"name": "channel", "type": "string"},
-    {"name": "chanId", "type": "int"},
-    {"name": "symbol", "type": ["null", "string"], "default": null},
-    {"name": "key", "type": ["null", "string"], "default": null},
-    {"name": "prec", "type": ["null", "string"], "default": null}
-  ]
-}
-
-{
-  "type": "record",
-  "name": "ConnectionInfo",
-  "namespace": "com.crypto.api.websocket",
-  "fields": [
-    {"name": "event", "type": "string", "default": "info"},
-    {"name": "version", "type": "int", "default": 2},
-    {"name": "serverId", "type": "string", "default": "crypto-api-gateway"}
-  ]
-}
-
-{
-  "type": "record",
-  "name": "PingMessage",
-  "namespace": "com.crypto.api.websocket",
-  "fields": [
-    {"name": "event", "type": "string", "default": "ping"}
-  ]
-}
-
-{
-  "type": "record",
-  "name": "PongMessage",
-  "namespace": "com.crypto.api.websocket",
-  "fields": [
-    {"name": "event", "type": "string", "default": "pong"}
-  ]
-}
-
-{
-  "type": "record",
-  "name": "TradeData",
-  "namespace": "com.crypto.api.data",
-  "fields": [
-    {"name": "channel_id", "type": "int"},
-    {"name": "event_type", "type": "string", "default": "te"},
-    {"name": "trade_id", "type": "int"},
-    {"name": "timestamp", "type": "long"},
-    {"name": "amount", "type": "double"},
-    {"name": "price", "type": "double"}
-  ]
-}
-
-{
-  "type": "record",
-  "name": "TickerData",
-  "namespace": "com.crypto.api.data",
-  "fields": [
-    {"name": "channel_id", "type": "int"},
-    {"name": "bid", "type": "double"},
-    {"name": "bid_size", "type": "double"},
-    {"name": "ask", "type": "double"},
-    {"name": "ask_size", "type": "double"},
-    {"name": "daily_change", "type": "double"},
-    {"name": "daily_change_rel", "type": "double"},
-    {"name": "last_price", "type": "double"},
-    {"name": "volume", "type": "double"},
-    {"name": "high", "type": "double"},
-    {"name": "low", "type": "double"}
-  ]
-}
+[
+  {
+    "type": "enum",
+    "name": "ChannelType",
+    "namespace": "com.crypto.api.types",
+    "symbols": ["TRADES", "TICKER", "BOOK", "CANDLES"]
+  },
+  {
+    "type": "record",
+    "name": "SubscribeRequest",
+    "namespace": "com.crypto.api.websocket",
+    "fields": [
+      { "name": "event", "type": "string", "default": "subscribe" },
+      { "name": "channel", "type": "string" },
+      { "name": "symbol", "type": ["null", "string"], "default": null },
+      { "name": "key", "type": ["null", "string"], "default": null },
+      { "name": "prec", "type": ["null", "string"], "default": null }
+    ]
+  },
+  {
+    "type": "record",
+    "name": "SubscribeResponse",
+    "namespace": "com.crypto.api.websocket",
+    "fields": [
+      { "name": "event", "type": "string", "default": "subscribed" },
+      { "name": "channel", "type": "string" },
+      { "name": "chanId", "type": "int" },
+      { "name": "symbol", "type": ["null", "string"], "default": null },
+      { "name": "key", "type": ["null", "string"], "default": null },
+      { "name": "prec", "type": ["null", "string"], "default": null }
+    ]
+  },
+  {
+    "type": "record",
+    "name": "TradeData",
+    "namespace": "com.crypto.api.data",
+    "fields": [
+      { "name": "channel_id", "type": "int" },
+      { "name": "event_type", "type": "string", "default": "te" },
+      { "name": "trade_id", "type": "int" },
+      { "name": "timestamp", "type": "long" },
+      { "name": "amount", "type": "double" },
+      { "name": "price", "type": "double" }
+    ]
+  },
+  {
+    "type": "record",
+    "name": "TickerData",
+    "namespace": "com.crypto.api.data",
+    "fields": [
+      { "name": "channel_id", "type": "int" },
+      { "name": "bid", "type": "double" },
+      { "name": "bid_size", "type": "double" },
+      { "name": "ask", "type": "double" },
+      { "name": "ask_size", "type": "double" },
+      { "name": "daily_change", "type": "double" },
+      { "name": "daily_change_rel", "type": "double" },
+      { "name": "last_price", "type": "double" },
+      { "name": "volume", "type": "double" },
+      { "name": "high", "type": "double" },
+      { "name": "low", "type": "double" }
+    ]
+  }
+]
