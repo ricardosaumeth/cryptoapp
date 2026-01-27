@@ -18,7 +18,7 @@ import {
   DepthPanel,
   Footer,
 } from "./App.styled"
-import { bootstrapApp, shutdownApp } from "./modules/app/slice"
+import { bootstrapApp } from "./modules/app/slice"
 import Book from "./modules/book/components/Book"
 import { getSelectedCurrencyPair } from "./modules/selection/selectors"
 import { getTicker } from "./modules/tickers/selectors"
@@ -37,18 +37,7 @@ function AppContent() {
   const tickerLastPrice = useSelector(getTicker)(currencyPair)?.lastPrice
 
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        dispatch(shutdownApp())
-      } else {
-        dispatch(bootstrapApp())
-      }
-    }
-
     dispatch(bootstrapApp())
-
-    document.addEventListener("visibilitychange", handleVisibilityChange)
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange)
   }, [dispatch])
 
   useEffect(() => {

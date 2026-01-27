@@ -56,11 +56,27 @@ export const getVisibleCurrencyPairTickers = createSelector(
   }
 )
 
+// Memoized price data selector to prevent recalculation
+const getPriceData = createSelector(candlesSelector, (candles) => {
+  const priceCache = new Map<string, number[]>()
+
+  Object.keys(candles).forEach((lookupKey) => {
+    const candleData = candles[lookupKey]
+    if (candleData && candleData.length > 0) {
+      // Only take last 20 candles for mini chart performance
+      const prices = candleData.slice(-20).map((candle) => candle.close)
+      priceCache.set(lookupKey, prices)
+    }
+  })
+
+  return priceCache
+})
+
 export const getTickersWithPrices = createSelector(
   getTickers,
-  candlesSelector,
+  getPriceData,
   (state: RootState) => state.subscriptions,
-  (tickers, candles, subscriptions) => {
+  (tickers, priceCache, subscriptions) => {
     return tickers.map((ticker) => {
       const channelId = Object.keys(subscriptions)
         .map(Number)
@@ -72,11 +88,12 @@ export const getTickersWithPrices = createSelector(
           )
         })
 
+      const lookupKey = getLookupKey(ticker.currencyPair, DEFAULT_TIMEFRAME)
+      const prices = priceCache.get(lookupKey) || []
+
       return {
         ...ticker,
-        prices: (candles[getLookupKey(ticker.currencyPair, DEFAULT_TIMEFRAME)] || []).map(
-          (candle) => candle.close
-        ),
+        prices,
         isStale: channelId ? subscriptions[channelId]?.isStale : false,
       }
     })

@@ -51,24 +51,14 @@ export const bootstrapApp = createAsyncThunk(
   }
 )
 
-export const shutdownApp = createAsyncThunk("app/shutdown", async (_, { extra }) => {
-  const { connection } = extra as { connection: Connection }
-  connection.disconnect()
-  return true
-})
-
 export const appBootstrapSlice = createSlice({
   name: "app/bootstrap",
   initialState: {},
   reducers: {},
   extraReducers: (builder) => {
-    builder
-      .addCase(bootstrapApp.fulfilled, (_state, _action) => {
-        console.log(`Bootstrap App successfully`)
-      })
-      .addCase(shutdownApp.fulfilled, (_state, _action) => {
-        console.log(`Websocket disconnected...`)
-      })
+    builder.addCase(bootstrapApp.fulfilled, (_state, _action) => {
+      console.log(`Bootstrap App successfully`)
+    })
   },
 })
 

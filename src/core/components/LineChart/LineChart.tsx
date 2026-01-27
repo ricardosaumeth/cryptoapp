@@ -19,6 +19,7 @@ const LineChart = ({ values, width = 50, height = 25 }: Props) => {
         backgroundColor: "transparent",
         margin: [0, 0, 0, 0],
         spacing: [0, 0, 0, 0],
+        animation: false,
       },
       title: { text: "" },
       xAxis: {
@@ -40,12 +41,18 @@ const LineChart = ({ values, width = 50, height = 25 }: Props) => {
           lineWidth: 1,
           color: Palette.LightGray,
           enableMouseTracking: false,
+          animation: false,
+          shadow: false,
+        },
+        series: {
+          animation: false,
         },
       },
       series: [
         {
           data: values,
           animation: false,
+          enableMouseTracking: false,
         },
       ],
     }),
@@ -56,7 +63,7 @@ const LineChart = ({ values, width = 50, height = 25 }: Props) => {
     return <div></div>
   }
 
-  return <HighchartsReact highcharts={Highcharts} options={chartOptions} />
+  return <HighchartsReact highcharts={Highcharts} options={chartOptions} allowChartUpdate={false} />
 }
 
 export default LineChart
