@@ -16,10 +16,13 @@ export const getBook = createSelector(
     const bids: Order[] = []
     const asks: Order[] = []
 
+    // Filter out invalid orders (zero price)
     for (const order of rawBook) {
+      if (order.price <= 0) continue // Skip invalid prices
+
       if (order.amount > 0) {
         bids.push(order)
-      } else {
+      } else if (order.amount < 0) {
         asks.push(order)
       }
     }
@@ -64,20 +67,31 @@ export const getDepth = createSelector(
     const rawBook = book[symbol]
     if (!rawBook?.length) return { bids: [], asks: [] }
 
-    const bids = rawBook.filter((order) => order.amount > 0).slice(0, MAX_DEPTH_LEVELS)
-    const asks = rawBook.filter((order) => order.amount < 0).slice(0, MAX_DEPTH_LEVELS)
+    // Filter out invalid orders (zero price or amount)
+    const validBids = rawBook
+      .filter((order) => order.amount > 0 && order.price > 0)
+      .slice(0, MAX_DEPTH_LEVELS)
 
-    bids.sort((a, b) => b.price - a.price)
-    asks.sort((a, b) => a.price - b.price)
+    const validAsks = rawBook
+      .filter((order) => order.amount < 0 && order.price > 0)
+      .slice(0, MAX_DEPTH_LEVELS)
+
+    // Return empty if no valid orders
+    if (validBids.length === 0 && validAsks.length === 0) {
+      return { bids: [], asks: [] }
+    }
+
+    validBids.sort((a, b) => b.price - a.price)
+    validAsks.sort((a, b) => a.price - b.price)
 
     // Calculate cumulative depth properly for depth chart
-    const bidDepth = bids.map((order, index) => {
-      const depth = bids.slice(index).reduce((sum, o) => sum + o.amount, 0)
+    const bidDepth = validBids.map((order, index) => {
+      const depth = validBids.slice(index).reduce((sum, o) => sum + o.amount, 0)
       return { price: order.price, depth }
     })
 
-    const askDepth = asks.map((order, index) => {
-      const depth = asks.slice(0, index + 1).reduce((sum, o) => sum + Math.abs(o.amount), 0)
+    const askDepth = validAsks.map((order, index) => {
+      const depth = validAsks.slice(0, index + 1).reduce((sum, o) => sum + Math.abs(o.amount), 0)
       return { price: order.price, depth }
     })
 
