@@ -17,11 +17,13 @@ export interface SubscriptionState {
   [channelId: number]: {
     isStale: boolean
     lastUpdate?: number
-    channel: string
+    channel: ChannelTypeEnum
     request: requestSubscribeToChannelAck
   }
   wsConnectionStatus: ConnectionStatus
 }
+
+export type SubscriptionEntry = SubscriptionState[number]
 
 const initialState: SubscriptionState = {
   wsConnectionStatus: ConnectionStatus.Disconnected,

@@ -1,20 +1,12 @@
 import type { Middleware } from "@reduxjs/toolkit"
 import { Connection } from "./Connection"
-import { updateStaleSubscription } from "./slice"
-import { ChannelTypeEnum } from "../../types/avro-types"
+import { updateStaleSubscription, type SubscriptionEntry } from "./slice"
 import { performanceMetrics } from "../../services/performanceMetrics"
-import {
-  handleSubscriptionAck,
-  handleUnSubscriptionAck,
-  handleTradesData,
-  handleTickerData,
-  handleCandlesData,
-  handleBookData,
-} from "./handlers"
+import { performanceTracker } from "../../services/performanceTracker"
+import { handleSubscriptionAck, handleUnSubscriptionAck, handlers } from "./handlers"
 
 export const createWsMiddleware = (connection: Connection): Middleware => {
   return (store) => {
-    // Register handler only once when middleware is created
     connection.onReceive((data) => {
       const parsedData = JSON.parse(data)
       console.log(parsedData)
@@ -28,7 +20,7 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
 
       if (Array.isArray(parsedData)) {
         const [channelId] = parsedData
-        const subscription = store.getState().subscriptions[channelId]
+        const subscription = store.getState().subscriptions[channelId] as SubscriptionEntry
 
         if (!subscription) {
           return
@@ -56,27 +48,13 @@ export const createWsMiddleware = (connection: Connection): Middleware => {
           }
         })
 
-        switch (subscription.channel) {
-          case ChannelTypeEnum.TRADES:
-            handleTradesData(parsedData, subscription, store.dispatch)
-            break
+        const handler = handlers[subscription.channel]
+        if (!handler) return
 
-          case ChannelTypeEnum.TICKER:
-            handleTickerData(parsedData, subscription, store.dispatch)
-            break
-
-          case ChannelTypeEnum.CANDLES:
-            handleCandlesData(parsedData, subscription, store.dispatch)
-            break
-
-          case ChannelTypeEnum.BOOK:
-            handleBookData(parsedData, subscription, store.dispatch)
-            break
-
-          default:
-            console.warn("Unhandled channel:", subscription.channel)
-            break
-        }
+        const start = performance.now()
+        handler(parsedData, subscription, store.dispatch)
+        const latency = performance.now() - start
+        performanceTracker.updateLatency(subscription.channel, latency)
       }
     })
 

@@ -1,10 +1,6 @@
-import { performanceTracker } from "../../../services/performanceTracker"
 import { bookSnapshotReducer, bookUpdateReducer } from "../../../modules/book/slice"
-import { ChannelTypeEnum } from "../../../types/avro-types"
 
 export const handleBookData = (parsedData: any[], subscription: any, dispatch: any) => {
-  const startTime = performance.now()
-
   const currencyPair = subscription.request.symbol.slice(1)
   if (Array.isArray(parsedData[1][0])) {
     // Snapshot
@@ -15,7 +11,4 @@ export const handleBookData = (parsedData: any[], subscription: any, dispatch: a
     const [, order] = parsedData
     dispatch(bookUpdateReducer({ currencyPair, order }))
   }
-
-  const processingTime = performance.now() - startTime
-  performanceTracker.updateLatency(ChannelTypeEnum.BOOK, processingTime)
 }

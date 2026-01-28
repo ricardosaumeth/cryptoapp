@@ -1,10 +1,7 @@
 import { tradesSnapshotReducer, tradesUpdateReducer } from "../../../modules/trades/slice"
 import type { RawTrade, Trade } from "../../../modules/trades/types/Trade"
-import { performanceTracker } from "../../../services/performanceTracker"
-import { ChannelTypeEnum } from "../../../types/avro-types"
 
 export const handleTradesData = (parsedData: any[], subscription: any, dispatch: any) => {
-  const startTime = performance.now()
   const currencyPair = subscription.request.symbol.slice(1)
 
   if (Array.isArray(parsedData[1])) {
@@ -25,9 +22,4 @@ export const handleTradesData = (parsedData: any[], subscription: any, dispatch:
     const [id, timestamp, amount, price] = trade
     dispatch(tradesUpdateReducer({ currencyPair, trade: { id, timestamp, amount, price } }))
   }
-
-  const processingTime = performance.now() - startTime
-  performanceTracker.updateLatency(ChannelTypeEnum.TRADES, processingTime)
-
-  console.log(`Trades processing: ${processingTime.toFixed(2)}ms`)
 }
