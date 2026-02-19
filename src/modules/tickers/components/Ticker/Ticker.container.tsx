@@ -1,5 +1,6 @@
 import { useSelector } from "react-redux"
 import { useDispatch } from "react-redux"
+import { useCallback } from "react"
 import { type AppDispatch, type RootState } from "../../../../modules/redux/store"
 import { getTicker } from "./../../selectors"
 import { selectCurrencyPair } from "../../../selection/slice"
@@ -29,13 +30,17 @@ const TickerContainer = ({ currencyPair, isStale: parentIsStale }: ContainerProp
       subscriptionId ? getIsSubscriptionStale(state, subscriptionId) : false
     ) || parentIsStale
 
+  const handleCurrencySelect = useCallback(() => {
+    dispatch(selectCurrencyPair({ currencyPair }))
+  }, [dispatch, currencyPair])
+
   return (
     <Ticker
       currencyPair={currencyPair}
       lastPrice={lastPrice!}
       dailyChange={dailyChange!}
       dailyChangeRelative={dailyChangeRelative!}
-      onClick={() => dispatch(selectCurrencyPair({ currencyPair }))}
+      onClick={handleCurrencySelect}
       isActive={selectedCurrencyPair === currencyPair}
       isStale={isStale || false}
     />

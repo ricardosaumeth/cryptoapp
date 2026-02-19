@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from "react"
+import { useState, useEffect, memo, useCallback, useMemo } from "react"
 import { useDispatch } from "react-redux"
 import { AgGridReact } from "ag-grid-react"
 import type { ColDef, GridApi, IRowNode } from "ag-grid-community"
@@ -20,13 +20,33 @@ export interface Props {
   selectedCurrencyPair?: string
 }
 
+// Pre-defined style objects to avoid recreation
+const bidCellStyle = {
+  color: Palette.Bid,
+  display: "flex",
+  justifiedContent: "flex-end",
+}
+
+const askCellStyle = {
+  color: Palette.Ask,
+}
+
+const priceChartCellStyle = {
+  paddingLeft: 0,
+  paddingRight: 0,
+}
+
 const Market = memo(
   ({ tickers, selectedCurrencyPair }: Props) => {
     useRenderTracker("Market")
     const dispatch = useDispatch<AppDispatch>()
     const [gridApi, setGridApi] = useState<GridApi | undefined>()
 
-    const columnDefs: ColDef[] = [
+    const handleRowClick = useCallback((event: any) => {
+      dispatch(selectCurrencyPair({ currencyPair: event.data.currencyPair }))
+    }, [dispatch])
+
+    const columnDefs: ColDef[] = useMemo(() => [
       {
         headerName: "Ccy",
         field: "currencyPair",
@@ -37,11 +57,7 @@ const Market = memo(
         headerName: "Bid Price",
         field: "bid",
         width: 95,
-        cellStyle: () => ({
-          color: Palette.Bid,
-          display: "flex",
-          justifiedContent: "flex-end",
-        }),
+        cellStyle: bidCellStyle,
         type: "numericColumn",
         valueFormatter: priceFormatter,
         cellRenderer: "priceRenderer",
@@ -50,9 +66,7 @@ const Market = memo(
         headerName: "Ask Price",
         field: "ask",
         width: 95,
-        cellStyle: () => ({
-          color: Palette.Ask,
-        }),
+        cellStyle: askCellStyle,
         valueFormatter: priceFormatter,
         cellRenderer: "priceRenderer",
       },
@@ -68,12 +82,9 @@ const Market = memo(
         cellRenderer: "priceChartRenderer",
         valueFormatter: () => "",
         width: 66,
-        cellStyle: () => ({
-          paddingLeft: 0,
-          paddingRight: 0,
-        }),
+        cellStyle: priceChartCellStyle,
       },
-    ]
+    ], [])
 
     useEffect(() => {
       if (gridApi) {
@@ -110,9 +121,7 @@ const Market = memo(
           onGridReady={(event) => {
             setGridApi(event.api)
           }}
-          onRowClicked={(event) => {
-            dispatch(selectCurrencyPair({ currencyPair: event.data.currencyPair }))
-          }}
+          onRowClicked={handleRowClick}
           noRowsOverlayComponent={"customLoadingOverlay"}
           components={{
             priceChartRenderer: PriceChartRenderer,
